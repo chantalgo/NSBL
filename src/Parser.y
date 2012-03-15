@@ -136,9 +136,20 @@ expression_statement
     | ';'
     ;
 
+general_statement
+    : declaration
+    | statement
+    ;
+
+general_statement_list
+    : general_statement
+    | general_statement_list general_statement
+    ;
+
 compound_statement
-    : '{' declaration_list statement_list '}'
-    | 
+    : '{' '}'
+    | '{' general_statement_list '}'
+    ;
 
 selection_statement
     : IF '(' expression ')' statement

@@ -12,7 +12,7 @@
 
 letter_         [A-Za-z_]
 digit           [0-9]
-numconst        [+-]?({digit}*\.?{digit}+|{digit}+\.?{digit}*)([eE][+-]?{digit}+)?
+numconst        ({digit}*\.?{digit}+|{digit}+\.?{digit}*)([eE][+-]?{digit}+)?
 identifier      {letter_}({letter_}|{digit})*
 strliteral      \"([^\"\\]|\\.)*\"
 comment         (\/\*([^\*]|(\*+([^\*\/])))*\*+\/)|(\/\/.*)
