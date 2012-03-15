@@ -1,5 +1,13 @@
 %{
 #include <stdio.h>
+#include <stdlib.h>
+
+extern FILE *yyin; /* Input for yacc parser. */
+extern void yyerror(char *str); /* Our version. */
+extern int yywrap(void); /* Our version. */
+extern int yylex(void); /* Lexical analyzer function. */
+extern int yyparse(void); /* Parser function. */
+
 
 %}
 
@@ -260,13 +268,19 @@ constant
     ;
 
 %%
-int yyerror(char *s) {
+void yyerror(char *s) {
     printf("%s\n", s);
     return 1;
 }
 
-int main(void) {
+int main(int argc, char * const * argv) {
+    if (argc<=1) { // missing file
+        fprintf(stdout, "missing input file\n");
+        exit(1);
+    }
+    yyin = fopen(argv[1], "r");
     yyparse();
+    fclose(yyin);
     return 0;
 }
 

@@ -73,8 +73,8 @@ comment         (\/\*([^\*]|(\*+([^\*\/])))*\*+\/)|(\/\/.*)
 "*"             { MYECHO; return '*'; }
 "/"             { MYECHO; return '/'; }
 "="             { MYECHO; return '='; }
-">"             { MYECHO; return '>'; }
-"<"             { MYECHO; return '<'; }
+">"             { MYECHO; return GT; }
+"<"             { MYECHO; return LT; }
 
 "true"          { MYECHO; return TRUE; }
 "false"         { MYECHO; return FALSE; }
