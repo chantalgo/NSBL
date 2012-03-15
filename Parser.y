@@ -52,7 +52,6 @@ declaration_specifiers
 
 declaration                 
     : declaration_specifiers init_declarator_list ';'
-    | init_declarator_list ';'
     ;
 
 declaration_list
@@ -125,7 +124,8 @@ statement_list
     ;
 
 expression_statement
-    : expression
+    : expression ';'
+    | ';'
     ;
 
 compound_statement
