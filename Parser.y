@@ -22,6 +22,7 @@
 %%
 start
     : start translation_unit
+    | start statement
     | start
     |
     ;
@@ -53,6 +54,10 @@ declaration
     : declaration_specifiers init_declarator_list ';'
     | init_declarator_list ';'
     ;
+
+declaration_list
+    : declaration
+    | declaration_list declaration
 
 init_declarator_list 
     : init_declarator
@@ -104,6 +109,44 @@ initializer
 initializer_list
     : initializer
     | initializer_list ',' initializer
+    ;
+
+statement
+    : expression_statement
+    | compound_statement
+    | selection_statement
+    | iteration_statement
+    | jump_statement
+    ;
+
+statement_list
+    : statement
+    | statement_list statement
+    ;
+
+expression_statement
+    : expression
+    ;
+
+compound_statement
+    : '{' declaration_list statement_list '}'
+    | 
+
+selection_statement
+    : IF '(' expression ')' statement
+    | IF '(' expression ')' statement ELSE statement
+    ;
+
+iteration_statement
+    : WHILE '(' expression ')' statement
+    | FOR '(' expression ';' expression ';' expression ')' statement
+    ;
+
+jump_statement
+    : BREAK ';'
+    | CONTINUE ';'
+    | RETURN expression ';'
+    | RETURN ';'
     ;
 
 expression
