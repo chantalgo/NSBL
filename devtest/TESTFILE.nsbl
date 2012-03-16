@@ -1,0 +1,68 @@
+/** 
+ * declaration
+ */
+graph g1,g2,g3;
+vertex v;
+edge e;
+number a=1,b=2,c=3;
+string s1="hellow world";
+string s2="hellow", s3="world";
+list l = {v1,v2,v3};
+/*** statement ***/
+/* simple statements */
+v<:(name="Tom");
+e:v1->v2;
+a=1;
+b<:g;
+a<b;
+g <: l;
+a=a++1;
+a+=+1;
+a*=-1;
+
+// selection statement
+if (a>1) {
+}
+
+if (a && b || !c) {
+    a+=(3*243453);
+}
+else {
+    b-=c;
+}
+
+// iteration statement
+for(i=1;i<=j;i=m)a=b;
+// for(i=1; ;i=j)a=b;               // TODO
+for(i=1; i<=j; i=i+b)a=b;
+a=b+d-1;
+for(i=1;i<=j;i=m){
+    number h = 0;
+    number c=1;
+    h=c;
+    number a=2;
+    for(u=9; u>-100; u=u-c){
+        boolean a = true;
+        a = false;
+    }
+    
+}
+
+// graph statement
+g.allV;
+g.allE;
+
+v[(a>b)&&(@name=="TOM"||@age>28)]|outE[@weight==3]|endV;
+
+// def cond(int a, int b) = { (a>b)&&(@name=="TOM"||@age>28) };
+// v[cond];
+
+/* declare function */
+number addition(number a, number b) {
+    number c = a + b;
+    return c;
+}
+
+number xx,a=1,b=2;
+xx = addition(a,b);
+
