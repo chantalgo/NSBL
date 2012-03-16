@@ -11,6 +11,7 @@ YFLAGS = --warnings=all
 
 toy.exe : Parser.tab.c Parser.tab.h LexAly.yy.c
 	$(CC) $(CFLAGS) -o toy.exe Parser.tab.c Parser.tab.h LexAly.yy.c -lfl -ly
+	mkdir -p $(BINDIR)
 	mv toy.exe $(BINDIR)
 Parser.tab.c : Parser.y
 	$(YACC) $(YFLAGS) -d Parser.y
