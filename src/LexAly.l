@@ -19,6 +19,7 @@ strliteral      \"([^\"\\]|\\.)*\"
 comment         (\/\*([^\*]|(\*+([^\*\/])))*\*+\/)|(\/\/.*)
 
 %%
+"void"          { MYECHO; return VOID; }
 "boolean"       { MYECHO; return BOOLEAN; }
 "number"        { MYECHO; return NUMBER; }
 "string"        { MYECHO; return STRING; }

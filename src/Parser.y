@@ -14,7 +14,7 @@ extern int yyparse(void); /* Parser function. */
  *      TOKEN LIST        *
  **************************/
 /* TYPE RELATED */
-%token BOOLEAN NUMBER STRING LIST VERTEX EDGE GRAPH
+%token VOID BOOLEAN NUMBER STRING LIST VERTEX EDGE GRAPH
 %token IDENTIFIER NUMBER_CONSTANT STRING_LITERAL
 %token TRUE FALSE
 /* FUNCTIONS RELATED */
@@ -250,7 +250,8 @@ function_definition
     ;
 
 type_specifier
-    : BOOLEAN
+    : VOID
+    | BOOLEAN
     | NUMBER
     | STRING
     | LIST

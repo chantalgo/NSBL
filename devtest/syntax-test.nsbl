@@ -202,3 +202,4 @@ number addition(number a, number b) {
 number xx,a=1,b=2;
 xx = addition(a,b);
 
+void testvoid(){}
