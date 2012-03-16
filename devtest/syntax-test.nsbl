@@ -54,7 +54,7 @@ g.allE;
 
 v[(a>b)&&(@name=="TOM"||@age>28)]|outE[@weight==3]|endV;
 
-// def cond(int a, int b) = { (a>b)&&(@name=="TOM"||@age>28) };
+def cond(number a, number b) = { (a>b)&&(@name=="TOM"||@age>28) };
 // v[cond];
 
 /* declare function */

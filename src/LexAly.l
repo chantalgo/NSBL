@@ -27,6 +27,7 @@ comment         (\/\*([^\*]|(\*+([^\*\/])))*\*+\/)|(\/\/.*)
 "edge"          { MYECHO; return EDGE; }
 "graph"         { MYECHO; return GRAPH; }
 
+"def"			{ MYECHO; return DEF; }
 "if"            { MYECHO; return IF; }
 "else"          { MYECHO; return ELSE; }
 "for"           { MYECHO; return FOR; }
@@ -41,7 +42,6 @@ comment         (\/\*([^\*]|(\*+([^\*\/])))*\*+\/)|(\/\/.*)
 "endV"          { MYECHO; return ENDING_VERTICES; }
 "allV"          { MYECHO; return ALL_VERTICES; }
 "allE"          { MYECHO; return ALL_EDGES; }
-
 
 
 "..."           { MYECHO; return ELLIPSIS; }

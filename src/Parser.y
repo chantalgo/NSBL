@@ -106,6 +106,7 @@ jump_statement
 
 declaration_statement
     : declaration
+	| function_literal_definition
     ;
 
 /**************************
@@ -232,11 +233,10 @@ constant
  *   DECLARATION          *
  **************************/
 
-/*
-function_definition
-    : DEF declarator ':' declaration_specifiers  compound_statement
+function_literal_definition
+    : DEF declarator '=' '{' conditional_expression '}' ';'
     ;
-*/
+
 function_definition
     : declaration_specifiers declarator compound_statement
     ;
