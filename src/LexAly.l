@@ -8,6 +8,7 @@
 #else
 #define MYECHO 
 #endif
+void  myecho();
 %}
 
 letter_         [A-Za-z_]
@@ -38,6 +39,9 @@ comment         (\/\*([^\*]|(\*+([^\*\/])))*\*+\/)|(\/\/.*)
 "inE"           { MYECHO; return INCOMING_EDGES; }
 "strtV"         { MYECHO; return STARTING_VERTICES; }
 "endV"          { MYECHO; return ENDING_VERTICES; }
+"allV"          { MYECHO; return ALL_VERTICES; }
+"allE"          { MYECHO; return ALL_EDGES; }
+
 
 
 "..."           { MYECHO; return ELLIPSIS; }

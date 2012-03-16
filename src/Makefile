@@ -8,7 +8,7 @@ YFLAGS = --warnings=all
 
 toy.exe : Parser.tab.c Parser.tab.h LexAly.yy.c
 	$(CC) $(CFLAGS) -o toy.exe Parser.tab.c Parser.tab.h LexAly.yy.c -lfl -ly
-	mv toy.exe ../
+	mv toy.exe ../bin
 Parser.tab.c : Parser.y
 	$(YACC) $(YFLAGS) -d Parser.y
 	mv y.tab.c Parser.tab.c

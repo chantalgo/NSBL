@@ -8,114 +8,59 @@ extern int yywrap(void); /* Our version. */
 extern int yylex(void); /* Lexical analyzer function. */
 extern int yyparse(void); /* Parser function. */
 
-
 %}
 
+/**************************
+ *      TOKEN LIST        *
+ **************************/
+/* TYPE RELATED */
 %token BOOLEAN NUMBER STRING LIST VERTEX EDGE GRAPH
-%token TRUE FALSE
 %token IDENTIFIER NUMBER_CONSTANT STRING_LITERAL
+%token TRUE FALSE
+/* FUNCTIONS RELATED */
+%token DEF
+/* GRAPH RELATED */
 %token OUTCOMING_EDGES INCOMING_EDGES STARTING_VERTICES ENDING_VERTICES
-
+%token ALL_VERTICES ALL_EDGES
+/* OPERATOR */
 %token OR AND
 %token EQ NE
 %token GT LT GE LE ELLIPSIS
 %token ADD_ASSIGN SUB_ASSIGN MUL_ASSIGN DIV_ASSIGN
-%token EAT ARROW PIPE AT 
-
+%token EAT ARROW PIPE AT
+/* CONTROL */
 %token IF ELSE
 %token FOR WHILE
 %token BREAK CONTINUE
 %token RETURN
 
+/**************************
+ *  PRECEDENCE & ASSOC    *
+ **************************/
+%nonassoc LOWER_THAN_ELSE
+%nonassoc ELSE
+
+/**************************
+ *     START SYMBOL       *
+ **************************/
+%start translation_unit
+
 %%
-start
-    : start translation_unit
-    | start statement
-    | start
-    |
-    ;
 
+/**************************
+ *   BASIC CONCEPTS       *
+ **************************/
 translation_unit
-    : external_declaration
-    | translation_unit external_declaration
+    : external_statement
+    | translation_unit external_statement
     ;
 
-external_declaration
-    : declaration
-    ;
-
-type_specifier              
-    : BOOLEAN
-    | NUMBER
-    | STRING
-    | LIST
-    | VERTEX
-    | EDGE
-    | GRAPH
-    ;
-
-declaration_specifiers      
-    : type_specifier
-    ;
-
-declaration                 
-    : declaration_specifiers init_declarator_list ';'
-    ;
-
-declaration_list
-    : declaration
-    | declaration_list declaration
-
-init_declarator_list 
-    : init_declarator
-    | init_declarator_list ',' init_declarator
-    ;
-
-init_declarator
-    : declarator
-    | declarator '=' initializer
-    ;
-
-declarator
-    : direct_declarator
-    ;
-
-direct_declarator
-    : IDENTIFIER
-    | '(' declarator ')'
-    | direct_declarator '(' parameter_type_list ')'
-    | direct_declarator '(' ')'
-    | direct_declarator '(' identifier_list ')'
-    ;
-
-identifier_list
-    : IDENTIFIER
-    | identifier_list ',' IDENTIFIER
-    ;
-
-parameter_type_list
-    : parameter_list
-    | parameter_list ',' ELLIPSIS
-    ;
-
-parameter_list
-    : parameter_declaration
-    | parameter_list ',' parameter_declaration
-    ;
-
-parameter_declaration
-    : declaration_specifiers declarator
-    ;
-
-initializer
-    : assignment_expression
-    | '{' initializer_list '}'
-    | '{' initializer_list ',' '}'
-    ;
-
-initializer_list
-    : initializer
-    | initializer_list ',' initializer
+/**************************
+ *   STATEMENTS           *
+ **************************/
+external_statement
+    : function_definition
+    | statement
     ;
 
 statement
@@ -124,11 +69,7 @@ statement
     | selection_statement
     | iteration_statement
     | jump_statement
-    ;
-
-statement_list
-    : statement
-    | statement_list statement
+    | declaration_statement
     ;
 
 expression_statement
@@ -136,23 +77,18 @@ expression_statement
     | ';'
     ;
 
-general_statement
-    : declaration
-    | statement
-    ;
-
-general_statement_list
-    : general_statement
-    | general_statement_list general_statement
+statement_list
+    : statement
+    | statement_list statement
     ;
 
 compound_statement
     : '{' '}'
-    | '{' general_statement_list '}'
+    | '{' statement_list '}'
     ;
 
 selection_statement
-    : IF '(' expression ')' statement
+    : IF '(' expression ')' statement %prec LOWER_THAN_ELSE ;
     | IF '(' expression ')' statement ELSE statement
     ;
 
@@ -167,6 +103,14 @@ jump_statement
     | RETURN expression ';'
     | RETURN ';'
     ;
+
+declaration_statement
+    : declaration
+    ;
+
+/**************************
+ *   EXPRESSIONS          *
+ **************************/
 
 expression
     : assignment_expression
@@ -241,9 +185,10 @@ unary_operator
 postfix_expression
     : primary_expression
     | primary_expression ':' primary_expression ARROW primary_expression
-    | postfix_expression PIPE graph_property
+    | postfix_expression PIPE pipe_property
     | postfix_expression '[' conditional_expression ']'
     | postfix_expression '.' IDENTIFIER
+    | postfix_expression '.' graph_property
     | postfix_expression '(' argument_expression_list ')'
     | postfix_expression '(' ')'
     ;
@@ -257,6 +202,11 @@ primary_expression
     ;
 
 graph_property
+    : ALL_VERTICES
+    | ALL_EDGES
+    ;
+
+pipe_property
     : OUTCOMING_EDGES
     | INCOMING_EDGES
     | STARTING_VERTICES
@@ -278,10 +228,93 @@ constant
     | FALSE
     ;
 
+/**************************
+ *   DECLARATION          *
+ **************************/
+
+/*
+function_definition
+    : DEF declarator ':' declaration_specifiers  compound_statement
+    ;
+*/
+function_definition
+    : declaration_specifiers declarator compound_statement
+    ;
+
+type_specifier
+    : BOOLEAN
+    | NUMBER
+    | STRING
+    | LIST
+    | VERTEX
+    | EDGE
+    | GRAPH
+    ;
+
+declaration_specifiers
+    : type_specifier
+    ;
+
+declaration
+    : declaration_specifiers init_declarator_list ';'
+    ;
+
+init_declarator_list
+    : init_declarator
+    | init_declarator_list ',' init_declarator
+    ;
+
+init_declarator
+    : declarator
+    | declarator '=' initializer
+    ;
+
+declarator
+    : direct_declarator
+    ;
+
+direct_declarator
+    : IDENTIFIER
+    | '(' declarator ')'
+    | direct_declarator '(' parameter_type_list ')'
+    | direct_declarator '(' ')'
+    | direct_declarator '(' identifier_list ')'
+    ;
+
+identifier_list
+    : IDENTIFIER
+    | identifier_list ',' IDENTIFIER
+    ;
+
+parameter_type_list
+    : parameter_list
+    | parameter_list ',' ELLIPSIS
+    ;
+
+parameter_list
+    : parameter_declaration
+    | parameter_list ',' parameter_declaration
+    ;
+
+parameter_declaration
+    : declaration_specifiers declarator
+    ;
+
+initializer
+    : assignment_expression
+    | '{' initializer_list '}'
+    | '{' initializer_list ',' '}'
+    ;
+
+initializer_list
+    : initializer
+    | initializer_list ',' initializer
+    ;
+
 %%
+
 void yyerror(char *s) {
     printf("%s\n", s);
-    return 1;
 }
 
 int main(int argc, char * const * argv) {
@@ -294,5 +327,3 @@ int main(int argc, char * const * argv) {
     fclose(yyin);
     return 0;
 }
-
-
