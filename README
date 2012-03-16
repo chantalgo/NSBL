@@ -1,0 +1,6 @@
+03/15/2012
+How to compile?
+cd src
+make
+make test
+
