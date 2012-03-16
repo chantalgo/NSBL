@@ -2,13 +2,16 @@ CC = gcc
 LEX = flex
 YACC = yacc
 
+BINDIR = ../bin
+TESTDIR = ../devtest
+
 CFLAGS = -Wall
 XFLAGS = -7 -D_MYECHO
 YFLAGS = --warnings=all
 
 toy.exe : Parser.tab.c Parser.tab.h LexAly.yy.c
 	$(CC) $(CFLAGS) -o toy.exe Parser.tab.c Parser.tab.h LexAly.yy.c -lfl -ly
-	mv toy.exe ../bin
+	mv toy.exe $(BINDIR)
 Parser.tab.c : Parser.y
 	$(YACC) $(YFLAGS) -d Parser.y
 	mv y.tab.c Parser.tab.c
@@ -18,5 +21,8 @@ LexAly.yy.c : LexAly.l
 	$(LEX) $(XFLAGS) LexAly.l
 	mv lex.yy.c LexAly.yy.c
 
+test : toy.exe
+	$(BINDIR)/toy.exe $(TESTDIR)/syntax-test.nsbl 
+
 clean :
-	rm -f Parser.tab.c Parser.tab.h LexAly.yy.c toy.exe y.output
+	rm -f Parser.tab.c Parser.tab.h LexAly.yy.c y.output $(BINDIR)/toy.exe
