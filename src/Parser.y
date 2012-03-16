@@ -30,7 +30,7 @@ extern int yyparse(void); /* Parser function. */
 %token EAT ARROW PIPE AT
 /* CONTROL */
 %token IF ELSE
-%token FOR WHILE
+%token FOR FOREACH WHILE
 %token BREAK CONTINUE
 %token RETURN
 
@@ -95,6 +95,14 @@ selection_statement
 iteration_statement
     : WHILE '(' expression ')' statement
     | FOR '(' expression ';' expression ';' expression ')' statement
+    | FOR '(' expression ';' expression ';' ')' statement
+    | FOR '(' expression ';' ';' expression ')' statement
+    | FOR '(' expression ';' ';' ')' statement
+    | FOR '(' ';' expression ';' expression ')' statement
+    | FOR '(' ';' expression ';' ')' statement
+    | FOR '(' ';' ';' expression ')' statement
+    | FOR '(' ';' ';' ')' statement
+    | FOREACH '(' IDENTIFIER ':' postfix_expression ')' statement
     ;
 
 jump_statement

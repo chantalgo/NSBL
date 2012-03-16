@@ -7,7 +7,7 @@ TESTDIR = ../devtest
 
 CFLAGS = -Wall
 XFLAGS = -7 -D_MYECHO
-YFLAGS = --warnings=all
+YFLAGS =
 
 toy.exe : Parser.tab.c Parser.tab.h LexAly.yy.c
 	$(CC) $(CFLAGS) -o toy.exe Parser.tab.c Parser.tab.h LexAly.yy.c -lfl -ly

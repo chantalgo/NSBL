@@ -31,6 +31,7 @@ comment         (\/\*([^\*]|(\*+([^\*\/])))*\*+\/)|(\/\/.*)
 "if"            { MYECHO; return IF; }
 "else"          { MYECHO; return ELSE; }
 "for"           { MYECHO; return FOR; }
+"foreach"       { MYECHO; return FOREACH; }
 "while"         { MYECHO; return WHILE; }
 "break"         { MYECHO; return BREAK; }
 "continue"      { MYECHO; return CONTINUE; }
