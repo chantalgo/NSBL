@@ -14,20 +14,20 @@ extern int yyparse(void); /* Parser function. */
  *      TOKEN LIST        *
  **************************/
 /* TYPE RELATED */
-%token BOOLEAN NUMBER STRING LIST VERTEX EDGE GRAPH
+%token VOID BOOLEAN NUMBER STRING LIST VERTEX EDGE GRAPH
 %token IDENTIFIER NUMBER_CONSTANT STRING_LITERAL
 %token TRUE FALSE
 /* FUNCTIONS RELATED */
-%token DEF
+%token FUNC_LITERAL
 /* GRAPH RELATED */
 %token OUTCOMING_EDGES INCOMING_EDGES STARTING_VERTICES ENDING_VERTICES
 %token ALL_VERTICES ALL_EDGES
 /* OPERATOR */
 %token OR AND
 %token EQ NE
-%token GT LT GE LE ELLIPSIS
+%token GT LT GE LE
 %token ADD_ASSIGN SUB_ASSIGN MUL_ASSIGN DIV_ASSIGN
-%token EAT ARROW PIPE AT
+%token EAT ARROW PIPE AT MARK
 /* CONTROL */
 %token IF ELSE
 %token FOR FOREACH WHILE
@@ -114,7 +114,7 @@ jump_statement
 
 declaration_statement
     : declaration
-	| function_literal_definition
+	| function_literal_declaration
     ;
 
 /**************************
@@ -127,7 +127,7 @@ expression
     ;
 
 assignment_expression
-    : conditional_expression
+    : logical_OR_expression
     | unary_expression assignment_operator assignment_expression
     ;
 
@@ -138,10 +138,6 @@ assignment_operator
     | MUL_ASSIGN
     | DIV_ASSIGN
     | EAT
-    ;
-
-conditional_expression
-    : logical_OR_expression
     ;
 
 logical_OR_expression
@@ -194,12 +190,13 @@ unary_operator
 postfix_expression
     : primary_expression
     | primary_expression ':' primary_expression ARROW primary_expression
-    | postfix_expression PIPE pipe_property
-    | postfix_expression '[' conditional_expression ']'
-    | postfix_expression '.' IDENTIFIER
-    | postfix_expression '.' graph_property
+	| primary_expression ':' primary_expression ARROW primary_expression MARK primary_expression 
     | postfix_expression '(' argument_expression_list ')'
     | postfix_expression '(' ')'
+    | postfix_expression PIPE pipe_property
+    | postfix_expression '[' logical_OR_expression ']'
+    | postfix_expression '.' IDENTIFIER
+    | postfix_expression '.' graph_property
     ;
 
 primary_expression
@@ -241,16 +238,22 @@ constant
  *   DECLARATION          *
  **************************/
 
-function_literal_definition
-    : DEF declarator '=' '{' conditional_expression '}' ';'
+function_literal_declaration
+    : function_literal_type_sepcifier declarator '=' compound_statement ';'
+	| function_literal_type_sepcifier declarator ':' declaration_specifiers '=' compound_statement ';'
     ;
 
 function_definition
     : declaration_specifiers declarator compound_statement
     ;
 
-type_specifier
-    : BOOLEAN
+function_literal_type_sepcifier
+	: FUNC_LITERAL
+	;
+
+basic_type_specifier
+    : VOID
+	| BOOLEAN
     | NUMBER
     | STRING
     | LIST
@@ -259,12 +262,12 @@ type_specifier
     | GRAPH
     ;
 
-declaration_specifiers
-    : type_specifier
-    ;
-
 declaration
     : declaration_specifiers init_declarator_list ';'
+    ;
+
+declaration_specifiers
+    : basic_type_specifier
     ;
 
 init_declarator_list
@@ -282,21 +285,9 @@ declarator
     ;
 
 direct_declarator
-    : IDENTIFIER
-    | '(' declarator ')'
-    | direct_declarator '(' parameter_type_list ')'
-    | direct_declarator '(' ')'
-    | direct_declarator '(' identifier_list ')'
-    ;
-
-identifier_list
-    : IDENTIFIER
-    | identifier_list ',' IDENTIFIER
-    ;
-
-parameter_type_list
-    : parameter_list
-    | parameter_list ',' ELLIPSIS
+	: IDENTIFIER
+    | IDENTIFIER '(' parameter_list ')'
+    | IDENTIFIER '(' ')'
     ;
 
 parameter_list
@@ -305,7 +296,8 @@ parameter_list
     ;
 
 parameter_declaration
-    : declaration_specifiers declarator
+    : declaration_specifiers IDENTIFIER
+	| function_literal_type_sepcifier IDENTIFIER
     ;
 
 initializer

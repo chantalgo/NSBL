@@ -19,6 +19,7 @@ strliteral      \"([^\"\\]|\\.)*\"
 comment         (\/\*([^\*]|(\*+([^\*\/])))*\*+\/)|(\/\/.*)
 
 %%
+"void"			{ MYECHO; return VOID; }
 "boolean"       { MYECHO; return BOOLEAN; }
 "number"        { MYECHO; return NUMBER; }
 "string"        { MYECHO; return STRING; }
@@ -27,7 +28,7 @@ comment         (\/\*([^\*]|(\*+([^\*\/])))*\*+\/)|(\/\/.*)
 "edge"          { MYECHO; return EDGE; }
 "graph"         { MYECHO; return GRAPH; }
 
-"def"			{ MYECHO; return DEF; }
+"func"			{ MYECHO; return FUNC_LITERAL; }
 "if"            { MYECHO; return IF; }
 "else"          { MYECHO; return ELSE; }
 "for"           { MYECHO; return FOR; }
@@ -36,6 +37,7 @@ comment         (\/\*([^\*]|(\*+([^\*\/])))*\*+\/)|(\/\/.*)
 "break"         { MYECHO; return BREAK; }
 "continue"      { MYECHO; return CONTINUE; }
 "return"        { MYECHO; return RETURN; }
+"mark"			{ MYECHO; return MARK; }
 
 "outE"          { MYECHO; return OUTCOMING_EDGES; }
 "inE"           { MYECHO; return INCOMING_EDGES; }
@@ -45,7 +47,6 @@ comment         (\/\*([^\*]|(\*+([^\*\/])))*\*+\/)|(\/\/.*)
 "allE"          { MYECHO; return ALL_EDGES; }
 
 
-"..."           { MYECHO; return ELLIPSIS; }
 "=="            { MYECHO; return EQ; }
 "!="            { MYECHO; return NE; }
 "<="            { MYECHO; return LE; }

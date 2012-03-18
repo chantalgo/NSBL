@@ -40,7 +40,7 @@ v3<:(name="Susan");
 
 //EDGE assignment
 e1:v1->v2;
-e2:v2->v3;
+e2:v2->v3 mark "knows";
 e3:v1->v3;
 
 //GRAPH construction
@@ -184,16 +184,22 @@ g.allV[@id==3];
 g.allV[@isfemale&&(@name=="TOM"||@age>28)]|outE[@weight==3]|endV;
 
 //FUNCTION LITERAL + FOREACH + PIPE + MATCH
-def cond() = { (@name=="TOM"||@age>28) };
+func cond():boolean = { return (@name=="TOM"||@age>28); };
 foreach (item : g.allV[cond()&&@isfemale] ) {
    print( item.outEdge[@weight==3]|endV );
 }
 
 
 
+
+
 /************************************** 
- *       3.FUNCTION DECLARATION       *
+ *       3.DECLARATIONS               *
  **************************************/
+
+/******************************
+ * 3.1 FUNCTION DECLARATION   *
+ ******************************/
 number addition(number a, number b) {
     number c = a + b;
     return c;
@@ -202,3 +208,13 @@ number addition(number a, number b) {
 number xx,a=1,b=2;
 xx = addition(a,b);
 
+
+/**************************************
+ * 3.2 FUNCTION LITERAL DECLARATION   *
+ **************************************/
+func addition(number a, number b):number = { return a+b; };
+xx = addition(a,b);
+
+boolean check(number c, number a, number b, func addition) {
+	return c==addition(a,b);
+}
