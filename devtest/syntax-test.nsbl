@@ -16,8 +16,14 @@ vertex v1,v2,v3;
 //EDGE declaration
 edge e1,e2,e3;
 
-//NUMBER declaration
-number a=1,b=2,c=3;
+//INT declaration and cast
+int a=1,b=2,c=3;
+int acast = (int)3.45;
+
+//FLOAT declaration and cast
+float af=1.1, bf=2.2, cf=3.3;
+float afcast = (float)10;
+acast = (float)afcast;
 
 //STRING declaration
 string s1="hellow world";
@@ -61,7 +67,7 @@ g2 <: v1;
 g2 <: v2;
 g2 <: e1;
 
-//NUMBER assignment
+//INT and FLOAT assignment
 a=1;
 a=b=2;
 a=2.04;
@@ -111,7 +117,7 @@ if(a!=b)
         else
             b = b+10.4;
 else{
-    number c = 0;
+    int c = 0;
     if(b>=c){
         c=c+1;
         a=a-1;
@@ -131,15 +137,15 @@ else
  ******************************/
 
 //FOR loop
-number i=0, j=100;
+int i=0, j=100;
 for(i=1;i<=j;i=i+1)a=b;
 for(i=1; ;i=j)a=b;
 for(i=1; i<=j; i=i+b)a=b;
 for(i=1;i<=j;i=i+1){
-    number m = 0;
-    number n=1;
+    int m = 0;
+    int n=1;
     m=n+2;
-    number l=2;
+    int l=2;
     for(l=10; l<100; l=l+10){
         if(m>100)
             break;
@@ -158,10 +164,10 @@ a=100;
 while(a>0){
     a=a-1;
     for(i=1;i<=j;i=i+1){
-        number m = 0;
-        number n=1;
+        int m = 0;
+        int n=1;
         m=n+2;
-        number l=2;
+        int l=2;
         for(i=10; i<100; i=i+10){
             boolean bool = true;
             bool = false;
@@ -208,21 +214,21 @@ foreach (item : g.allV[cond()&&@isfemale] ) {
 /******************************
  * 3.1 FUNCTION DECLARATION   *
  ******************************/
-number addition(number a, number b) {
-    number c = a + b;
+int addition(int a, float b) {
+    float c = a + b;
     return c;
 }
 
-number xx,a=1,b=2;
+int xx,a=1,b=2;
 xx = addition(a,b);
 void testvoid(){}
 
 /**************************************
  * 3.2 FUNCTION LITERAL DECLARATION   *
  **************************************/
-func addition(number a, number b):number = { return a+b; };
+func addition(int a, float b):int = { return (int)a+b; };
 xx = addition(a,b);
 
-boolean check(number c, number a, number b, func addition) {
+boolean check(int c, int a, int b, func addition) {
 	return c==addition(a,b);
 }

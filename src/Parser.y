@@ -14,8 +14,8 @@ extern int yyparse(void); /* Parser function. */
  *      TOKEN LIST        *
  **************************/
 /* TYPE RELATED */
-%token VOID BOOLEAN NUMBER STRING LIST VERTEX EDGE GRAPH
-%token IDENTIFIER NUMBER_CONSTANT STRING_LITERAL
+%token VOID BOOLEAN INTEGER FLOAT STRING LIST VERTEX EDGE GRAPH
+%token IDENTIFIER INTEGER_CONSTANT FLOAT_CONSTANT STRING_LITERAL
 %token TRUE FALSE
 /* FUNCTIONS RELATED */
 %token FUNC_LITERAL
@@ -170,15 +170,21 @@ additive_expression
     | additive_expression '-' multiplicative_expression
     ;
 
-multiplicative_expression
+cast_expression
     : unary_expression
-    | multiplicative_expression '*' unary_expression
-    | multiplicative_expression '/' unary_expression
+    | '(' declaration_specifiers ')' cast_expression
+    ;
+
+multiplicative_expression
+    : cast_expression
+    | multiplicative_expression '*' cast_expression
+    | multiplicative_expression '/' cast_expression
     ;
 
 unary_expression
     : postfix_expression
-    | unary_operator unary_expression
+   /* | unary_operator unary_expression*/
+    | unary_operator cast_expression
     ;
 
 unary_operator
@@ -229,7 +235,8 @@ attribute
     ;
 
 constant
-    : NUMBER_CONSTANT
+    : INTEGER_CONSTANT
+    | FLOAT_CONSTANT
     | TRUE
     | FALSE
     ;
@@ -254,7 +261,8 @@ function_literal_type_sepcifier
 basic_type_specifier
     : VOID
 	| BOOLEAN
-    | NUMBER
+    | INTEGER
+    | FLOAT
     | STRING
     | LIST
     | VERTEX
