@@ -302,8 +302,8 @@ parameter_declaration
 
 initializer
     : assignment_expression
-    | '{' initializer_list '}'
-    | '{' initializer_list ',' '}'
+    | '[' initializer_list ']'
+	| '[' ']'
     ;
 
 initializer_list
