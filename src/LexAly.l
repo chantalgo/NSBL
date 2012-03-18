@@ -13,7 +13,8 @@ void  myecho();
 
 letter_         [A-Za-z_]
 digit           [0-9]
-numconst        ({digit}*\.?{digit}+|{digit}+\.?{digit}*)([eE][+-]?{digit}+)?
+floatconst      ({digit}*\.{digit}+|{digit}+\.{digit}*)([eE][+-]?{digit}+)?
+intconst        {digit}+
 identifier      {letter_}({letter_}|{digit})*
 strliteral      \"([^\"\\]|\\.)*\"
 comment         (\/\*([^\*]|(\*+([^\*\/])))*\*+\/)|(\/\/.*)
@@ -21,7 +22,8 @@ comment         (\/\*([^\*]|(\*+([^\*\/])))*\*+\/)|(\/\/.*)
 %%
 "void"          { MYECHO; return VOID; }
 "boolean"       { MYECHO; return BOOLEAN; }
-"number"        { MYECHO; return NUMBER; }
+"int"           { MYECHO; return INTEGER; }
+"float"         { MYECHO; return FLOAT; }
 "string"        { MYECHO; return STRING; }
 "list"          { MYECHO; return LIST; }
 "vertex"        { MYECHO; return VERTEX; }
@@ -84,9 +86,9 @@ comment         (\/\*([^\*]|(\*+([^\*\/])))*\*+\/)|(\/\/.*)
 
 "true"          { MYECHO; return TRUE; }
 "false"         { MYECHO; return FALSE; }
-
+{intconst}      { MYECHO; return INTEGER_CONSTANT;}
+{floatconst}    { MYECHO; return FLOAT_CONSTANT;}
 {identifier}    { MYECHO; return IDENTIFIER; }
-{numconst}      { MYECHO; return NUMBER_CONSTANT; }
 {strliteral}    { MYECHO; return STRING_LITERAL; }
 {comment}       { MYECHO; }
 
