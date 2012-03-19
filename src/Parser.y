@@ -27,7 +27,8 @@ extern int yyparse(void); /* Parser function. */
 %token EQ NE
 %token GT LT GE LE
 %token ADD_ASSIGN SUB_ASSIGN MUL_ASSIGN DIV_ASSIGN
-%token EAT ARROW PIPE AT MARK
+%token APPEND ARROW PIPE AT MARK
+%token BELONG
 /* CONTROL */
 %token IF ELSE
 %token FOR FOREACH WHILE
@@ -137,7 +138,7 @@ assignment_operator
     | SUB_ASSIGN
     | MUL_ASSIGN
     | DIV_ASSIGN
-    | EAT
+    | APPEND
     ;
 
 logical_OR_expression
@@ -295,6 +296,7 @@ direct_declarator
     : IDENTIFIER
     | IDENTIFIER '(' parameter_list ')'
     | IDENTIFIER '(' ')'
+	| direct_declarator BELONG IDENTIFIER
     ;
 
 parameter_list

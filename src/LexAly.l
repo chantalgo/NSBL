@@ -48,7 +48,6 @@ comment         (\/\*([^\*]|(\*+([^\*\/])))*\*+\/)|(\/\/.*)
 "allV"          { MYECHO; return ALL_VERTICES; }
 "allE"          { MYECHO; return ALL_EDGES; }
 
-
 "=="            { MYECHO; return EQ; }
 "!="            { MYECHO; return NE; }
 "<="            { MYECHO; return LE; }
@@ -59,8 +58,9 @@ comment         (\/\*([^\*]|(\*+([^\*\/])))*\*+\/)|(\/\/.*)
 "/="            { MYECHO; return DIV_ASSIGN; }
 "||"            { MYECHO; return OR; }
 "&&"            { MYECHO; return AND; }
+"::"			{ MYECHO; return BELONG; }
 
-"<:"            { MYECHO; return EAT; }
+"<:"            { MYECHO; return APPEND; }
 "->"            { MYECHO; return ARROW; }
 "|"             { MYECHO; return PIPE; }
 "@"             { MYECHO; return AT; }
