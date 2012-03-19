@@ -30,9 +30,17 @@ string s1="hellow world";
 string s2="hellow", s3="world";
 
 //LIST declaration
-list lv = {v1,v2,v3};
-list le = {e1,e2,e3};
-lv[0] = 24;
+list lv = [v1,v2,v3];
+list le = [e1,e2,e3];
+vertex v4,v5;
+lv <: v4;
+lv[1] = v5;
+
+list empty = [];
+//lv[number] => list element
+//lv[boolean] => match
+
+// lv = [];  //syntax error
 
 /******************************
  * 1.2 EXPRESSION_STATEMENT   *

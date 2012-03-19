@@ -170,20 +170,19 @@ additive_expression
     | additive_expression '-' multiplicative_expression
     ;
 
-cast_expression
-    : unary_expression
-    | '(' declaration_specifiers ')' cast_expression
-    ;
-
 multiplicative_expression
     : cast_expression
     | multiplicative_expression '*' cast_expression
     | multiplicative_expression '/' cast_expression
     ;
 
+cast_expression
+    : unary_expression
+    | '(' declaration_specifiers ')' cast_expression
+    ;
+
 unary_expression
     : postfix_expression
-   /* | unary_operator unary_expression*/
     | unary_operator cast_expression
     ;
 
@@ -310,8 +309,8 @@ parameter_declaration
 
 initializer
     : assignment_expression
-    | '{' initializer_list '}'
-    | '{' initializer_list ',' '}'
+    | '[' initializer_list ']'
+	| '[' ']'
     ;
 
 initializer_list
