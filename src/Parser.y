@@ -296,7 +296,7 @@ direct_declarator
     : IDENTIFIER
     | IDENTIFIER '(' parameter_list ')'
     | IDENTIFIER '(' ')'
-	| direct_declarator BELONG IDENTIFIER
+    | direct_declarator BELONG IDENTIFIER
     ;
 
 parameter_list
