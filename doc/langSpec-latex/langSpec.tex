@@ -1,0 +1,628 @@
+\documentclass[letterpaper,12pt]{article}
+\usepackage{times}
+\usepackage{graphicx}
+\usepackage{rotating}
+\usepackage[
+    hmargin=2cm,
+    vmargin=2cm,
+    includefoot]{geometry}
+\usepackage{color}
+\usepackage{cite}
+\usepackage[colorlinks,citecolor=blue]{hyperref}
+\usepackage{longtable}
+\usepackage{listings}
+%\usepackage{titlesec}
+%\titleformat{\item}[runin]{}{}{}{}[]
+
+\setlength\parindent{0pt}
+
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+
+% code listing style
+\lstset{
+language=java,
+basicstyle=\footnotesize\ttfamily,
+numbers=none,
+numberstyle=\tiny\color{gray},
+stepnumber=2,
+numbersep=5pt,
+backgroundcolor=\color{white},
+showspaces=false,
+showstringspaces=false,
+showtabs=false,
+frame=single,
+rulecolor=\color{black},
+tabsize=2,
+captionpos=b,
+breaklines=true,
+breakautoindent=true,
+breakindent=20pt,
+breakatwhitespace=false,
+title=\lstname,
+keywordstyle=\color{blue},
+commentstyle=\color{dkgreen},
+stringstyle=\color{mauve},
+belowskip=0pt,
+belowcaptionskip=0pt,
+escapeinside={\%*}{*)},
+morekeywords={string,list,vertex,edge,graph,func}
+}
+
+\title {NSBL : Language Reference Manual} 
+\author {Chantal Galvez, Kunal Mishra, Lixing Pan and Jing Zhang}
+\date{\today}
+
+\begin{document}
+\maketitle
+\section{Introduction}
+  This manual describes the NSBL language, which is intended for graph data structure manipulation.
+
+\section{Lexical Conventions}
+\subsection{Tokens}
+There are six classes of tokens: identifiers, keywords, constants, string literals, operators, and other separators. Blanks, horizontal and vertical tabs, newlines, formfeeds, and comments as described below (collectively, "white space") are ignored except as they separate token. \newline
+
+Some white space is required to separate otherwise adjacent identifiers, keywords, and constants. \newline
+
+If the input stream has been separated into tokens up to a given character, the next token is the longest string of characters that could constitute a token.
+
+\subsection{Comments}
+  The characters /* introduce a comment, which terminates with the characters */.\newline
+
+  The characters // also introduce a comment, which terminates with the newline.
+
+\subsection{Identifiers}
+An identifier is a sequence of letters and digits. The first character must be a letter; th underscore \_ counts as a letter. Upper and lower case letters are different. Identifiers may have any length.
+
+\subsection{Keywords}
+The following identifiers are reserved for use as keywords, and may not be used otherwise:
+\begin{table}
+\begin{center}
+\begin{tabular}{cccc}
+        void    &    float   &    int   &      string    \\
+        list    &    vertex  &    edge  &      graph     \\
+        def     &    if      &    else  &      for       \\
+        foreach &    while   &    break &      continue  \\
+        return  &    outE    &    inE   &      strtV     \\
+        endV    &    allV    &    allE  &      true      \\
+        false   &    boolean &    id    &                \\
+\end{tabular}
+\end{center}
+\end{table}
+
+\subsection{Constants}\label{sec:constants}
+There are several kinds of constants. Each has a data type; Sec.\ref{sec:basic_types}  discusses the basic types.
+\begin{lstlisting}
+	constant :
+		integer_constant
+		float_constant
+		boolean_constant
+
+	boolean_constant :
+		true
+		false
+\end{lstlisting}
+
+\subsection{Integer Constants}
+An integer constant consisting of a sequence of digits is taken to be decimal. An integer constant is always signed.
+
+\subsection{Float Constants}
+A float condstant consists of an integer part, a decimal point, fraction part, an e or E, an optionally signed integer exponent.The integer and fraction parts both consist of a sequence of digits. Either the integer part or the fraction part (not both) may be missing; either the decimal point or the e (E) or the exponent (not both) may be missing.
+
+\subsection{Boolean Constants}
+A boolean constant can either be true or false.
+
+\subsection{String Literals}
+A string literal, also called a string constant, is a sequence of characters surrounded by double quotes, as in "..." and has type string. The behavior of a program that attempts to alter a string literal is undefined. \newline
+
+Adjacent string literals are concatenated into a single string. Unlike C language, you do not need a '$\backslash 0$' to mark the end of a string. String literals do not contain newline or double-quote characters; in order to represent them, escape sequence '$\backslash n$' and '$\backslash$"' will be needed.\newline
+
+\section{Syntax Notation}
+In the syntax notation used in this manual, syntactic categories are indicated by {\ttfamily {italic}} type, and literal words and characters in $typewriter$ style. Alternative categories are usually listed on separate lines; in a few cases, a long set of narrow alternatives is presented on one line, marked by the phrase "one of." The syntax is summarized in Sec.\ref{sec:grammar}.
+
+\section{Meaning of Identifiers}
+Identifiers, or names refer to two things: functions and objects. An object, sometimes called a variable, is a location in storage, and its interpretation depends on two main attributes: its storage class and its type. The storage class determines the lifetime of the storage associated with the identified object; the type determines the meaning of the values found in the identified object. A name a so has a scope, which is the region of the program in which it is known, and a linkage, which determines whether the same name in another scope refers to the same object or function. Scope is discussed in Sec.\ref{sec:scope}.
+
+\subsection{Basic Types}\label{sec:basic_types}
+There are four fundamental types: int, float, string, boolean. \newline
+
+The int type, which is signed, is used to represent all integer numbers. \newline
+
+The float type, which is signed, is used to represent all decimal numbers or exponential numbers. \newline
+
+There is not char type defined here, string is the basic unit to represent a character or a sequence of characters. The string can be any length and there is no end of string symbol needed. \newline
+
+The boolean type has two values, true and false.
+
+\subsection{Derived Types}
+There are six derived types Vertex, edge, graph, list, functions, function\_literal.\newline
+
+  Vertex is the type to represent a node of a graph. Attributes can be added or deleted dynamically to the node. An attribute can be any one of the fundamental types. $id$ is one reserved attribute, which is assigned by a unique vertices identification number. \newline
+
+  Edge is the type to represent an edge of a graph. It has a outgoing vertex and an incoming vertex; it can also contain any number of attributes which can be added or deleted dynamically. The attribute can be any one of the fundamental types. $id$ is one reserved attribute, which is assigned by a unique edge identification number. \newline
+
+  Graph is the type to represent a whole graph. It keeps lists of vertices and edges. Vertices and edges can be added or deleted dynamically. $id$ is one reserved attribute, which is assigned by a unique graph identification number. \newline
+
+  List is the type to a list of objects. The objects can be any of the fundamental types, vertices and edges. The type of objects in the same list should be same. \newline
+
+  Functions return objects of a given type. \newline
+
+  Function\_literal, after evaluating the conditional expression given to it, returns a boolean type.
+
+\section{Expressions}
+
+\subsection{Primary Expressions}
+Primary expressions are attributes, identifiers, constants, strings or expressions in parentheses.
+\begin{lstlisting}
+	primary_expression :
+		identifier
+		attribute
+		constant
+		string
+		( expression )
+
+	attribute :
+		@ identifier
+\end{lstlisting}
+An identifier is a primary expression, and its type is statically specified by its declaration. \newline 
+
+An attribute is a primary expression consisting of the @ operator and an identifier. Its type dynamically depends the context. \newline
+
+A constant is a primary expression. Its type depends on its form as discussed in Sec.\ref{sec:constants}. \newline
+
+A string literal is a primary expression. Its type is "string". \newline
+
+A parenthesized expression is a primary expression whose type and value are identical to those of the unadorned expression. 
+
+\subsection{Postfix Expressions}
+The operations in postfix expressions group left to right.
+\begin{lstlisting}
+	postfix_expression :
+		primary_expression
+		primary_expression : primary_expression -> primary_expression
+		primary_expression : primary_expression -> primary_expression MARK primary_expression
+		postfix_expression ( argument_expression_list )
+		postfix_expression ( )
+		postfix_expression | pipe_property
+		postfix_expression [ conditional_expression ]
+		postfix_expression . identifier
+		postfix_expression . graph_property
+
+	graph_property :
+		allV
+		allE
+
+	pipe_property :
+		outE
+		inE
+		strtV
+		endV
+
+	argument_expression_list :
+		assignment_expression
+		argument_expression_list , assignment_expression 
+\end{lstlisting}
+\subsubsection{Edge Assignment}
+A postfix expression followed by colon, primary expression, $\rightarrow$ operator and another primary expression is a postfix expression assigning the starting vertex and ending vertex for an directed edge. Obviously, the first primary expression must have type "edge", and the second and third primary expressions must have type "vertex". The additional MARK operator and fourth primary expression is optional, used to describe the  feature of the edge. The type of the fourth primary expression must be "string". The postfix expression of edge assignment is finally evaluated as the edge corresponding to the first primary expression.
+
+\subsubsection{Function Calls and Function Literal Calls}
+The syntax of function call and function literal call are the same, a postfix expression followed by parentheses containing a possibly empty, comma-separated list of assignment expressions, which constitute the arguments to the function or function literal. \newline
+
+In preparing for the call to a function or function literal, a copy is made of each argument; all argument-passing is strictly by value. 
+
+\subsubsection{Pipe Operations}
+A pipe operation is a postfix expression of type "list", followed by the $|$ operator and pipe property. The allowed choices of pipe property depend on the type of the list element. If list element has type of "vertex", the pipe property can be $outE$ or $inE$; similarly, if the type of list element is "edge", the pipe property can be $strtV$ or $endV$. 
+This pipe operation is eventually evaluated by appending all piped properties to an empty list, and the return type is "list" whose element has the type specified by pipe property.
+
+\subsubsection{Match Operations}
+A match operation is a postfix expression of type "list", followed by and conditional expression in square brackets. The type of first operand must have type list, and the type of conditional expression must have type $boolean$. The return of match operation is a list containing all elements satisfying the conditional expression. \newline
+
+An example is
+\begin{lstlisting}[frame=none]
+	list result = v[ @name=="Tom" && @age>17 ];
+\end{lstlisting}
+
+\subsubsection{List References}
+List References share the same syntax as match operation, but requires different type of conditional expression, which must be $int$. The starting index of a list is $zero$, and the return of list reference $E1[E2]$ is the $(E2+1)$-th element of the list.
+
+\subsubsection{Property References}\label{sec:property_op}
+A postfix expression followed by a dot followed by an identifier or graph property is a postfix expression. The first operand expression must be a graph, vertex or edge, and the identifier must name an existing property of the first operand. The value is the named property of the first operand, and its type is the type of the property. 
+The existence and type checks are dynamic, depend on the implementation, and are not included in this grammar.
+
+\subsection{Unary Operations}
+Expressions with unary operators group right-to-left.
+\begin{lstlisting}
+	unary_expression :
+    	postfix_expression
+    	unary_operator unary_expression
+
+	unary_operator : one of
+		+ - !
+\end{lstlisting}
+\subsubsection{Unary Plus Operator}
+The operand of the unary + operator must be integer or float type, and the result is the value of the operand. 
+\subsubsection{Unary Minus Operator}
+The operand of the unary - operator must be integer or float type, and the result is the negative of its operand. 
+\subsubsection{Logical Negation Operator}
+The operand of the ! operator must be boolean type, and the result is true if the value of its operand compares equal to false (boolean). The type of the result is {\ttfamily {boolean}}.
+\subsection{Casts}
+A unary expression preceded by the parenthesized name of a type causes conversion of the value of the expression to the named type.
+\begin{lstlisting}
+	cast_expression :
+		unary_expression
+		( declaration_specifiers ) cast_expression
+\end{lstlisting}
+The construction is called a $cast$. The cast is allowed only between $int$ and $float$.
+
+\subsection{Multiplicative Operators}
+The multiplicative operators * and / group left-to-right.
+\begin{lstlisting}
+	multiplicative_expression :
+		cast_expression
+		multiplicative_expression * cast_expression
+		multiplicative_expression / cast_expression
+\end{lstlisting}
+The operand of * and / operators have integer or float type. The usual arithmetic conversions are performed on the operands between type $int$ and type $float$, and predict the type of the result. \newline 
+
+The binary * operator denotes multiplication. \newline 
+
+The binary / operator yields the quotient of the division of the first operand by the second; if the second operand is 0, the result is undefined. 
+
+\subsection{Additive Operators}
+The additive operators + and - group left-to-right.
+\begin{lstlisting}
+	additive_expression :
+		multiplicative_expression
+		additive_expression + multiplicative_expression
+		additive_expression - multiplicative_expression
+\end{lstlisting}
+The operands of the + and - operator can have type int or float. The result of the + operator is the sum of the operands; the result of the - operator is the differece of the operands. The usual arithmetic conversions are performed when necessary, and predict the type of the result. \newline
+
+The operands of the + operator can also have string type, and the result of the + operator is the concatenation of the operands.\newline
+
+\subsection{Relational Operators}
+The relational operands group left-to-right.
+\begin{lstlisting}
+	relational_expression :
+		additive_expression
+		relational_expression <  additive_expression
+		relational_expression >  additive_expression
+		relational_expression <= additive_expression
+		relational_expression >= additive_expression
+\end{lstlisting}
+The operators $<$(less), $>$(greater), $<=$(less or equal) and $>=$(greater or equal) all yield false if the specified relation is false and true if it is true. The type of the result is {\ttfamily {boolean}}. The operand of the four relational operators must have type int or float. The example $a<b<c$ is parsed as $(a<b)<c$, and the type of $(a<b)$ is boolean and is incompatible with the second $<$ operator.
+
+\subsection{Equality Operators}
+\begin{lstlisting}
+	equality_expression :
+		relational_expression
+		equality_expression == relational_expression
+		equality_expression != relational_expression
+\end{lstlisting}
+The $==$ (equal to) and the $!=$ (not equal to) operators yield boolean result on the specified relation, which is similar to the relational operators except for lower precedence. The two operands of $==$ and $!=$ operators must have identical type, which can be boolean, number (int or float) or string. 
+
+\subsection{Logical AND Operator}
+\begin{lstlisting}
+	logical_AND_expression :
+		equality_expression
+		logical_AND_expression && equality_expression
+\end{lstlisting}
+The \&\& operator groups left-to-right. The operands of \&\& operator have boolean type. If both operands are true, the result is true; otherwise, false is returned. \&\& guarantees left-to-right evalution: the first operand is evaluated first, and the second operand is evaluated only when the evaluated result of first operand is true. The result is {\ttfamily {boolean}}. 
+
+\subsection{Logical OR Operator}
+\begin{lstlisting}
+	logical_AND_expression
+	logical_OR_expression || logical_AND_expression
+\end{lstlisting}
+The $||$ operator groups left-to-right. The operands of $||$ operator have boolean type. If either operand is true, the result is true; if both operands are false, the result is false. $||$ guarantees left-to-right evalution: the first operand is evaluated first, and the second operand is evaluated only when the evaluated result of first operand is false. The result is {\ttfamily {boolean}}.
+
+\subsection{Assignment Expressions}
+There are six assignment operators; all group right-to-left.
+\begin{lstlisting}
+	assignment_expression :
+		logical_OR_expression
+		unary_expression assignment_operator assignment_expression
+
+	assignment_operator : one of
+		= += -= *= /= <:
+\end{lstlisting}
+\subsubsection{Assignment Operators}
+In the simple assignment with =, the value of first operand replaces by the value of second operand. The operands of = operator must have the same type, which can be any type of boolean, int, float, string, list, vertex, edge and graph.\newline
+
+An expression of the form $E1$ $op= E2$ is equivalent to $E1 = E1$ $op$ $(E2)$ except that E1 is evaluated only once.
+
+\subsubsection{Append Operator}
+The first operand of $<:$ operator can have type of list or graph. If it is list, the type of the second operand must be the same as the type of elements in this list; the $<:$ operation is to append the second operand at the end of the list. 
+the value of the second operand as a new property to the first operand, and the name of the property is the name of the second operand. An example is
+\begin{lstlisting}[frame=none]
+	list a = [1, 2, 3];
+	a <: 4;
+\end{lstlisting}
+
+If the first operand has type of graph, the second operand can have type of vertex, edge, or graph; the $<:$ operation is to append a vertex, an edge or a subgraph into the graph specified by the first operand. An example is
+\begin{lstlisting}[frame=none]
+	graph g;
+	vertex v1;
+	g <: v1;
+\end{lstlisting}
+
+The type and value of the result are the type and value of the first operand.
+
+\subsection{Comma Operator}
+\begin{lstlisting}
+	expression :
+		assignment_expression
+		expression , assignment_expression
+\end{lstlisting}
+A pair of expression separated by a comma is evaluated left-to-right, and the value of the left expression is discarded. The type and value of the result are the type and value of the right operand.
+
+\section{Declarations}
+Declaration specify the interpretation given to each identifier. Declarations have the form
+\begin{lstlisting}
+	declaration :
+		declaration_specifiers init_declarator_list ;
+\end{lstlisting}
+The declarators in the init-declarator list contain the identifiers being declared.
+\begin{lstlisting}
+	declaration_specifiers :
+		basic_type_specifier
+	
+	init_declarator_list :
+		init_declarator
+		init_declarator_list , init_declarator
+
+	init_declarator :
+		declarator
+		declarator = initializer
+\end{lstlisting}
+
+\subsection{Type Specifiers}\label{sec:type_spcifiers}
+The type-specifiers are
+\begin{lstlisting}
+	basic_type_specifier : one of
+		void boolean int float string list vertex edge graph
+
+	function_literal_type_sepcifier :
+		func
+\end{lstlisting}
+At most, only one type-specifier can be given in a declaration. If the type-specifier is missing from a declaration, a syntax error is generated; in other words, there is no default type assumed.
+
+\subsection{Declarators}
+Declarators have the syntax:
+\begin{lstlisting}
+	declarator :
+		direct_declarator
+
+	direct_declarator :
+		identifier
+		identifier ( parameter_list )
+		identifier ( )	
+		direct_declarator :: identifier
+\end{lstlisting}
+
+\subsubsection{Function Declarators}
+The function declaration is an identifier followed by a parenthesized list of parameters. The type of the identifier of $D$ in $T$ $D(parameter\_list)$, where $T$ is declaration specifier, is "function with arguments $parameter\_list$ returning $T$". The syntax of the parameters is
+\begin{lstlisting}
+	parameter_list :
+		parameter_declaration
+		parameter_list , parameter_declaration
+
+	parameter_declaration :
+		declaration_specifiers identifier
+		function_literal_type_sepcifier identifier
+\end{lstlisting}
+The parameter list specifies the type of the parameters. All the types (Sec.\ref{sec:type_spcifiers}) are allowed to be the function parameters, including the function literal type (Sec.\ref{sec:func_literal}).
+
+\subsubsection{Attribute Declarators}
+Attributes can be declared for vertex, edge or graph type. The attribute declarators have the syntax,
+\begin{lstlisting}
+		direct_declarator :: identifier
+\end{lstlisting}
+The allowed types of attributes are boolean, int, float and string. 
+
+\subsection{Function Literal Declaration}\label{sec:func_literal}
+Function literal declarations have the form
+\begin{lstlisting}
+	function_literal_declaration :
+		function_literal_type_sepcifier declarator = compound_statement ;
+		function_literal_type_sepcifier declarator : declaration_specifiers = compound_statement ;
+\end{lstlisting}
+The difference of the two declaration forms is that the second one explicitly specifies the return type as $declaration\_specifiers$, while the first one omits the return type.
+If the return type is omitted in function literal declarations, the default return type is the type of the last statement in $compound\_statement$. The allowed return types of function literal are all types except the function literal itself. \newline
+
+A complete example of function literal declaration is
+\begin{lstlisting}[frame=none]
+	func add(int a, int b):int = { a+b; };
+\end{lstlisting}	 
+
+Similar to simple declaration, the function literal declarations are allowed to be nested within the function definition. \newline
+
+The function literal can be used together with $attribute$ and match operator. The $attributes$ used within the $compound\_statement$ are not required to be declared in the $argument\_list$. An example is
+\begin{lstlisting}[frame=none] 
+	func cond() = { @name=="Tom" && age>17 ; } ;
+	// list out all Vertices match the condition
+	list v = g.allV[cond()];
+\end{lstlisting}
+
+\subsection{Initialization}
+An initial value may be specified for an identifier during its declaration via initializer. The initializer is preceded by $=$, is either an expression, or a list of initializers nested in square bracket.
+\begin{lstlisting}
+	initializer :
+		assignment_expression
+		[ initializer_list ]
+		[ ]
+
+	initializer_list :
+		initializer
+		initializer_list , initializer
+\end{lstlisting}
+The initializer for a list is either an expression of the same type, or a square-bracket-enclosed list of initializers for its members in order; empty list is allowed. The initializers in the square bracket for the initialization of a list must have the same type, which can be one of boolean, int, float, string, vertex, edge. A new list can only be initialized once, and after the initialization, the type of list element can not be modified. An example is,
+\begin{lstlisting}[frame=none]
+	list a = b ; 				// assume b is a list
+	list a = [ ] ;				// empty list
+	list a = [ 1, 2, 3, 4 ] ;	
+\end{lstlisting}
+
+The initializer for an attribute of vertex, edge or graph is an expression of the same type. An example of initializing attribute is,
+\begin{lstlisting}[frame=none]
+	vertex a;
+	string a::name = "Tom";
+	int a::age = 17;
+\end{lstlisting}
+
+The initializer for all types except list is an expression of the same type. 
+
+
+
+\section{Statements}
+Statements are executed in sequence. Statements are executed for their effect, and do not have values. They fall into several groups.
+\begin{lstlisting}
+	statement :
+		expression_statement
+		compound_statement
+		selection_statement
+		iteration_statement
+		jump_statement
+		declaration_statement
+\end{lstlisting}
+
+\subsection{Expression Statement}
+Most statements are expression statements, which have the form
+\begin{lstlisting}
+	expression_statement :
+		expression ;
+		;
+\end{lstlisting}
+Most expression statements are assignment or function calls. All side effects from the expression are completed before the next statement is executed. If the expression is missing, the construction is called a null statement; it is often use to supply an empty body to an iteration statement.
+
+\subsection{Compound Statements}
+So that several statements can be used where one is expected, the compound statement (also called "block") is provided. The body of a function definition is a compound statement.
+\begin{lstlisting}
+	compound_statemnet :
+		{ }
+		{ statement_list }
+
+	statement_list :
+		statement
+		statement_list statement
+\end{lstlisting}
+If an identifier in the statement-list was in scope outside the block, the outer declaration is suspended within the block, after which it resumes its force. An identifier may be declared only once in the same block. Initialization of objects is performed each time the block is entered at the top, and proceeds in the order of the declarators.
+
+\subsection{Selection Statements}
+Selection statements choose one of the two flows of control.
+\begin{lstlisting}
+	selection_statement :
+		if ( expression ) statement
+		if ( expression ) statement else statement
+\end{lstlisting}
+In both forms of the is statement, the expression has a boolean type after evaluated. If the boolean value is true, the first substatement is executed. If the boolean value is false in the second form, the second substatement is executed. The else ambiguity is resolved by connecting an els with the last encountered else-less if at the same block nesting level.
+
+\subsection{Iteration Statements}
+\begin{lstlisting}
+	iteration_statement :
+		while ( expression ) statement
+		for ( expression ; expression ; expression ) statement
+		for ( expression ; expression ; ) statement
+		for ( expression ; ; expression ) statement
+		for ( ; expression ; expression ) statement
+		for ( expression ; ; ) statement
+		for ( ; expression ; expression ) statement
+		for ( ; expression ; ) statement
+		for ( ; ; ) statement
+		foreach ( identifier : postfix_expression ) statement
+\end{lstlisting}
+In the while statement, the substatement is executed repeatedly so long as the value of the expression remains true; the expression must have boolean type. The test, including all side effects from the expression, occurs before each execution of the statement. \newline
+
+In the for statement, the first expression is evaluated once, and thus specifies initialization for the loop. There is no restriction on its type. The second expression must have boolean type; it is evaluated before each iteration, and if it becomes false, the for is terminated. The third expression is evaluated after each iteration, and thus specifies a re-initialization for the loop. There is no restriction on its type. Side-effects from each expression are completed immediately after its evaluation. If the substatement does not contain continue, a statement
+\begin{lstlisting}[frame=none]
+	for ( expression1 ; expression2 ; expression3 ) statement
+\end{lstlisting}
+is equivalent to
+\begin{lstlisting}[frame=none]
+	expressin1 ;
+	while ( expression2 ) {
+		statement
+		experssion3 ;
+	}
+\end{lstlisting}
+Any of the three expressions may be dropped. A missing second expression makes the implied test equivalent to test a true constant. \newline
+
+In the foreach statement, the identifier must have a vertex or edge type and is assigned a vertex or edge objects at each iteration. The postfix expression must have a list type, which consists of elements of vertex of edge type. The identifier iterate over all the elements in the list and do the substatement once at in each iteration.
+
+\subsection{Jump Statements}
+Jump statements transfer control unconditionally.
+\begin{lstlisting}
+	jump_statement :
+		break ;
+		continue ;
+		return expression ;
+		return
+\end{lstlisting}
+ A continue statement may appear only within an iteration statement. It causes control to pass to the loop-continuation portion of the smallest enclosing such statement.\newline
+
+A break statement may appear only in an iteration statement and terminates execuation of the smallest enclosing such statement; control passes to the statement following the terminated statement. \newline
+
+A function returns to its caller by the return statement. When return is followed by an expression, the value is returned to the caller of the function. The expression type must agree with the function return type. \newline
+
+ Flowing off the end of a function is equivalent to a return with no expression. In either case, the returned value is undefined and the function should have type void. \newline
+
+\subsection{Declaration Statements}
+Declaration statements have the syntax
+\begin{lstlisting}
+	declaration_statement :
+		declaration
+		function_literal_declaration
+\end{lstlisting}
+Simple declaration and function literal declaration can be specified in the declaration statements.  
+
+\section{External Statements}
+The unit of input provided to the NSBL compiler is called a translation unit; it consists of a sequence of external statements, which are either statement or function definitions.
+\begin{lstlisting}
+	translation_unit :
+		external_statement
+		translation_unit external_statement
+
+	external_statement :
+		function_definition
+		statement
+\end{lstlisting}
+The scope of declarations within the external statements persists to the end of the translation unit in which they are declared. Only at the level of external statement may the function definition be given, therefore nested function is not allowed.
+
+\subsection{Function Definitions}
+Function definition have the form
+\begin{lstlisting}
+	function_definition :
+		declaration_specifiers declarator compound_statement
+\end{lstlisting}
+A function may return any type (Sec.\ref{sec:type_spcifiers}) except the function literal type. The declarator in a function declaration must specify explicitly that the declared identifier has function type; that is, it must contain one of the forms
+\begin{lstlisting}
+		identifier ( parameter_list )
+		identifier ( )
+\end{lstlisting}
+The syntax of function definition of NSBL is similar to the new-style syntax in Language C, but not compatible to the old-style syntax.
+
+\subsection{External Statements}
+External statements refers to the statements which are located outside functions, and are automatically executed after the program is loaded. Unlike C language, in NSBL language there does not exist a starting function (in C language, that is $main$ function); and the external statements are conceptually equivalent to the $main$ function in C. \newline 
+
+External statements can include $declaration\_statement$.
+All objects declared within external statements have global scope, which persists to the end of the translation unit in which the external statements are declared, and are visible in functions. \newline
+
+Each object or function must have exactly one definition. \newline
+
+\section{Scope}\label{sec:scope}
+At this time, a program must be compiled at one time: the source text must be kept in one file. Therefore, the external function or data does not exist in NSBL language. \newline
+
+The scope of an identifier is the region of the program text within which the identifier's characteristics are understood. 
+Each type has a name space, and the name spaces of different types are disjoint. 
+Identifiers in different name spaces that do not interfere with one another; the same identifier may be used for different purposes, even in the same scope, if the uses are in different name spaces. \newline
+
+The scope of an object or function identifier in an external statement begins at the end of its declarator and persists to the end of the translation unit in which it appears. The scope of a parameter of a function definition begins at the start of the block defining the function, and persists through the function; the scope of a parameter in a function declaration ends at the end of the declarator. The scope of an identifier declared at the head of a block begins at the end of its declarator, and persists to the end of the block. \newline
+
+If an identifier is declared in external statement, it can be shadowed by the same identifier in the same name space within a function. 
+
+\section{Grammar}\label{sec:grammar}
+Below is the implementation of the grammar that was given throughout this language specification in YACC.
+\lstinputlisting{../../src/Parser.y}
+\end{document}
+

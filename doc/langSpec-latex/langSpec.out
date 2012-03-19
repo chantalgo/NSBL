@@ -1,0 +1,58 @@
+\BOOKMARK [1][-]{section.1}{Introduction}{}
+\BOOKMARK [1][-]{section.2}{Lexical Conventions}{}
+\BOOKMARK [2][-]{subsection.2.1}{Tokens}{section.2}
+\BOOKMARK [2][-]{subsection.2.2}{Comments}{section.2}
+\BOOKMARK [2][-]{subsection.2.3}{Identifiers}{section.2}
+\BOOKMARK [2][-]{subsection.2.4}{Keywords}{section.2}
+\BOOKMARK [2][-]{subsection.2.5}{Constants}{section.2}
+\BOOKMARK [2][-]{subsection.2.6}{Integer Constants}{section.2}
+\BOOKMARK [2][-]{subsection.2.7}{Float Constants}{section.2}
+\BOOKMARK [2][-]{subsection.2.8}{Boolean Constants}{section.2}
+\BOOKMARK [2][-]{subsection.2.9}{String Literals}{section.2}
+\BOOKMARK [1][-]{section.3}{Syntax Notation}{}
+\BOOKMARK [1][-]{section.4}{Meaning of Identifiers}{}
+\BOOKMARK [2][-]{subsection.4.1}{Basic Types}{section.4}
+\BOOKMARK [2][-]{subsection.4.2}{Derived Types}{section.4}
+\BOOKMARK [1][-]{section.5}{Expressions}{}
+\BOOKMARK [2][-]{subsection.5.1}{Primary Expressions}{section.5}
+\BOOKMARK [2][-]{subsection.5.2}{Postfix Expressions}{section.5}
+\BOOKMARK [3][-]{subsubsection.5.2.1}{Edge Assignment}{subsection.5.2}
+\BOOKMARK [3][-]{subsubsection.5.2.2}{Function Calls and Function Literal Calls}{subsection.5.2}
+\BOOKMARK [3][-]{subsubsection.5.2.3}{Pipe Operations}{subsection.5.2}
+\BOOKMARK [3][-]{subsubsection.5.2.4}{Match Operations}{subsection.5.2}
+\BOOKMARK [3][-]{subsubsection.5.2.5}{List References}{subsection.5.2}
+\BOOKMARK [3][-]{subsubsection.5.2.6}{Property References}{subsection.5.2}
+\BOOKMARK [2][-]{subsection.5.3}{Unary Operations}{section.5}
+\BOOKMARK [3][-]{subsubsection.5.3.1}{Unary Plus Operator}{subsection.5.3}
+\BOOKMARK [3][-]{subsubsection.5.3.2}{Unary Minus Operator}{subsection.5.3}
+\BOOKMARK [3][-]{subsubsection.5.3.3}{Logical Negation Operator}{subsection.5.3}
+\BOOKMARK [2][-]{subsection.5.4}{Casts}{section.5}
+\BOOKMARK [2][-]{subsection.5.5}{Multiplicative Operators}{section.5}
+\BOOKMARK [2][-]{subsection.5.6}{Additive Operators}{section.5}
+\BOOKMARK [2][-]{subsection.5.7}{Relational Operators}{section.5}
+\BOOKMARK [2][-]{subsection.5.8}{Equality Operators}{section.5}
+\BOOKMARK [2][-]{subsection.5.9}{Logical AND Operator}{section.5}
+\BOOKMARK [2][-]{subsection.5.10}{Logical OR Operator}{section.5}
+\BOOKMARK [2][-]{subsection.5.11}{Assignment Expressions}{section.5}
+\BOOKMARK [3][-]{subsubsection.5.11.1}{Assignment Operators}{subsection.5.11}
+\BOOKMARK [3][-]{subsubsection.5.11.2}{Append Operator}{subsection.5.11}
+\BOOKMARK [2][-]{subsection.5.12}{Comma Operator}{section.5}
+\BOOKMARK [1][-]{section.6}{Declarations}{}
+\BOOKMARK [2][-]{subsection.6.1}{Type Specifiers}{section.6}
+\BOOKMARK [2][-]{subsection.6.2}{Declarators}{section.6}
+\BOOKMARK [3][-]{subsubsection.6.2.1}{Function Declarators}{subsection.6.2}
+\BOOKMARK [3][-]{subsubsection.6.2.2}{Attribute Declarators}{subsection.6.2}
+\BOOKMARK [2][-]{subsection.6.3}{Function Literal Declaration}{section.6}
+\BOOKMARK [2][-]{subsection.6.4}{Initialization}{section.6}
+\BOOKMARK [1][-]{section.7}{Statements}{}
+\BOOKMARK [2][-]{subsection.7.1}{Expression Statement}{section.7}
+\BOOKMARK [2][-]{subsection.7.2}{Compound Statements}{section.7}
+\BOOKMARK [2][-]{subsection.7.3}{Selection Statements}{section.7}
+\BOOKMARK [2][-]{subsection.7.4}{Iteration Statements}{section.7}
+\BOOKMARK [2][-]{subsection.7.5}{Jump Statements}{section.7}
+\BOOKMARK [2][-]{subsection.7.6}{Declaration Statements}{section.7}
+\BOOKMARK [1][-]{section.8}{External Statements}{}
+\BOOKMARK [2][-]{subsection.8.1}{Function Definitions}{section.8}
+\BOOKMARK [2][-]{subsection.8.2}{External Statements}{section.8}
+\BOOKMARK [1][-]{section.9}{Scope}{}
+\BOOKMARK [1][-]{section.10}{Grammar}{}
