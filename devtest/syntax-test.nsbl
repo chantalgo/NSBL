@@ -38,11 +38,15 @@ acast = (float)afcast;
 string s1="hellow world";
 string s2="hellow", s3="world";
 
+//Attribute declaration
+vertex v;
+string v::name = "Tom";
+int v::age = 17;
+
 //LIST declaration
 list lv = [v1,v2,v3];
 list le = [e1,e2,e3];
 list empty = [];
-
 
 /******************************
  * 1.2 EXPRESSION_STATEMENT   *
@@ -54,11 +58,14 @@ list empty = [];
 v1.name = "Jack";
 v1.age = 25;
 
-
 //EDGE assignment
 e1:v1->v2;
 e3:v1->v3;
 e1.weight = 14;
+
+//LIST
+lv <: v4;		// append one element
+lv[0] = v5; 	// memeber operation
 
 //GRAPH construction
 //EAT operation
