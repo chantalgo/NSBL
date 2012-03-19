@@ -13,8 +13,17 @@ graph g1,g2,g3;
 //VERTEX declaration
 vertex v1,v2,v3;
 
+//VERTEX ATTRIBUTE declaration
+string v1::name = "Tom";
+int v1::age = 24;
+float v1::height = 178.5;
+
 //EDGE declaration
 edge e1,e2,e3;
+
+//EDGE ATTRIBUTE declaration
+int e1::weight = 11;
+string e1::relation = "friends";
 
 //INT declaration and cast
 int a=1,b=2,c=3;
@@ -32,15 +41,8 @@ string s2="hellow", s3="world";
 //LIST declaration
 list lv = [v1,v2,v3];
 list le = [e1,e2,e3];
-vertex v4,v5;
-lv <: v4;
-lv[1] = v5;
-
 list empty = [];
-//lv[number] => list element
-//lv[boolean] => match
 
-// lv = [];  //syntax error
 
 /******************************
  * 1.2 EXPRESSION_STATEMENT   *
@@ -48,14 +50,15 @@ list empty = [];
  ******************************/
 
 //VERTEX ATTRIBUTE assignment
-v1<:(name="Tom");
-v2<:(name="Jack");
-v3<:(name="Susan");
+//v1<:(name="Tom");      semantic error
+v1.name = "Jack";
+v1.age = 25;
+
 
 //EDGE assignment
 e1:v1->v2;
-e2:v2->v3 mark "knows";
 e3:v1->v3;
+e1.weight = 14;
 
 //GRAPH construction
 //EAT operation
@@ -66,6 +69,11 @@ g1 <: le;
 g2 <: v1;
 g2 <: v2;
 g2 <: e1;
+
+//LIST operation
+vertex v4,v5;
+lv <: v4;                       //append operation
+lv[1] = v5;                     //member
 
 //INT and FLOAT assignment
 a=1;
