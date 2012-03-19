@@ -114,7 +114,7 @@ jump_statement
 
 declaration_statement
     : declaration
-	| function_literal_declaration
+    | function_literal_declaration
     ;
 
 /**************************
@@ -195,7 +195,7 @@ unary_operator
 postfix_expression
     : primary_expression
     | primary_expression ':' primary_expression ARROW primary_expression
-	| primary_expression ':' primary_expression ARROW primary_expression MARK primary_expression 
+    | primary_expression ':' primary_expression ARROW primary_expression MARK primary_expression 
     | postfix_expression '(' argument_expression_list ')'
     | postfix_expression '(' ')'
     | postfix_expression PIPE pipe_property
@@ -246,7 +246,7 @@ constant
 
 function_literal_declaration
     : function_literal_type_sepcifier declarator '=' compound_statement ';'
-	| function_literal_type_sepcifier declarator ':' declaration_specifiers '=' compound_statement ';'
+    | function_literal_type_sepcifier declarator ':' declaration_specifiers '=' compound_statement ';'
     ;
 
 function_definition
@@ -254,12 +254,12 @@ function_definition
     ;
 
 function_literal_type_sepcifier
-	: FUNC_LITERAL
-	;
+    : FUNC_LITERAL
+    ;
 
 basic_type_specifier
     : VOID
-	| BOOLEAN
+    | BOOLEAN
     | INTEGER
     | FLOAT
     | STRING
@@ -292,7 +292,7 @@ declarator
     ;
 
 direct_declarator
-	: IDENTIFIER
+    : IDENTIFIER
     | IDENTIFIER '(' parameter_list ')'
     | IDENTIFIER '(' ')'
     ;
@@ -304,13 +304,13 @@ parameter_list
 
 parameter_declaration
     : declaration_specifiers IDENTIFIER
-	| function_literal_type_sepcifier IDENTIFIER
+    | function_literal_type_sepcifier IDENTIFIER
     ;
 
 initializer
     : assignment_expression
     | '[' initializer_list ']'
-	| '[' ']'
+    | '[' ']'
     ;
 
 initializer_list
