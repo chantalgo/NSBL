@@ -50,14 +50,26 @@ escapeinside={\%*}{*)},
 morekeywords={string,list,vertex,edge,graph,func}
 }
 
-\title {NSBL : Language Reference Manual} 
-\author {Chantal Galvez, Kunal Mishra, Lixing Pan and Jing Zhang}
+\title {Team 19: Language Specification Reference of NSBL
+\footnote{COMS W4115, Spring 2012 }} 
+\author {
+Chantal Galvez\footnote{cg2486@columbia.edu}, 
+Kunal Mishra\footnote{ksm2135@columbia.edu}, 
+Lixing Pan\footnote{lp2441@columbia.edu},
+and Jing Zhang\footnote{jz2300@columbia.edu}}
 \date{\today}
 
 \begin{document}
 \maketitle
 \section{Introduction}
-  This manual describes the NSBL language, which is intended for graph data structure manipulation.
+  This manual describes the syntax and semantic specification of NSBL language. Although the grammar of NSBL is similar to C language, there exist many distinct differences between NSBL and C, for example, 
+dynamic list(Sec.\ref{sec:derType}\&Sec.\ref{sec:append}\&Sec.\ref{sec:init}), 
+function literal(Sec.\ref{sec:func_literal}), 
+pipe operation(Sec.\ref{sec:pipe}),
+match operation(Sec.\ref{sec:match}),
+foreach loop(Sec.\ref{sec:loop})
+and external statement(Sec.\ref{sec:extStat},
+ where the reader should pay attention to.  
 
 \section{Lexical Conventions}
 \subsection{Tokens}
@@ -135,7 +147,7 @@ There is not char type defined here, string is the basic unit to represent a cha
 
 The boolean type has two values, true and false.
 
-\subsection{Derived Types}
+\subsection{Derived Types}\label{sec:derType}
 There are six derived types Vertex, edge, graph, list, functions, function\_literal.\newline
 
   Vertex is the type to represent a node of a graph. Attributes can be added or deleted dynamically to the node. An attribute can be any one of the fundamental types. $id$ is one reserved attribute, which is assigned by a unique vertices identification number. \newline
@@ -211,11 +223,11 @@ The syntax of function call and function literal call are the same, a postfix ex
 
 In preparing for the call to a function or function literal, a copy is made of each argument; all argument-passing is strictly by value. 
 
-\subsubsection{Pipe Operations}
+\subsubsection{Pipe Operations}\label{sec:pipe}
 A pipe operation is a postfix expression of type "list", followed by the $|$ operator and pipe property. The allowed choices of pipe property depend on the type of the list element. If list element has type of "vertex", the pipe property can be $outE$ or $inE$; similarly, if the type of list element is "edge", the pipe property can be $strtV$ or $endV$. 
 This pipe operation is eventually evaluated by appending all piped properties to an empty list, and the return type is "list" whose element has the type specified by pipe property.
 
-\subsubsection{Match Operations}
+\subsubsection{Match Operations}\label{sec:match}
 A match operation is a postfix expression of type "list", followed by and conditional expression in square brackets. The type of first operand must have type list, and the type of conditional expression must have type $boolean$. The return of match operation is a list containing all elements satisfying the conditional expression. \newline
 
 An example is
@@ -332,7 +344,7 @@ In the simple assignment with =, the value of first operand replaces by the valu
 
 An expression of the form $E1$ $op= E2$ is equivalent to $E1 = E1$ $op$ $(E2)$ except that E1 is evaluated only once.
 
-\subsubsection{Append Operator}
+\subsubsection{Append Operator}\label{sec:append}
 The first operand of $<:$ operator can have type of list or graph. If it is list, the type of the second operand must be the same as the type of elements in this list; the $<:$ operation is to append the second operand at the end of the list. 
 the value of the second operand as a new property to the first operand, and the name of the property is the name of the second operand. An example is
 \begin{lstlisting}[frame=none]
@@ -445,7 +457,7 @@ The function literal can be used together with $attribute$ and match operator. T
 	list v = g.allV[cond()];
 \end{lstlisting}
 
-\subsection{Initialization}
+\subsection{Initialization}\label{sec:init}
 An initial value may be specified for an identifier during its declaration via initializer. The initializer is preceded by $=$, is either an expression, or a list of initializers nested in square bracket.
 \begin{lstlisting}
 	initializer :
@@ -457,7 +469,7 @@ An initial value may be specified for an identifier during its declaration via i
 		initializer
 		initializer_list , initializer
 \end{lstlisting}
-The initializer for a list is either an expression of the same type, or a square-bracket-enclosed list of initializers for its members in order; empty list is allowed. The initializers in the square bracket for the initialization of a list must have the same type, which can be one of boolean, int, float, string, vertex, edge. A new list can only be initialized once, and after the initialization, the type of list element can not be modified. An example is,
+The initializer for a list is either an expression of the same type, or a square-bracket-enclosed list of initializers for its members in order; empty list is allowed. The initializers in the square bracket for the initialization of a list must have the same type, which can be one of boolean, int, float, string, vertex or edge. A new list can only be initialized once. The type of all elements in a list must be identical. When a list is empty, the type of its element is $undefined$.
 \begin{lstlisting}[frame=none]
 	list a = b ; 				// assume b is a list
 	list a = [ ] ;				// empty list
@@ -518,7 +530,7 @@ Selection statements choose one of the two flows of control.
 \end{lstlisting}
 In both forms of the is statement, the expression has a boolean type after evaluated. If the boolean value is true, the first substatement is executed. If the boolean value is false in the second form, the second substatement is executed. The else ambiguity is resolved by connecting an els with the last encountered else-less if at the same block nesting level.
 
-\subsection{Iteration Statements}
+\subsection{Iteration Statements}\label{sec:loop}
 \begin{lstlisting}
 	iteration_statement :
 		while ( expression ) statement
@@ -548,7 +560,7 @@ is equivalent to
 \end{lstlisting}
 Any of the three expressions may be dropped. A missing second expression makes the implied test equivalent to test a true constant. \newline
 
-In the foreach statement, the identifier must have a vertex or edge type and is assigned a vertex or edge objects at each iteration. The postfix expression must have a list type, which consists of elements of vertex of edge type. The identifier iterate over all the elements in the list and do the substatement once at in each iteration.
+In the foreach statement, the type of the postfix expression must be $list$. The type of the identifier is identical to the type of the list elements. The foreach statement iterates over all elements in the specific list, and during each iteration the followed statement will be executed once. The scope of identifier in a foreach statement only covers the entire body of this foreach statement.
 
 \subsection{Jump Statements}
 Jump statements transfer control unconditionally.
@@ -602,7 +614,7 @@ A function may return any type (Sec.\ref{sec:type_spcifiers}) except the functio
 \end{lstlisting}
 The syntax of function definition of NSBL is similar to the new-style syntax in Language C, but not compatible to the old-style syntax.
 
-\subsection{External Statements}
+\subsection{External Statements}\label{sec:extStat}
 External statements refers to the statements which are located outside functions, and are automatically executed after the program is loaded. Unlike C language, in NSBL language there does not exist a starting function (in C language, that is $main$ function); and the external statements are conceptually equivalent to the $main$ function in C. \newline 
 
 External statements can include $declaration\_statement$.
