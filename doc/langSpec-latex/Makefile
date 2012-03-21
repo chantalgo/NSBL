@@ -10,7 +10,7 @@ all: clean-dist $(target:%=%.pdf)
 
 %.pdf: %.dvi
 	dvipdf $*.dvi
-	cp $*.pdf ../
+	cp $*.pdf ../"nsbl_LRM.pdf"
 
 clean-dist: clean
 	rm -f *.dvi *.ps *.pdf *.bbl

@@ -85,7 +85,7 @@ If the input stream has been separated into tokens up to a given character, the 
   The characters // also introduce a comment, which terminates with the newline.
 
 \subsection{Identifiers}
-An identifier is a sequence of letters and digits. The first character must be a letter; th underscore \_ counts as a letter. Upper and lower case letters are different. Identifiers may have any length.
+An identifier is a sequence of letters and digits. The first character must be a letter; the underscore \_ counts as a letter. Upper and lower case letters are different. Identifiers may have any length.
 
 \subsection{Keywords}
 The following identifiers are reserved for use as keywords, and may not be used otherwise:
@@ -120,7 +120,7 @@ There are several kinds of constants. Each has a data type; Sec.\ref{sec:basic_t
 An integer constant consisting of a sequence of digits is taken to be decimal. An integer constant is always signed.
 
 \subsection{Float Constants}
-A float condstant consists of an integer part, a decimal point, fraction part, an e or E, an optionally signed integer exponent.The integer and fraction parts both consist of a sequence of digits. Either the integer part or the fraction part (not both) may be missing; either the decimal point or the e (E) or the exponent (not both) may be missing.
+A float constant consists of an integer part, a decimal point, fraction part, an e or E, an optionally signed integer exponent.The integer and fraction parts both consist of a sequence of digits. Either the integer part or the fraction part (not both) may be missing; either the decimal point or the e (E) or the exponent (not both) may be missing.
 
 \subsection{Boolean Constants}
 A boolean constant can either be true or false.
@@ -134,7 +134,7 @@ Adjacent string literals are concatenated into a single string. Unlike C languag
 In the syntax notation used in this manual, syntactic categories are indicated by {\ttfamily {italic}} type, and literal words and characters in $typewriter$ style. Alternative categories are usually listed on separate lines; in a few cases, a long set of narrow alternatives is presented on one line, marked by the phrase "one of." The syntax is summarized in Sec.\ref{sec:grammar}.
 
 \section{Meaning of Identifiers}
-Identifiers, or names refer to two things: functions and objects. An object, sometimes called a variable, is a location in storage, and its interpretation depends on two main attributes: its storage class and its type. The storage class determines the lifetime of the storage associated with the identified object; the type determines the meaning of the values found in the identified object. A name a so has a scope, which is the region of the program in which it is known, and a linkage, which determines whether the same name in another scope refers to the same object or function. Scope is discussed in Sec.\ref{sec:scope}.
+Identifiers, or names refer to two things: functions and objects. An object, sometimes called a variable, is a location in storage, and its interpretation depends on two main attributes: its storage class and its type. The storage class determines the lifetime of the storage associated with the identified object; the type determines the meaning of the values found in the identified object. A name so has a scope, which is the region of the program in which it is known, and a linkage, which determines whether the same name in another scope refers to the same object or function. Scope is discussed in Sec.\ref{sec:scope}.
 
 \subsection{Basic Types}\label{sec:basic_types}
 There are four fundamental types: int, float, string, boolean. \newline
@@ -506,7 +506,7 @@ Most statements are expression statements, which have the form
 		expression ;
 		;
 \end{lstlisting}
-Most expression statements are assignment or function calls. All side effects from the expression are completed before the next statement is executed. If the expression is missing, the construction is called a null statement; it is often use to supply an empty body to an iteration statement.
+Most expression statements are assignment or function calls. All side effects from the expression are completed before the next statement is executed. If the expression is missing, the construction is called a null statement; it is often used to supply an empty body to an iteration statement.
 
 \subsection{Compound Statements}
 So that several statements can be used where one is expected, the compound statement (also called "block") is provided. The body of a function definition is a compound statement.
