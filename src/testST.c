@@ -6,12 +6,14 @@ extern SymbolTableStack*       s_stack;
 int main() {
     s_table_init();
     // generate entries
-    SymbolTableEntry* entry, *result, *result2;
+    SymbolTableEntry* entry, *entry2, *result, *result2;
     Lexeme ll = "abc";
     int tt = 1;
     ScopeId ss = 0;
     entry = s_entry_new ( ll, tt, ss );
+    entry2 = s_entry_new ( "xyz", 2, 1 );
     printf("key=%s\nbind=%s\n", entry->key, entry->bind);
+    printf("key=%s\nbind=%s\n", entry2->key, entry2->bind);
     // insert to s_table
     s_table_insert(s_table, entry);
     // lookup

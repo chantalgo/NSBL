@@ -51,10 +51,16 @@ char* s_table_type_name (int type) {
     }
 }
 
-int s_table_tmpid () {
+int s_table_new_tmpid () {
     static int tid = 0;
     return tid++;
 }
+
+int s_table_new_scopeid () {
+    static int sid = 0;
+    return sid++;
+}
+
 int s_stack_init () {
     s_stack = (SymbolTableStack*) malloc ( sizeof(SymbolTableStack) );
     s_stack->stack = g_array_new (1,1,sizeof(ScopeId));
@@ -109,7 +115,7 @@ int s_new_key ( Lexeme lex, ScopeId scope, SymbolTableKey key) {
 
 int s_new_bind ( SymbolTableEntry* entry, Binding bind) {
     char * typename = s_table_type_name( entry->type );
-    int tmpid = s_table_tmpid();
+    int tmpid = s_table_new_tmpid();
     sprintf( bind, "_%s%d\0", typename, tmpid );
     return 0;
 }
