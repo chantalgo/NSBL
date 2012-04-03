@@ -36,7 +36,7 @@ typedef struct {
     int                 type;
     ScopeId             scope;
     SymbolTableKey      key;
-    Binding             bind;    
+    Binding             bind;
 }SymbolTableEntry;
 
 typedef struct {
@@ -58,13 +58,13 @@ bool                    s_table_remove      (SymbolTable* s_table,   SymbolTable
 SymbolTableEntry*       s_table_lookup      (SymbolTable* s_table,   SymbolTableKey key);
 
 char*                   s_table_type_name   (int type);
-int                     s_table_new_tmpid   ();
+int                     s_table_new bindid   ();
 int                     s_table_new_scopeid ();
 
 int                     s_stack_init        ();
 int                     s_stack_destroy     ();
 int                     s_stack_push        (SymbolTableStack* s_stack, ScopeId scopeid);
-ScopeId                 s_stack_pop         (SymbolTableStack* s_stack);  
+ScopeId                 s_stack_pop         (SymbolTableStack* s_stack);
 ScopeId                 s_stack_down        (SymbolTableStack* s_stack);
 int                     s_stack_reset       (SymbolTableStack* s_stack);
 
