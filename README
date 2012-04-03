@@ -4,6 +4,9 @@ How to compile?
 > make
 > make test
 
+IMPORTANT:
+YACC : version 2.4.1 work (1.9 buggy!!!)
+
 04/02/2012
 ADD symbol table : SymbolTable.c SymbolTable.h testST.c
 ADD abstract syntax tree : ASTree.c ASTree.h
