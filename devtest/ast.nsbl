@@ -1,0 +1,5 @@
+int i,j,k=2;
+i=2*3+4;
+i>j || m<k && !j;
+float i=1.2;
+string a="abcd";
