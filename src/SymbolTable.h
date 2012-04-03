@@ -58,7 +58,7 @@ bool                    s_table_remove      (SymbolTable* s_table,   SymbolTable
 SymbolTableEntry*       s_table_lookup      (SymbolTable* s_table,   SymbolTableKey key);
 
 char*                   s_table_type_name   (int type);
-int                     s_table_new bindid   ();
+int                     s_table_new_bindid  ();
 int                     s_table_new_scopeid ();
 
 int                     s_stack_init        ();

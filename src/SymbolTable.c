@@ -38,16 +38,16 @@ SymbolTableEntry* s_table_lookup (SymbolTable* table, SymbolTableKey key) {
 
 char* s_table_type_name (int type) {
     switch (type) {
-        case VOID_T: return "void";
-        case BOOL_T: return "bool";
-        case INT_T: return "int";
-        case FLOAT_T: return "float";
-        case STRING_T: return "str";
-        case LIST_T: return "list";
-        case VERTEX_T: return "vertex";
-        case EDGE_T: return "edge";
-        case GRAPH_T: return "graph";
-        default: return NULL;
+        case VOID_T:    return "void";
+        case BOOL_T:    return "bool";
+        case INT_T:     return "int";
+        case FLOAT_T:   return "float";
+        case STRING_T:  return "str";
+        case LIST_T:    return "list";
+        case VERTEX_T:  return "vertex";
+        case EDGE_T:    return "edge";
+        case GRAPH_T:   return "graph";
+        default:        return NULL;
     }
 }
 
@@ -115,7 +115,7 @@ int s_new_key ( Lexeme lex, ScopeId scope, SymbolTableKey key) {
 
 int s_new_bind ( SymbolTableEntry* entry, Binding bind) {
     char * typename = s_table_type_name( entry->type );
-    int tmpid = s_table_newbindid();
+    int tmpid = s_table_new_bindid();
     sprintf( bind, "_%s%d\0", typename, tmpid );
     return 0;
 }
