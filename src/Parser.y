@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include <SymbolTable.h>
+
 extern FILE *yyin; /* Input for yacc parser. */
 extern void yyerror(char *str); /* Our version. */
 extern int yywrap(void); /* Our version. */
