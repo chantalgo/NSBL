@@ -22,6 +22,7 @@
 #define VERTEX_T    6
 #define EDGE_T      7
 #define GRAPH_T     8
+#define UNKNOWN_T   -1
 
 typedef int ScopeId;
 typedef GHashTable SymbolTable;
