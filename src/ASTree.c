@@ -103,6 +103,7 @@ void ast_free(struct Node* node) {
 }
 
 void ast_output_node(struct Node* node, FILE* out, const char * sep) {
+    if(node==NULL) return;
     switch (node->token) {
         case INTEGER_CONSTANT :
             fprintf(out, "Node<INT>    : lexval = %d%s", node->lexval.ival, sep);break;
@@ -194,6 +195,7 @@ void ast_output_node(struct Node* node, FILE* out, const char * sep) {
     
 void ast_output_subtree(struct Node* node, FILE* out, int level) {
     int i;
+    if(node == NULL) return;
     fprintf(out, "TreeLevel<%4d>:: ",level);
     ast_output_node(node, out, "\n");
     for(i=0; i<node->nch; ++i) {
