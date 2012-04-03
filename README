@@ -25,5 +25,5 @@ STATUS: AST is working, EXCEPT for function, function literal, statements
 
 
 Bugs:
-LexAly.l : for strliteral, should remove ""
+04/02/2012 LexAly.l : for strliteral, should remove ""
 
