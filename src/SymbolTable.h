@@ -22,6 +22,7 @@
 #define VERTEX_T    6
 #define EDGE_T      7
 #define GRAPH_T     8
+#define UNKNOWN_T   -1
 
 typedef int ScopeId;
 typedef GHashTable SymbolTable;
@@ -57,7 +58,6 @@ bool                    s_table_remove      (SymbolTable* s_table,   SymbolTable
 SymbolTableEntry*       s_table_lookup      (SymbolTable* s_table,   SymbolTableKey key);
 
 char*                   s_table_type_name   (int type);
-int                     s_table_new_bindid   ();
 int                     s_table_new_scopeid ();
 
 int                     s_stack_init        ();

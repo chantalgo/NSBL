@@ -38,16 +38,16 @@ SymbolTableEntry* s_table_lookup (SymbolTable* table, SymbolTableKey key) {
 
 char* s_table_type_name (int type) {
     switch (type) {
-        case VOID_T: return "void";
-        case BOOL_T: return "bool";
-        case INT_T: return "int";
-        case FLOAT_T: return "float";
-        case STRING_T: return "str";
-        case LIST_T: return "list";
-        case VERTEX_T: return "vertex";
-        case EDGE_T: return "edge";
-        case GRAPH_T: return "graph";
-        default: return NULL;
+        case VOID_T:    return "void";
+        case BOOL_T:    return "bool";
+        case INT_T:     return "int";
+        case FLOAT_T:   return "float";
+        case STRING_T:  return "str";
+        case LIST_T:    return "list";
+        case VERTEX_T:  return "vertex";
+        case EDGE_T:    return "edge";
+        case GRAPH_T:   return "graph";
+        default:        return NULL;
     }
 }
 

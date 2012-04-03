@@ -10,11 +10,21 @@ extern int yywrap(void); /* Our version. */
 extern int yylex(void); /* Lexical analyzer function. */
 extern int yyparse(void); /* Parser function. */
 
-extern SymbolTable* s_table;
-extern SymbolTableStack* s_stack;
-
+#include "ASTree.h"
+#include "SymbolTable.h"
 %}
 
+/**************************
+ * Field names            *
+ **************************/
+%union{
+    struct Node*    node;
+    char *          str;
+}
+%type <str> IDENTIFIER
+%type <node> declaration
+%type <node> basic_type_specifier declaration_specifiers 
+%type <node> init_declarator_list init_declarator declarator direct_declarator
 /**************************
  *      TOKEN LIST        *
  **************************/
@@ -264,41 +274,55 @@ function_literal_type_sepcifier
     ;
 
 basic_type_specifier
-    : VOID
-    | BOOLEAN
-    | INTEGER
-    | FLOAT
-    | STRING
-    | LIST
-    | VERTEX
-    | EDGE
-    | GRAPH
+    : VOID      { int ttype = VOID_T;   $$= ast_new_leaf(AST_TYPE_SPECIFIER, (void *) &(ttype)); }
+    | BOOLEAN   { int ttype = BOOL_T;   $$= ast_new_leaf(AST_TYPE_SPECIFIER, (void *) &(ttype)); }
+    | INTEGER   { int ttype = INT_T;    $$= ast_new_leaf(AST_TYPE_SPECIFIER, (void *) &(ttype)); }
+    | FLOAT     { int ttype = FLOAT_T;  $$= ast_new_leaf(AST_TYPE_SPECIFIER, (void *) &(ttype)); }
+    | STRING    { int ttype = STRING_T; $$= ast_new_leaf(AST_TYPE_SPECIFIER, (void *) &(ttype)); }
+    | LIST      { int ttype = LIST_T;   $$= ast_new_leaf(AST_TYPE_SPECIFIER, (void *) &(ttype)); }
+    | VERTEX    { int ttype = VERTEX_T; $$= ast_new_leaf(AST_TYPE_SPECIFIER, (void *) &(ttype)); }
+    | EDGE      { int ttype = EDGE_T;   $$= ast_new_leaf(AST_TYPE_SPECIFIER, (void *) &(ttype)); }
+    | GRAPH     { int ttype = GRAPH_T;  $$= ast_new_leaf(AST_TYPE_SPECIFIER, (void *) &(ttype)); }
     ;
 
 declaration
-    : declaration_specifiers init_declarator_list ';'
+    : declaration_specifiers init_declarator_list ';' {
+        $$ = ast_new_node( AST_DECLARATION, 2, ast_all_children(2, $1, $2) );    
+    }
     ;
 
 declaration_specifiers
-    : basic_type_specifier
+    : basic_type_specifier {
+        $$= $1;
+    }
     ;
 
 init_declarator_list
-    : init_declarator
-    | init_declarator_list ',' init_declarator
+    : init_declarator {
+        $$ = $1;
+    }
+    | init_declarator_list ',' init_declarator {
+        $$ = ast_new_node( AST_COMMA, 2, ast_all_children(2, $1, $3) );
+    }
     ;
 
 init_declarator
-    : declarator
+    : declarator {
+        $$ = $1;
+    }
     | declarator '=' initializer
     ;
 
 declarator
-    : direct_declarator
+    : direct_declarator {
+        $$ = $1;
+    }
     ;
 
 direct_declarator
-    : IDENTIFIER
+    : IDENTIFIER {
+        $$ = ast_new_leaf(IDENTIFIER, $1);
+    }
     | IDENTIFIER '(' parameter_list ')'
     | IDENTIFIER '(' ')'
     | direct_declarator BELONG IDENTIFIER

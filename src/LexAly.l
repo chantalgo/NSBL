@@ -88,7 +88,7 @@ comment         (\/\*([^\*]|(\*+([^\*\/])))*\*+\/)|(\/\/.*)
 "false"         { MYECHO; return FALSE; }
 {intconst}      { MYECHO; return INTEGER_CONSTANT;}
 {floatconst}    { MYECHO; return FLOAT_CONSTANT;}
-{identifier}    { MYECHO; return IDENTIFIER; }
+{identifier}    { MYECHO; yylval.str = (char *) malloc ( strlen(yytext) ); strcpy( yylval.str, yytext ); return IDENTIFIER; }
 {strliteral}    { MYECHO; return STRING_LITERAL; }
 {comment}       { MYECHO; }
 
