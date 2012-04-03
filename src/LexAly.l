@@ -76,20 +76,20 @@ comment         (\/\*([^\*]|(\*+([^\*\/])))*\*+\/)|(\/\/.*)
 ":"             { MYECHO; return ':'; }
 "."             { MYECHO; return '.'; }
 "!"             { MYECHO; return '!'; }
-"+"             { MYECHO; return '+'; }
-"-"             { MYECHO; return '-'; }
-"*"             { MYECHO; return '*'; }
-"/"             { MYECHO; return '/'; }
+"+"             { MYECHO; return ADD; }
+"-"             { MYECHO; return SUB; }
+"*"             { MYECHO; return MUL; }
+"/"             { MYECHO; return DIV; }
 "="             { MYECHO; return '='; }
 ">"             { MYECHO; return GT; }
 "<"             { MYECHO; return LT; }
 
 "true"          { MYECHO; return TRUE; }
 "false"         { MYECHO; return FALSE; }
-{intconst}      { MYECHO; return INTEGER_CONSTANT;}
-{floatconst}    { MYECHO; return FLOAT_CONSTANT;}
-{identifier}    { MYECHO; yylval.str = (char *) malloc ( strlen(yytext) ); strcpy( yylval.str, yytext ); return IDENTIFIER; }
-{strliteral}    { MYECHO; return STRING_LITERAL; }
+{intconst}      { MYECHO; yylval.string = (char *) malloc ( strlen(yytext) ); strcpy( yylval.string, yytext ); return INTEGER_CONSTANT;}
+{floatconst}    { MYECHO; yylval.string = (char *) malloc ( strlen(yytext) ); strcpy( yylval.string, yytext ); return FLOAT_CONSTANT;}
+{identifier}    { MYECHO; yylval.string = (char *) malloc ( strlen(yytext) ); strcpy( yylval.string, yytext ); return IDENTIFIER; }
+{strliteral}    { MYECHO; yylval.string = (char *) malloc ( strlen(yytext) ); strcpy( yylval.string, yytext ); return STRING_LITERAL; }
 {comment}       { MYECHO; }
 
 [ \t\n]         { }
@@ -100,8 +100,8 @@ comment         (\/\*([^\*]|(\*+([^\*\/])))*\*+\/)|(\/\/.*)
 void myecho() {
     fprintf(yyout, "LEX:");
     fprintf(yyout, "YYLENG=%d:",yyleng);
-    fprintf(yyout, "YYTEXT=");
+    fprintf(yyout, "YYTEXT=\"");
     ECHO; 
-    fprintf(yyout, "\n");
+    fprintf(yyout, "\"\n");
 }
 

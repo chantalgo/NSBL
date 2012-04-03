@@ -2,7 +2,14 @@ BINDIR = ../bin
 TESTDIR = ../devtest
 
 CFLAGS = -D_AST_DEBUG 
-XFLAGS = -7 -D_MYECHO
+##### CFLAGS Options ############
+# -D_AST_DEBUG	: for AST DEBUG
+#################################  
+XFLAGS = -7 
+##### XFLAGS Options ############
+# -7			: 7bit ASCII
+# -D_MYECHO 	: for LEX DEBUG 
+#################################  
 YFLAGS =
 
 GLIBINCLUDE = -I/usr/include/glib-2.0/ -I/usr/lib64/glib-2.0/include

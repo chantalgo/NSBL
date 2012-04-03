@@ -1,6 +1,29 @@
 03/15/2012
 How to compile?
-cd src
-make
-make test
+> cd src
+> make
+> make test
+
+04/02/2012
+ADD symbol table : SymbolTable.c SymbolTable.h testST.c
+ADD abstract syntax tree : ASTree.c ASTree.h
+
+STATUS: AST is working, EXCEPT for function, function literal, statements
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Bugs:
+LexAly.l : for strliteral, should remove ""
 

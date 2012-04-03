@@ -5,6 +5,7 @@
 #include <stdarg.h>
 #include "ASTree.h"
 
+/** create a leaf in AST */
 struct Node* ast_new_leaf(int token, void * ptr) {
     struct Node* node = (struct Node *) malloc ( sizeof (struct Node) );
     node->nch = 0;
@@ -46,6 +47,18 @@ struct Node* ast_new_leaf(int token, void * ptr) {
             node->type = UNKNOWN_T;
             node->lexval.ival = *((int *) ptr);
             break;
+        case ALL_VERTICES :
+            node->token = ALL_VERTICES;break;
+        case ALL_EDGES :
+            node->token = ALL_EDGES;break;
+        case OUTCOMING_EDGES :
+            node->token = OUTCOMING_EDGES;break;
+        case INCOMING_EDGES :
+            node->token = INCOMING_EDGES;break;
+        case STARTING_VERTICES :
+            node->token = STARTING_VERTICES;break;
+        case ENDING_VERTICES :
+            node->token = ENDING_VERTICES;break;
         default:
             fprintf(stderr,"ast_new_leaf: unknown token: %d\n",token);
     }
@@ -57,6 +70,7 @@ struct Node* ast_new_leaf(int token, void * ptr) {
 }
 
 struct Node** ast_all_children(int n, ...){
+    if (n<=0) return NULL;
     int i;
     va_list args;
     va_start (args, n);
@@ -73,7 +87,7 @@ struct Node* ast_new_node(int token, int nch, struct Node** child){
     node->nch = nch;
     node->child = child;
     node->symbol = NULL;
-#ifdef _AST_DEBUG
+#ifdef _AST_DEBUG_NODE
     fprintf(stdout, "ast_new_node :: create \n");
     fprintf(stdout, "==DEBUG INFO==\n");
     ast_output_subtree(node, stdout,0);
@@ -106,8 +120,72 @@ void ast_output_node(struct Node* node, FILE* out, const char * sep) {
             fprintf(out, "Node<TYPE>   : lexval = %s%s", s_table_type_name(node->lexval.ival), sep);break;
         case AST_DECLARATION :
             fprintf(out, "Node<DECLAR>%s", sep);break;
+        case AST_FUNC_DECLARATOR :
+            fprintf(out, "Node<FUNC_DECLARATOR>%s", sep);break;
+        case BELONG :
+            fprintf(out, "Node<BELONG>%s", sep);break;
+        case AST_PARA_DECLARATION :
+            fprintf(out, "Node<PARA_DECLARATION>%s", sep);break;
+        case AST_LIST_INIT :
+            fprintf(out, "Node<LIST_INIT>%s", sep);break;
         case AST_COMMA :
             fprintf(out, "Node<COMMA>%s", sep);break;
+        case AST_ASSIGN :
+            fprintf(out, "Node<ASSIGN>%s", sep);break;
+        case ADD_ASSIGN :
+            fprintf(out, "Node<ADD_ASSIGN>%s", sep);break;
+        case SUB_ASSIGN :
+            fprintf(out, "Node<SUB_ASSIGN>%s", sep);break;
+        case MUL_ASSIGN :
+            fprintf(out, "Node<MUL_ASSIGN>%s", sep);break;
+        case DIV_ASSIGN :
+            fprintf(out, "Node<DIV_ASSIGN>%s", sep);break;
+        case OR :
+            fprintf(out, "Node<OR>%s", sep);break;
+        case AND :
+            fprintf(out, "Node<AND>%s", sep);break;
+        case EQ :
+            fprintf(out, "Node<EQ>%s", sep);break;
+        case NE :
+            fprintf(out, "Node<Ne>%s", sep);break;
+        case LT :
+            fprintf(out, "Node<LT>%s", sep);break;
+        case GT :
+            fprintf(out, "Node<GT>%s", sep);break;
+        case LE :
+            fprintf(out, "Node<LE>%s", sep);break;
+        case GE :
+            fprintf(out, "Node<GE>%s", sep);break;
+        case ADD :
+            fprintf(out, "Node<ADD>%s", sep);break;
+        case SUB :
+            fprintf(out, "Node<SUB>%s", sep);break;
+        case MUL :
+            fprintf(out, "Node<MUL>%s", sep);break;
+        case DIV :
+            fprintf(out, "Node<DIV>%s", sep);break;
+        case AST_CAST :
+            fprintf(out, "Node<CAST>%s", sep);break;
+        case AST_UNARY_PLUS :
+            fprintf(out, "Node<UNARY_PLUS>%s", sep);break;
+        case AST_UNARY_MINUS :
+            fprintf(out, "Node<UNARY_MINUS>%s", sep);break;
+        case AST_UNARY_NOT :
+            fprintf(out, "Node<UNARY_NOT>%s", sep);break;
+        case ARROW :
+            fprintf(out, "Node<ARROW>%s", sep);break;
+        case PIPE :
+            fprintf(out, "Node<PIPE>%s", sep);break;
+        case AST_MATCH :
+            fprintf(out, "Node<MATCH>%s", sep);break;
+        case AST_ATTIBUTE :
+            fprintf(out, "Node<ATTRIBUTE>%s", sep);break;
+        case AST_GRAPH_PROP :
+            fprintf(out, "Node<GRAPH_PROP>%s", sep);break;
+        case AST_STAT_LIST :
+            fprintf(out, "Node<STAT_LIST>%s", sep);break;
+        case AST_COMP_STAT :
+            fprintf(out, "Node<COMP_STAT>%s", sep);break;
         default :
             fprintf(out, "Node<UNKNOWN> !!!!!!!!!!!!!!!!\n");
     }
