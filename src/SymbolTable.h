@@ -57,7 +57,7 @@ bool                    s_table_remove      (SymbolTable* s_table,   SymbolTable
 SymbolTableEntry*       s_table_lookup      (SymbolTable* s_table,   SymbolTableKey key);
 
 char*                   s_table_type_name   (int type);
-int                     s_table_new bindid   ();
+int                     s_table_new_bindid   ();
 int                     s_table_new_scopeid ();
 
 int                     s_stack_init        ();
@@ -70,4 +70,5 @@ int                     s_stack_reset       (SymbolTableStack* s_stack);
 SymbolTableEntry*       s_entry_new         (Lexeme lex, int type, ScopeId scope);
 int                     s_new_key           (Lexeme lex, ScopeId scope, SymbolTableKey key);
 int                     s_new_bind          (SymbolTableEntry* entry, Binding bind);
+
 #endif

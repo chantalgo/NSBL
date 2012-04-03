@@ -115,7 +115,7 @@ int s_new_key ( Lexeme lex, ScopeId scope, SymbolTableKey key) {
 
 int s_new_bind ( SymbolTableEntry* entry, Binding bind) {
     char * typename = s_table_type_name( entry->type );
-    int tmpid = s_table_newbindid();
+    int tmpid = s_table_new_bindid();
     sprintf( bind, "_%s%d\0", typename, tmpid );
     return 0;
 }

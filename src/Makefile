@@ -13,7 +13,7 @@ GLIBINCLUDE = -I/usr/include/glib-2.0/ -I/usr/lib64/glib-2.0/include
 GLIBLINK = `pkg-config --cflags --libs glib-2.0`
 
 toy.exe : Parser.tab.c Parser.tab.h LexAly.yy.c
-	$(CC) $(CFLAGS) -o toy.exe Parser.tab.c Parser.tab.h LexAly.yy.c -lfl -ly
+	$(CC) $(CFLAGS) -o toy.exe Parser.tab.c Parser.tab.h LexAly.yy.c -lfl
 	mkdir -p $(BINDIR)
 	mv toy.exe $(BINDIR)
 Parser.tab.c : Parser.y
