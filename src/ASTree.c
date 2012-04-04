@@ -187,6 +187,40 @@ void ast_output_node(struct Node* node, FILE* out, const char * sep) {
             fprintf(out, "Node<STAT_LIST>%s", sep);break;
         case AST_COMP_STAT :
             fprintf(out, "Node<COMP_STAT>%s", sep);break;
+		case AST_FUNC :
+			fprintf(out, "Node<FUNCTION>%s" , sep);break;
+		case FUNC_LITERAL:
+			fprintf(out, "Node<FUNC_LITERAL>%s" , sep);break;
+		case AST_IF_STAT :
+			fprintf(out, "Node<IF_STAT>%s", sep);break;
+		case AST_IFELSE_STAT :
+			fprintf(out, "Node<IFELSE_STAT>%s", sep);break;
+		case AST_WHILE :
+			fprintf(out, "Node<WHILE_STAT>%s", sep);break;
+		case AST_FOR_XXX :
+			fprintf(out, "Node<FOR_STAT>%s", sep);break;
+		case AST_FOR_XXO :
+			fprintf(out, "Node<FOR_STAT>%s", sep);break;
+		case AST_FOR_XOX :
+			fprintf(out, "Node<FOR_STAT>%s", sep);break;
+		case AST_FOR_XOO :
+			fprintf(out, "Node<FOR_STAT>%s", sep);break;
+		case AST_FOR_OXX :
+			fprintf(out, "Node<FOR_STAT>%s", sep);break;
+		case AST_FOR_OXO :
+			fprintf(out, "Node<FOR_STAT>%s", sep);break;
+		case AST_FOR_OOX :
+			fprintf(out, "Node<FOR_STAT>%s", sep);break;
+		case AST_FOR_OOO :
+			fprintf(out, "Node<FOR_STAT>%s", sep);break;
+		case AST_JUMP_CONTINUE:
+			fprintf(out, "Node<CONTINUE>%s", sep);break;
+		case AST_JUMP_BREAK:
+			fprintf(out, "Node<BREAK>%s", sep);break;
+		case AST_JUMP_RETURN:
+			fprintf(out, "Node<RETRUN>%s", sep);break;
+		case AST_POSTFIX_EPR:
+			fprintf(out, "Node<POSTFIX_EXPRESSION>%s", sep);break;
         default :
             fprintf(out, "Node<UNKNOWN> !!!!!!!!!!!!!!!!\n");
     }
