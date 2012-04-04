@@ -446,6 +446,7 @@ parameter_declaration
         $$ = ast_new_node( AST_PARA_DECLARATION, 2, ast_all_children(2, $1, ast_new_leaf(IDENTIFIER, $2)));
     }
     | function_literal_type_specifier IDENTIFIER {
+	    $$ = ast_new_node( FUNC_LITERAL, 1, ast_all_children(1, ast_new_leaf(IDENTIFIER, $2)));
     }
     ;
 
