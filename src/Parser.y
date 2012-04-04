@@ -111,7 +111,12 @@ translation_unit
  *   STATEMENTS           *
  **************************/
 external_statement
-    : function_definition
+    : function_definition{
+		$$ = $1;
+		fprintf(stdout, "==FUNCTION DEFINITION==\n");
+		ast_output_subtree($$, stdout, 0);
+		fprintf(stdout, "=======================\n");
+	}
     | statement{ 
         $$ = $1; 
         fprintf(stdout, "==EXTERNAL STATEMENT==\n");
