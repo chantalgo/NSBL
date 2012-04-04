@@ -20,7 +20,7 @@ LEX = flex
 YACC = yacc
 
 toy.exe : Parser.tab.o LexAly.yy.o ASTree.o SymbolTable.o
-	$(CC) -o toy.exe Parser.tab.o LexAly.yy.o ASTree.o SymbolTable.o -lfl -ly $(GLIBLINK)
+	$(CC) -o toy.exe Parser.tab.o LexAly.yy.o ASTree.o SymbolTable.o -lfl $(GLIBLINK)
 	mkdir -p $(BINDIR)
 	mv toy.exe $(BINDIR)
 

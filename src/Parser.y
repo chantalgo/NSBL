@@ -44,6 +44,11 @@ extern int yyparse(void); /* Parser function. */
 %type <node> iteration_statement jump_statement declaration_statement
 %type <node> statement_list 
 
+// function
+%type <integer> function_literal_type_specifier
+%type <node> function_definition
+%type <node> function_literal_declaration
+
 /**************************
  *      TOKEN LIST        *
  **************************/
@@ -73,10 +78,14 @@ extern int yyparse(void); /* Parser function. */
 %token AST_TYPE_SPECIFIER AST_DECLARATION AST_COMMA
 %token AST_ASSIGN AST_CAST
 %token AST_UNARY_PLUS AST_UNARY_MINUS AST_UNARY_NOT
-%token AST_FUNC_DECLARATOR AST_PARA_DECLARATION 
+%token AST_FUNC_DECLARATOR AST_PARA_DECLARATION AST_FUNC
 %token AST_LIST_INIT
 %token AST_MATCH AST_ATTIBUTE AST_GRAPH_PROP
 %token AST_STAT_LIST AST_COMP_STAT
+%token AST_IF_STAT AST_IFELSE_STAT
+%token AST_WHILE AST_FOR_XXX AST_FOR_XXO AST_FOR_XOX AST_FOR_XOO AST_FOR_OXX AST_FOR_OXO AST_FOR_OOX AST_FOR_OOO AST_FOREACH
+%token AST_JUMP_CONTINUE AST_JUMP_BREAK AST_JUMP_RETURN
+%token AST_POSTFIX_EPR
 /**************************
  *  PRECEDENCE & ASSOC    *
  **************************/
@@ -142,28 +151,28 @@ compound_statement
     ;
 
 selection_statement
-    : IF '(' expression ')' statement %prec LOWER_THAN_ELSE ;
-    | IF '(' expression ')' statement ELSE statement
+    : IF '(' expression ')' statement {$$ = ast_new_node(AST_IF_STAT, 2, ast_all_children(2, $3, $5));} %prec LOWER_THAN_ELSE ;	
+    | IF '(' expression ')' statement ELSE statement			{$$ = ast_new_node(AST_IFELSE_STAT, 3, ast_all_children(3,$3, $5, $7));}
     ;
 
 iteration_statement
-    : WHILE '(' expression ')' statement
-    | FOR '(' expression ';' expression ';' expression ')' statement
-    | FOR '(' expression ';' expression ';' ')' statement
-    | FOR '(' expression ';' ';' expression ')' statement
-    | FOR '(' expression ';' ';' ')' statement
-    | FOR '(' ';' expression ';' expression ')' statement
-    | FOR '(' ';' expression ';' ')' statement
-    | FOR '(' ';' ';' expression ')' statement
-    | FOR '(' ';' ';' ')' statement
-    | FOREACH '(' IDENTIFIER ':' postfix_expression ')' statement
+    : WHILE '(' expression ')' statement								{$$ = ast_new_node(AST_WHILE, 2, ast_all_children(2, $3, $5));}
+    | FOR '(' expression ';' expression ';' expression ')' statement	{$$ = ast_new_node(AST_FOR_XXX, 4, ast_all_children(4, $3, $5, $7, $9));}
+    | FOR '(' expression ';' expression ';' ')' statement				{$$ = ast_new_node(AST_FOR_XXO, 3, ast_all_children(3, $3, $5, $8));}
+    | FOR '(' expression ';' ';' expression ')' statement				{$$ = ast_new_node(AST_FOR_XOX, 3, ast_all_children(3, $3, $6, $8));}
+    | FOR '(' expression ';' ';' ')' statement							{$$ = ast_new_node(AST_FOR_XOO, 2, ast_all_children(2, $3, $7));}
+    | FOR '(' ';' expression ';' expression ')' statement				{$$ = ast_new_node(AST_FOR_OXX, 3, ast_all_children(3, $4, $6, $8));}
+    | FOR '(' ';' expression ';' ')' statement							{$$ = ast_new_node(AST_FOR_OXO, 2, ast_all_children(2, $4, $7));}
+    | FOR '(' ';' ';' expression ')' statement							{$$ = ast_new_node(AST_FOR_OOX, 2, ast_all_children(2, $5, $7));}
+    | FOR '(' ';' ';' ')' statement										{$$ = ast_new_node(AST_FOR_OOO, 1, ast_all_children(1, $6));}
+    | FOREACH '(' IDENTIFIER ':' postfix_expression ')' statement		{$$ = ast_new_node(AST_FOREACH, 3, ast_all_children(3, $3, $5, $7));}
     ;
 
 jump_statement
-    : BREAK ';'
-    | CONTINUE ';'
-    | RETURN expression ';'
-    | RETURN ';'
+    : BREAK ';'							{$$ = ast_new_node(AST_JUMP_BREAK, 0, NULL);}
+    | CONTINUE ';'						{$$ = ast_new_node(AST_JUMP_CONTINUE, 0, NULL);}
+    | RETURN expression ';'				{$$ = ast_new_node(AST_JUMP_RETURN, 1, ast_all_children(1, $2));}
+    | RETURN ';'						{$$ = ast_new_node(AST_JUMP_RETURN, 0, NULL);}
     ;
 
 declaration_statement
@@ -284,9 +293,8 @@ postfix_expression
         $$ = ast_new_node ( ARROW, 3, ast_all_children(3, $1, $3, $5) );
     }
     | primary_expression ':' primary_expression ARROW primary_expression MARK primary_expression 
-    | postfix_expression '(' argument_expression_list ')' {
-    }
-    | postfix_expression '(' ')'
+    | postfix_expression '(' argument_expression_list ')' 											{$$ = ast_new_node(AST_POSTFIX_EPR, 2, ast_all_children(2, $1, $3));}
+    | postfix_expression '(' ')'																	{$$ = ast_new_node(AST_POSTFIX_EPR, 1, ast_all_children(1, $1));}
     | postfix_expression PIPE pipe_property {
         $$ = ast_new_node ( PIPE, 2, ast_all_children(2, $1, $3) );
     }
@@ -346,16 +354,16 @@ constant
  **************************/
 
 function_literal_declaration
-    : function_literal_type_sepcifier declarator '=' compound_statement ';'
-    | function_literal_type_sepcifier declarator ':' declaration_specifiers '=' compound_statement ';'
+    : function_literal_type_specifier declarator '=' compound_statement ';'									{$$ = ast_new_node($1, 2, ast_all_children(2, $2, $4));}
+    | function_literal_type_specifier declarator ':' declaration_specifiers '=' compound_statement ';'		{$$ = ast_new_node($1, 3, ast_all_children(3, $2, $4, $6));}
     ;
 
 function_definition
-    : declaration_specifiers declarator compound_statement
+    : declaration_specifiers declarator compound_statement						{$$ = ast_new_node(AST_FUNC, 3, ast_all_children(3, $1, $2, $3));}
     ;
 
-function_literal_type_sepcifier
-    : FUNC_LITERAL
+function_literal_type_specifier
+    : FUNC_LITERAL		{$$ = FUNC_LITERAL;}
     ;
 
 basic_type_specifier
@@ -432,7 +440,7 @@ parameter_declaration
     : declaration_specifiers IDENTIFIER {
         $$ = ast_new_node( AST_PARA_DECLARATION, 2, ast_all_children(2, $1, ast_new_leaf(IDENTIFIER, $2)));
     }
-    | function_literal_type_sepcifier IDENTIFIER {
+    | function_literal_type_specifier IDENTIFIER {
     }
     ;
 
