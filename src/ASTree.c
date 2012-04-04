@@ -195,7 +195,11 @@ void ast_output_node(struct Node* node, FILE* out, const char * sep) {
     
 void ast_output_subtree(struct Node* node, FILE* out, int level) {
     int i;
+	int indent = level;
     if(node == NULL) return;
+	while(indent-->0){
+		fprintf(out, "\t");
+	}
     fprintf(out, "TreeLevel<%4d>:: ",level);
     ast_output_node(node, out, "\n");
     for(i=0; i<node->nch; ++i) {
