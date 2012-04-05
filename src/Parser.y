@@ -30,7 +30,7 @@ extern int yyparse(void); /* Parser function. */
     }LInteger;
 }
 // basic
-%type <LInteger> assignment_operator unary_operator 
+%type <LInteger> assignment_operator unary_operator function_literal_type_specifier 
 %type <LString> IDENTIFIER STRING_LITERAL INTEGER_CONSTANT FLOAT_CONSTANT
 %type <LString> '=' ADD_ASSIGN SUB_ASSIGN MUL_ASSIGN DIV_ASSIGN APPEND
 %type <LString> ADD SUB MUL DIV '!'
@@ -45,7 +45,7 @@ extern int yyparse(void); /* Parser function. */
 // declaration
 %type <node> declaration
 %type <node> basic_type_specifier declaration_specifiers 
-%type <node> init_declarator_list init_declarator declarator direct_declarator
+%type <node> init_declarator_list init_declarator simple_declarator func_declarator
 %type <node> parameter_list parameter_declaration
 %type <node> initializer initializer_list
 
@@ -54,15 +54,19 @@ extern int yyparse(void); /* Parser function. */
 %type <node> logical_AND_expression equality_expression relational_expression
 %type <node> additive_expression multiplicative_expression cast_expression
 %type <node> unary_expression postfix_expression primary_expression
-%type <node> graph_property pipe_property argument_expression_list
+%type <node> graph_property pipe_property graph_pipe_property argument_expression_list
 %type <node> attribute constant
 
 // statments
 %type <node> start_nonterminal translation_unit
 %type <node> external_statement statement 
-%type <node> expression_statement compound_statement selection_statement 
+%type <node> expression_statement compound_statement selection_statement compound_statement_no_scope 
 %type <node> iteration_statement jump_statement declaration_statement
 %type <node> statement_list 
+
+// function
+%type <node> function_definition
+%type <node> function_literal_declaration
 
 /**************************
  *      TOKEN LIST        *
@@ -93,10 +97,15 @@ extern int yyparse(void); /* Parser function. */
 %token AST_TYPE_SPECIFIER AST_DECLARATION AST_COMMA
 %token AST_ASSIGN AST_CAST
 %token AST_UNARY_PLUS AST_UNARY_MINUS AST_UNARY_NOT
-%token AST_FUNC_DECLARATOR AST_PARA_DECLARATION 
+%token AST_FUNC_DECLARATOR AST_PARA_DECLARATION AST_FUNC 
 %token AST_INIT_ASSGN AST_LIST_INIT
 %token AST_MATCH AST_ATTIBUTE AST_GRAPH_PROP
 %token AST_STAT_LIST AST_COMP_STAT AST_EXT_STAT_COMMA
+
+%token AST_IF_STAT AST_IFELSE_STAT
+%token AST_WHILE AST_FOR_XXX AST_FOR_XXO AST_FOR_XOX AST_FOR_XOO AST_FOR_OXX AST_FOR_OXO AST_FOR_OOX AST_FOR_OOO AST_FOREACH
+%token AST_JUMP_CONTINUE AST_JUMP_BREAK AST_JUMP_RETURN
+%token AST_POSTFIX_EPR
 /**************************
  *  PRECEDENCE & ASSOC    *
  **************************/
@@ -131,7 +140,13 @@ translation_unit
  *   STATEMENTS           *
  **************************/
 external_statement
-    : function_definition
+    : function_definition{
+		$$ = $1;
+		fprintf(stdout, "==FUNCTION DEFINITION==\n");
+        astOutTree($$, stdout, 0);
+		fprintf(stdout, "=======================\n");
+        sTableShow(stdout);
+	}
     | statement{ 
         $$ = $1; 
         fprintf(stdout, "==EXTERNAL STATEMENT==\n");
@@ -171,29 +186,38 @@ compound_statement
     }
     ;
 
+compound_statement_no_scope
+    : '{' '}' {
+        $$ = astNewNode( AST_COMP_STAT, 0, NULL );
+    }
+    | '{' statement_list '}'   {
+        $$ = astNewNode( AST_COMP_STAT, 1, astAllChildren(1, $2) );
+    }
+    ;
+
 selection_statement
-    : IF '(' expression ')' statement %prec LOWER_THAN_ELSE ;
-    | IF '(' expression ')' statement ELSE statement
+    : IF '(' expression ')' statement {$$ = astNewNode(AST_IF_STAT, 2, astAllChildren(2, $3, $5));} %prec LOWER_THAN_ELSE ;	
+    | IF '(' expression ')' statement ELSE statement			{$$ = astNewNode(AST_IFELSE_STAT, 3, astAllChildren(3,$3, $5, $7));}
     ;
 
 iteration_statement
-    : WHILE '(' expression ')' statement
-    | FOR '(' expression ';' expression ';' expression ')' statement
-    | FOR '(' expression ';' expression ';' ')' statement
-    | FOR '(' expression ';' ';' expression ')' statement
-    | FOR '(' expression ';' ';' ')' statement
-    | FOR '(' ';' expression ';' expression ')' statement
-    | FOR '(' ';' expression ';' ')' statement
-    | FOR '(' ';' ';' expression ')' statement
-    | FOR '(' ';' ';' ')' statement
-    | FOREACH '(' IDENTIFIER ':' postfix_expression ')' statement
+    : WHILE '(' expression ')' statement								{$$ = astNewNode(AST_WHILE, 2, astAllChildren(2, $3, $5));}
+    | FOR '(' expression ';' expression ';' expression ')' statement	{$$ = astNewNode(AST_FOR_XXX, 4, astAllChildren(4, $3, $5, $7, $9));}
+    | FOR '(' expression ';' expression ';' ')' statement				{$$ = astNewNode(AST_FOR_XXO, 3, astAllChildren(3, $3, $5, $8));}
+    | FOR '(' expression ';' ';' expression ')' statement				{$$ = astNewNode(AST_FOR_XOX, 3, astAllChildren(3, $3, $6, $8));}
+    | FOR '(' expression ';' ';' ')' statement							{$$ = astNewNode(AST_FOR_XOO, 2, astAllChildren(2, $3, $7));}
+    | FOR '(' ';' expression ';' expression ')' statement				{$$ = astNewNode(AST_FOR_OXX, 3, astAllChildren(3, $4, $6, $8));}
+    | FOR '(' ';' expression ';' ')' statement							{$$ = astNewNode(AST_FOR_OXO, 2, astAllChildren(2, $4, $7));}
+    | FOR '(' ';' ';' expression ')' statement							{$$ = astNewNode(AST_FOR_OOX, 2, astAllChildren(2, $5, $7));}
+    | FOR '(' ';' ';' ')' statement										{$$ = astNewNode(AST_FOR_OOO, 1, astAllChildren(1, $6));}
+    | FOREACH '(' IDENTIFIER ':' postfix_expression ')' statement		{$$ = astNewNode(AST_FOREACH, 3, astAllChildren(3, astNewLeaf(IDENTIFIER, $3.s, $3.l), $5, $7));}
     ;
 
 jump_statement
-    : BREAK ';'
-    | CONTINUE ';'
-    | RETURN expression ';'
-    | RETURN ';'
+    : BREAK ';'							{$$ = astNewNode(AST_JUMP_BREAK, 0, NULL);}
+    | CONTINUE ';'						{$$ = astNewNode(AST_JUMP_CONTINUE, 0, NULL);}
+    | RETURN expression ';'				{$$ = astNewNode(AST_JUMP_RETURN, 1, astAllChildren(1, $2));}
+    | RETURN ';'						{$$ = astNewNode(AST_JUMP_RETURN, 0, NULL);}
     ;
 
 declaration_statement
@@ -314,9 +338,12 @@ postfix_expression
         $$ = astNewNode ( ARROW, 3, astAllChildren(3, $1, $3, $5) );
     }
     | primary_expression ':' primary_expression ARROW primary_expression MARK primary_expression 
-    | postfix_expression '(' argument_expression_list ')' {
+    | IDENTIFIER '(' argument_expression_list ')' {
+        $$ = astNewNode(AST_POSTFIX_EPR, 2, astAllChildren(2, astNewLeaf(IDENTIFIER, $1.s, $1.l), $3));
     }
-    | postfix_expression '(' ')'
+    | IDENTIFIER '(' ')' {
+        $$ = astNewNode(AST_POSTFIX_EPR, 1, astAllChildren(1, astNewLeaf(IDENTIFIER, $1.s, $1.l)));
+    }
     | postfix_expression PIPE pipe_property {
         $$ = astNewNode ( PIPE, 2, astAllChildren(2, $1, $3) );
     }
@@ -324,7 +351,7 @@ postfix_expression
         $$ = astNewNode ( AST_MATCH, 2, astAllChildren(2, $1, $3) );
     }
     | postfix_expression '.' IDENTIFIER {
-        $$ = astNewNode ( AST_ATTIBUTE, 2, astAllChildren(2, $1, $3) );
+        $$ = astNewNode ( AST_ATTIBUTE, 2, astAllChildren(2, $1, astNewLeaf(IDENTIFIER, $3.s, $3.l)) );
     }
     | postfix_expression '.' graph_property {
         $$ = astNewNode ( AST_GRAPH_PROP, 2, astAllChildren(2, $1, $3) );
@@ -341,6 +368,11 @@ primary_expression
     | STRING_LITERAL        { $$ = astNewLeaf(STRING_LITERAL, $1.s, $1.l); }
     | '(' expression ')'    { $$ = $2; }
     ;
+
+graph_pipe_property
+	: graph_property		{$$ = $1;}
+	| pipe_property			{$$ = $1;}
+	;
 
 graph_property
     : ALL_VERTICES          { $$ = astNewLeaf(ALL_VERTICES, NULL, $1.l); }
@@ -379,16 +411,22 @@ constant
  **************************/
 
 function_literal_declaration
-    : function_literal_type_sepcifier declarator '=' compound_statement ';'
-    | function_literal_type_sepcifier declarator ':' declaration_specifiers '=' compound_statement ';'
+    : function_literal_type_specifier func_declarator '=' compound_statement_no_scope ';' scope_out {
+        $$ = astNewNode($1.i, 2, astAllChildren(2, $2, $4));
+    }
+    | function_literal_type_specifier func_declarator ':' declaration_specifiers '=' compound_statement_no_scope scope_out ';' {
+        $$ = astNewNode($1.i, 3, astAllChildren(3, $2, $4, $6));
+    }
     ;
 
 function_definition
-    : declaration_specifiers declarator compound_statement
+    : declaration_specifiers func_declarator compound_statement_no_scope scope_out{
+        $$ = astNewNode(AST_FUNC, 3, astAllChildren(3, $1, $2, $3));
+    }
     ;
 
-function_literal_type_sepcifier
-    : FUNC_LITERAL
+function_literal_type_specifier
+    : FUNC_LITERAL		{ $$.i = FUNC_LITERAL; $$.l = $1.l; }
     ;
 
 basic_type_specifier
@@ -426,32 +464,29 @@ init_declarator_list
     ;
 
 init_declarator
-    : declarator {
+    : simple_declarator {
         $$ = $1;
     }
-    | declarator '=' initializer {
+    | simple_declarator '=' initializer {
         $$ = astNewNode( AST_ASSIGN, 2, astAllChildren(2, $1, $3) );
     }
     ;
 
-declarator
-    : direct_declarator {
-        $$ = $1;
-    }
-    ;
-
-direct_declarator
+simple_declarator
     : IDENTIFIER {
         $$ = astNewLeaf(IDENTIFIER, $1.s, $1.l);
     }
-    | IDENTIFIER '(' parameter_list ')' {
-        $$ = astNewNode( AST_FUNC_DECLARATOR, 2, astAllChildren(2, astNewLeaf(IDENTIFIER, $1.s, $1.l), $3) );
+    | simple_declarator BELONG IDENTIFIER {
+        $$ = astNewNode( BELONG, 2, astAllChildren(2, $1, astNewLeaf(IDENTIFIER, $3.s, $3.l)) );
     }
-    | IDENTIFIER '(' ')' {
+    ;
+
+func_declarator
+    : IDENTIFIER '(' scope_in parameter_list ')' {
+        $$ = astNewNode( AST_FUNC_DECLARATOR, 2, astAllChildren(2, astNewLeaf(IDENTIFIER, $1.s, $1.l), $4) );
+    }
+    | IDENTIFIER '(' scope_in ')' {
         $$ = astNewNode( AST_FUNC_DECLARATOR, 1, astAllChildren(1, astNewLeaf(IDENTIFIER, $1.s, $1.l) ) );
-    }
-    | direct_declarator BELONG IDENTIFIER {
-        $$ = astNewNode( BELONG, 2, astAllChildren(2, $1, $3) );
     }
     ;
 
@@ -465,8 +500,10 @@ parameter_list
 parameter_declaration
     : declaration_specifiers IDENTIFIER {
         $$ = astNewNode( AST_PARA_DECLARATION, 2, astAllChildren(2, $1, astNewLeaf(IDENTIFIER, $2.s, $2.l)));
+        sTableDeclare($$);
     }
-    | function_literal_type_sepcifier IDENTIFIER {
+    | function_literal_type_specifier IDENTIFIER {
+	    $$ = astNewNode( FUNC_LITERAL, 1, astAllChildren(1, astNewLeaf(IDENTIFIER, $2.s, $2.l)));
     }
     ;
 

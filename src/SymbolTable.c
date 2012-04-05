@@ -49,13 +49,13 @@ int s_table_check_key_exsit (SymbolTable* table, SymbolTableKey key) {
 // Output an entry
 void s_entry_show  (gpointer key, gpointer entry, gpointer out) {
     SymbolTableEntry * e = (SymbolTableEntry*) entry;
-    fprintf( (FILE*) out, "%10s  %3d  %3d  %3d  %20s  %20s  %4d\n",
+    fprintf( (FILE*) out, "%10s  %3d  %3d  %3d  %15s  %15s  %4d\n",
         e->lex, e->type, e->scope[0], e->scope[1], e->key, e->bind, e->line );
 }
 
 // show entire ST
 void s_table_show (SymbolTable* table, FILE* out) {
-    fprintf(out, "%10s  %3s  %3s  %3s  %20s  %20s  %4s\n",
+    fprintf(out, "%10s  %3s  %3s  %3s  %15s  %15s  %4s\n",
         "Lexeme", "T", "L", "Sp", "Key", "Binding", "Line");
     g_hash_table_foreach(table, &s_entry_show, (gpointer) out);
 }

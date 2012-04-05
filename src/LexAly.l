@@ -112,7 +112,7 @@ comment         (\/\*([^\*]|(\*+([^\*\/])))*\*+\/)|(\/\/.*)
                   strcpy( yylval.LString.s, yytext ); 
                   return STRING_LITERAL; 
                 }
-{comment}       { MYECHO; }
+{comment}       { MYECHO; countLine(yytext); }
 
 [ \t]           { }
 [\n]            { LEXLINECOUNTER++; }
@@ -120,6 +120,13 @@ comment         (\/\*([^\*]|(\*+([^\*\/])))*\*+\/)|(\/\/.*)
                 }
 
 %%
+
+void countLine(const char* ptr) {
+    int i;
+    for (i=0; i<strlen(ptr); ++i) {
+        if (ptr[i]=='\n') LEXLINECOUNTER++;
+    }
+}
 
 void myecho() {
     fprintf(yyout, "LEX:");

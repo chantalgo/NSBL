@@ -215,7 +215,7 @@ g.allV[@isfemale&&(@name=="TOM"||@age>28)]|outE[@weight==3]|endV;
 //FUNCTION LITERAL + FOREACH + PIPE + MATCH
 func cond():boolean = { return (@name=="TOM"||@age>28); };
 foreach (item : g.allV[cond()&&@isfemale] ) {
-   print( item.outEdge[@weight==3]|endV );
+   print( item|outE[@weight==3]|endV );
 }
 
 

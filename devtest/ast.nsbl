@@ -21,3 +21,10 @@ string s="abcd";
     k=j+i;
     p=1;
 }
+
+
+int text(int a, int b){
+    float x=1, y=2;
+}
+
+func tt(int i,boolean a):int = { return a+i; };
