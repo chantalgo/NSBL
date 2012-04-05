@@ -35,7 +35,7 @@ extern int yyparse(void); /* Parser function. */
 %type <node> logical_AND_expression equality_expression relational_expression
 %type <node> additive_expression multiplicative_expression cast_expression
 %type <node> unary_expression postfix_expression primary_expression
-%type <node> graph_property pipe_property argument_expression_list
+%type <node> graph_property pipe_property graph_pipe_property argument_expression_list
 %type <node> attribute constant
 
 // statments
@@ -170,7 +170,7 @@ iteration_statement
     | FOR '(' ';' expression ';' ')' statement							{$$ = ast_new_node(AST_FOR_OXO, 2, ast_all_children(2, $4, $7));}
     | FOR '(' ';' ';' expression ')' statement							{$$ = ast_new_node(AST_FOR_OOX, 2, ast_all_children(2, $5, $7));}
     | FOR '(' ';' ';' ')' statement										{$$ = ast_new_node(AST_FOR_OOO, 1, ast_all_children(1, $6));}
-    | FOREACH '(' IDENTIFIER ':' postfix_expression ')' statement		{$$ = ast_new_node(AST_FOREACH, 3, ast_all_children(3, $3, $5, $7));}
+    | FOREACH '(' IDENTIFIER ':' postfix_expression ')' statement		{$$ = ast_new_node(AST_FOREACH, 3, ast_all_children(3, ast_new_leaf(IDENTIFIER, $3), $5, $7));}
     ;
 
 jump_statement
@@ -307,9 +307,9 @@ postfix_expression
         $$ = ast_new_node ( AST_MATCH, 2, ast_all_children(2, $1, $3) );
     }
     | postfix_expression '.' IDENTIFIER {
-        $$ = ast_new_node ( AST_ATTIBUTE, 2, ast_all_children(2, $1, $3) );
+        $$ = ast_new_node ( AST_ATTIBUTE, 2, ast_all_children(2, $1, ast_new_leaf(IDENTIFIER, $3)));
     }
-    | postfix_expression '.' graph_property {
+    | postfix_expression '.' graph_pipe_property {
         $$ = ast_new_node ( AST_GRAPH_PROP, 2, ast_all_children(2, $1, $3) );
     }
     ;
@@ -321,6 +321,11 @@ primary_expression
     | STRING_LITERAL        { $$ = ast_new_leaf(STRING_LITERAL, $1); }
     | '(' expression ')'    { $$ = $2; }
     ;
+
+graph_pipe_property
+	: graph_property		{$$ = $1;}
+	| pipe_property			{$$ = $1;}
+	;
 
 graph_property
     : ALL_VERTICES          { $$ = ast_new_leaf(ALL_VERTICES, NULL); }
@@ -343,7 +348,7 @@ argument_expression_list
 
 attribute
     : AT IDENTIFIER{ 
-        $$ = ast_new_node ( AT, 1, ast_all_children(1, $2) );
+        $$ = ast_new_node ( AT, 1, ast_all_children(1, ast_new_leaf(IDENTIFIER, $2)));
     }
     ;
 
@@ -430,7 +435,7 @@ direct_declarator
         $$ = ast_new_node( AST_FUNC_DECLARATOR, 1, ast_all_children(1, ast_new_leaf(IDENTIFIER, $1) ) );
     }
     | direct_declarator BELONG IDENTIFIER {
-        $$ = ast_new_node( BELONG, 2, ast_all_children(2, $1, $3) );
+        $$ = ast_new_node( BELONG, 2, ast_all_children(2, $1, ast_new_leaf(IDENTIFIER, $3)));
     }
     ;
 

@@ -141,6 +141,8 @@ void ast_output_node(struct Node* node, FILE* out, const char * sep) {
             fprintf(out, "Node<MUL_ASSIGN>%s", sep);break;
         case DIV_ASSIGN :
             fprintf(out, "Node<DIV_ASSIGN>%s", sep);break;
+		case APPEND :
+			fprintf(out, "Node<APPEND>%s", sep);break;
         case OR :
             fprintf(out, "Node<OR>%s", sep);break;
         case AND :
@@ -197,6 +199,8 @@ void ast_output_node(struct Node* node, FILE* out, const char * sep) {
 			fprintf(out, "Node<IFELSE_STAT>%s", sep);break;
 		case AST_WHILE :
 			fprintf(out, "Node<WHILE_STAT>%s", sep);break;
+		case AST_FOREACH :
+			fprintf(out, "Node<FOREACH_STAT>%s", sep);break;
 		case AST_FOR_XXX :
 			fprintf(out, "Node<FOR_STAT>%s", sep);break;
 		case AST_FOR_XXO :
@@ -221,6 +225,20 @@ void ast_output_node(struct Node* node, FILE* out, const char * sep) {
 			fprintf(out, "Node<RETRUN>%s", sep);break;
 		case AST_POSTFIX_EPR:
 			fprintf(out, "Node<POSTFIX_EXPRESSION>%s", sep);break;
+		case ALL_VERTICES :
+			fprintf(out, "Node<ALL_VERTICES>%s", sep);break;
+		case OUTCOMING_EDGES :
+			fprintf(out, "Node<OUTEDGES>%s", sep);break;
+		case STARTING_VERTICES :
+			fprintf(out, "Node<STARTING_VERTICES>%s", sep);break;
+		case ENDING_VERTICES :
+			fprintf(out, "Node<ENDING_VERTICES>%s", sep);break;
+		case ALL_EDGES :
+			fprintf(out, "Node<ALL_EDGES>%s", sep);break;
+		case INCOMING_EDGES:
+			fprintf(out, "Node<INCOMING_EDGES>%s", sep);break;
+		case AT :
+			fprintf(out, "Node<AT_ATTRIBUTE>%s", sep);break;
         default :
             fprintf(out, "Node<UNKNOWN> !!!!!!!!!!!!!!!!\n");
     }
