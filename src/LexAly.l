@@ -109,7 +109,7 @@ comment         (\/\*([^\*]|(\*+([^\*\/])))*\*+\/)|(\/\/.*)
 {strliteral}    { MYECHO; 
                   yylval.LString.s = (char *) malloc ( strlen(yytext) ); 
                   yylval.LString.l = LEXLINECOUNTER;
-                  strcpy( yylval.LString.s, yytext ); 
+                  strncpy( yylval.LString.s, yytext+1, strlen(yytext)-2  ); 
                   return STRING_LITERAL; 
                 }
 {comment}       { MYECHO; countLine(yytext); }

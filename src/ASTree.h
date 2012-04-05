@@ -50,6 +50,10 @@ void ast_free_tree(struct Node* node);
 void ast_output_node(struct Node* node, FILE* out, const char * sep);
 void ast_output_tree(struct Node* node, FILE* out, int level);
 
+/****************
+ * Call Wrapper *
+ ****************/
+
 #define astNewLeaf(t,p,l)       ast_new_leaf( t, (void*) p, l )
 #define astNewNode(t,n,c)       ast_new_node( t, n, c )
 #define astAllChildren          ast_all_children
