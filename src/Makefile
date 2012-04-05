@@ -1,9 +1,10 @@
 BINDIR = ../bin
 TESTDIR = ../devtest
 
-CFLAGS = -D_AST_DEBUG 
+CFLAGS = -D_DEBUG 
 ##### CFLAGS Options ############
-# -D_AST_DEBUG	: for AST DEBUG
+# -D_AST_DEBUG
+# -D_AST_DEBUG_ALL
 #################################  
 XFLAGS = -7 
 ##### XFLAGS Options ############
@@ -19,8 +20,10 @@ CC = gcc $(CFLAGS) $(GLIBINCLUDE)
 LEX = flex
 YACC = yacc
 
-toy.exe : Parser.tab.o LexAly.yy.o ASTree.o SymbolTable.o
-	$(CC) -o toy.exe Parser.tab.o LexAly.yy.o ASTree.o SymbolTable.o -lfl -ly $(GLIBLINK)
+OBJ = Parser.tab.o LexAly.yy.o ASTree.o SymbolTable.o SymbolTableUtil.o util.o Error.o
+
+toy.exe : $(OBJ)
+	$(CC) -o toy.exe $(OBJ) -lfl -ly $(GLIBLINK)
 	mkdir -p $(BINDIR)
 	mv toy.exe $(BINDIR)
 
@@ -41,7 +44,12 @@ ASTree.o : ASTree.c ASTree.h Parser.tab.h
 	$(CC) -c ASTree.c
 SymbolTable.o: SymbolTable.h SymbolTable.c
 	$(CC) -c SymbolTable.c
-
+SymbolTableUtil.o: SymbolTableUtil.c
+	$(CC) -c SymbolTableUtil.c
+util.o:	util.h util.c
+	$(CC) -c util.c
+Error.o: Error.c
+	$(CC) -c Error.c
 
 test : toy.exe
 	$(BINDIR)/toy.exe $(TESTDIR)/syntax-test.nsbl 

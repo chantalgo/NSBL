@@ -4,21 +4,22 @@
 extern SymbolTable* s_table;
 extern SymbolTableStack*       s_stack;
 int main() {
-    s_table_init();
+    sTableInit();
+    sStackInit();
     // generate entries
     SymbolTableEntry* entry, *entry2, *result, *result2;
     Lexeme ll = "abc";
     int tt = 1;
-    ScopeId ss = 0;
-    entry = s_entry_new ( ll, tt, ss );
-    entry2 = s_entry_new ( "xyz", 2, 1 );
-    printf("key=%s\nbind=%s\n", entry->key, entry->bind);
+    printf("%d\n", s_stack->top);fflush(stdout);
+    entry = sNewEntry ( ll, tt, sStackLevel, sStackTopId );
+    entry2 = sNewEntry ( "xyz", 2, 1, 1 );
+    printf("key=%s\nbind=%s\nSlevel=%d\nScopeId=%d\n", entry->key, entry->bind,entry->scope[0],entry->scope[1]);
     printf("key=%s\nbind=%s\n", entry2->key, entry2->bind);
     // insert to s_table
-    s_table_insert(s_table, entry);
+    sTableInsert( entry);
     // lookup
     SymbolTableKey key;
-    s_new_key(entry->lex, entry->scope, key);
+    sNewKey(entry->lex, entry->scope[1], key);
     result = s_table_lookup(s_table, key);
     // check
     printf("key=%s\nbind=%s\n", result->key, result->bind);
@@ -30,11 +31,10 @@ int main() {
     result2 = s_table_lookup(s_table, key);
     printf("Should be NULL %p\n", result2);
     // cleanup
-    s_table_destroy();
+    sTableDestory();
 
     // test stack
     ScopeId ttt;
-    s_stack_init();
     s_stack_push(s_stack, 1);
     s_stack_push(s_stack, 2);
     s_stack_push(s_stack, 3);
@@ -52,5 +52,5 @@ int main() {
     s_stack_reset(s_stack);
     printf("top=%d, present=%d\n", s_stack->top, s_stack->present);
     //
-    s_stack_destroy();
+    sStackDestroy();
 }

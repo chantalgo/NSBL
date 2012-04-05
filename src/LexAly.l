@@ -9,6 +9,8 @@
 #define MYECHO 
 #endif
 void  myecho();
+#include "util.h"
+#include "global.h"
 %}
 
 letter_         [A-Za-z_]
@@ -20,50 +22,50 @@ strliteral      \"([^\"\\]|\\.)*\"
 comment         (\/\*([^\*]|(\*+([^\*\/])))*\*+\/)|(\/\/.*)
 
 %%
-"void"          { MYECHO; return VOID; }
-"boolean"       { MYECHO; return BOOLEAN; }
-"int"           { MYECHO; return INTEGER; }
-"float"         { MYECHO; return FLOAT; }
-"string"        { MYECHO; return STRING; }
-"list"          { MYECHO; return LIST; }
-"vertex"        { MYECHO; return VERTEX; }
-"edge"          { MYECHO; return EDGE; }
-"graph"         { MYECHO; return GRAPH; }
+"void"          { MYECHO; yylval.LString.l = LEXLINECOUNTER; return VOID; }
+"boolean"       { MYECHO; yylval.LString.l = LEXLINECOUNTER; return BOOLEAN; }
+"int"           { MYECHO; yylval.LString.l = LEXLINECOUNTER; return INTEGER; }
+"float"         { MYECHO; yylval.LString.l = LEXLINECOUNTER; return FLOAT; }
+"string"        { MYECHO; yylval.LString.l = LEXLINECOUNTER; return STRING; }
+"list"          { MYECHO; yylval.LString.l = LEXLINECOUNTER; return LIST; }
+"vertex"        { MYECHO; yylval.LString.l = LEXLINECOUNTER; return VERTEX; }
+"edge"          { MYECHO; yylval.LString.l = LEXLINECOUNTER; return EDGE; }
+"graph"         { MYECHO; yylval.LString.l = LEXLINECOUNTER; return GRAPH; }
 
-"func"			{ MYECHO; return FUNC_LITERAL; }
-"if"            { MYECHO; return IF; }
-"else"          { MYECHO; return ELSE; }
-"for"           { MYECHO; return FOR; }
-"foreach"       { MYECHO; return FOREACH; }
-"while"         { MYECHO; return WHILE; }
-"break"         { MYECHO; return BREAK; }
-"continue"      { MYECHO; return CONTINUE; }
-"return"        { MYECHO; return RETURN; }
-"mark"			{ MYECHO; return MARK; }
+"func"			{ MYECHO; yylval.LString.l = LEXLINECOUNTER; return FUNC_LITERAL; }
+"if"            { MYECHO; yylval.LString.l = LEXLINECOUNTER; return IF; }
+"else"          { MYECHO; yylval.LString.l = LEXLINECOUNTER; return ELSE; }
+"for"           { MYECHO; yylval.LString.l = LEXLINECOUNTER; return FOR; }
+"foreach"       { MYECHO; yylval.LString.l = LEXLINECOUNTER; return FOREACH; }
+"while"         { MYECHO; yylval.LString.l = LEXLINECOUNTER; return WHILE; }
+"break"         { MYECHO; yylval.LString.l = LEXLINECOUNTER; return BREAK; }
+"continue"      { MYECHO; yylval.LString.l = LEXLINECOUNTER; return CONTINUE; }
+"return"        { MYECHO; yylval.LString.l = LEXLINECOUNTER; return RETURN; }
+"mark"			{ MYECHO; yylval.LString.l = LEXLINECOUNTER; return MARK; }
 
-"outE"          { MYECHO; return OUTCOMING_EDGES; }
-"inE"           { MYECHO; return INCOMING_EDGES; }
-"strtV"         { MYECHO; return STARTING_VERTICES; }
-"endV"          { MYECHO; return ENDING_VERTICES; }
-"allV"          { MYECHO; return ALL_VERTICES; }
-"allE"          { MYECHO; return ALL_EDGES; }
+"outE"          { MYECHO; yylval.LString.l = LEXLINECOUNTER; return OUTCOMING_EDGES; }
+"inE"           { MYECHO; yylval.LString.l = LEXLINECOUNTER; return INCOMING_EDGES; }
+"strtV"         { MYECHO; yylval.LString.l = LEXLINECOUNTER; return STARTING_VERTICES; }
+"endV"          { MYECHO; yylval.LString.l = LEXLINECOUNTER; return ENDING_VERTICES; }
+"allV"          { MYECHO; yylval.LString.l = LEXLINECOUNTER; return ALL_VERTICES; }
+"allE"          { MYECHO; yylval.LString.l = LEXLINECOUNTER; return ALL_EDGES; }
 
-"=="            { MYECHO; return EQ; }
-"!="            { MYECHO; return NE; }
-"<="            { MYECHO; return LE; }
-">="            { MYECHO; return GE; }
-"+="            { MYECHO; return ADD_ASSIGN; }
-"-="            { MYECHO; return SUB_ASSIGN; }
-"*="            { MYECHO; return MUL_ASSIGN; }
-"/="            { MYECHO; return DIV_ASSIGN; }
-"||"            { MYECHO; return OR; }
-"&&"            { MYECHO; return AND; }
-"::"			{ MYECHO; return BELONG; }
+"=="            { MYECHO; yylval.LString.l = LEXLINECOUNTER; return EQ; }
+"!="            { MYECHO; yylval.LString.l = LEXLINECOUNTER; return NE; }
+"<="            { MYECHO; yylval.LString.l = LEXLINECOUNTER; return LE; }
+">="            { MYECHO; yylval.LString.l = LEXLINECOUNTER; return GE; }
+"+="            { MYECHO; yylval.LString.l = LEXLINECOUNTER; return ADD_ASSIGN; }
+"-="            { MYECHO; yylval.LString.l = LEXLINECOUNTER; return SUB_ASSIGN; }
+"*="            { MYECHO; yylval.LString.l = LEXLINECOUNTER; return MUL_ASSIGN; }
+"/="            { MYECHO; yylval.LString.l = LEXLINECOUNTER; return DIV_ASSIGN; }
+"||"            { MYECHO; yylval.LString.l = LEXLINECOUNTER; return OR; }
+"&&"            { MYECHO; yylval.LString.l = LEXLINECOUNTER; return AND; }
+"::"			{ MYECHO; yylval.LString.l = LEXLINECOUNTER; return BELONG; }
 
-"<:"            { MYECHO; return APPEND; }
-"->"            { MYECHO; return ARROW; }
-"|"             { MYECHO; return PIPE; }
-"@"             { MYECHO; return AT; }
+"<:"            { MYECHO; yylval.LString.l = LEXLINECOUNTER; return APPEND; }
+"->"            { MYECHO; yylval.LString.l = LEXLINECOUNTER; return ARROW; }
+"|"             { MYECHO; yylval.LString.l = LEXLINECOUNTER; return PIPE; }
+"@"             { MYECHO; yylval.LString.l = LEXLINECOUNTER; return AT; }
 
 "{"             { MYECHO; return '{'; }
 "}"             { MYECHO; return '}'; }
@@ -75,25 +77,47 @@ comment         (\/\*([^\*]|(\*+([^\*\/])))*\*+\/)|(\/\/.*)
 ","             { MYECHO; return ','; }
 ":"             { MYECHO; return ':'; }
 "."             { MYECHO; return '.'; }
-"!"             { MYECHO; return '!'; }
-"+"             { MYECHO; return ADD; }
-"-"             { MYECHO; return SUB; }
-"*"             { MYECHO; return MUL; }
-"/"             { MYECHO; return DIV; }
-"="             { MYECHO; return '='; }
-">"             { MYECHO; return GT; }
-"<"             { MYECHO; return LT; }
+"!"             { MYECHO; yylval.LString.l = LEXLINECOUNTER; return '!'; }
+"+"             { MYECHO; yylval.LString.l = LEXLINECOUNTER; return ADD; }
+"-"             { MYECHO; yylval.LString.l = LEXLINECOUNTER; return SUB; }
+"*"             { MYECHO; yylval.LString.l = LEXLINECOUNTER; return MUL; }
+"/"             { MYECHO; yylval.LString.l = LEXLINECOUNTER; return DIV; }
+"="             { MYECHO; yylval.LString.l = LEXLINECOUNTER; return '='; }
+">"             { MYECHO; yylval.LString.l = LEXLINECOUNTER; return GT; }
+"<"             { MYECHO; yylval.LString.l = LEXLINECOUNTER; return LT; }
 
-"true"          { MYECHO; return TRUE; }
-"false"         { MYECHO; return FALSE; }
-{intconst}      { MYECHO; yylval.string = (char *) malloc ( strlen(yytext) ); strcpy( yylval.string, yytext ); return INTEGER_CONSTANT;}
-{floatconst}    { MYECHO; yylval.string = (char *) malloc ( strlen(yytext) ); strcpy( yylval.string, yytext ); return FLOAT_CONSTANT;}
-{identifier}    { MYECHO; yylval.string = (char *) malloc ( strlen(yytext) ); strcpy( yylval.string, yytext ); return IDENTIFIER; }
-{strliteral}    { MYECHO; yylval.string = (char *) malloc ( strlen(yytext) ); strcpy( yylval.string, yytext ); return STRING_LITERAL; }
+"true"          { MYECHO; yylval.LString.l = LEXLINECOUNTER; return BOOL_TRUE; }
+"false"         { MYECHO; yylval.LString.l = LEXLINECOUNTER; return BOOL_FALSE; }
+{intconst}      { MYECHO; 
+                  yylval.LString.s = (char *) malloc ( strlen(yytext) ); 
+                  yylval.LString.l = LEXLINECOUNTER;
+                  strcpy( yylval.LString.s, yytext ); 
+                  return INTEGER_CONSTANT;
+                }
+{floatconst}    { MYECHO; 
+                  yylval.LString.s = (char *) malloc ( strlen(yytext) ); 
+                  yylval.LString.l = LEXLINECOUNTER;
+                  strcpy( yylval.LString.s, yytext ); 
+                  return FLOAT_CONSTANT;
+                }
+{identifier}    { MYECHO; 
+                  yylval.LString.s = (char *) malloc ( strlen(yytext) ); 
+                  yylval.LString.l = LEXLINECOUNTER;
+                  strcpy( yylval.LString.s, yytext ); 
+                  return IDENTIFIER; 
+                }
+{strliteral}    { MYECHO; 
+                  yylval.LString.s = (char *) malloc ( strlen(yytext) ); 
+                  yylval.LString.l = LEXLINECOUNTER;
+                  strcpy( yylval.LString.s, yytext ); 
+                  return STRING_LITERAL; 
+                }
 {comment}       { MYECHO; }
 
-[ \t\n]         { }
-.               { ECHO; }
+[ \t]           { }
+[\n]            { LEXLINECOUNTER++; }
+.               { errorInfo("error :%d: unrecognized lexeme `%s'\n", LEXLINECOUNTER, yytext);
+                }
 
 %%
 
