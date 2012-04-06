@@ -1,4 +1,5 @@
-==EXTERNAL STATEMENT==
+DEBUG: Symbol Table Initialized.
+=======AST::External Statment=======
 Tree<0>::1::Node<DECLAR>
   Tree<1>::1::Node<TYPE>   : lexval = int
   Tree<1>::2::Node<COMMA>
@@ -8,53 +9,53 @@ Tree<0>::1::Node<DECLAR>
     Tree<2>::4::Node<ASSIGN>
       Tree<3>::4::Node<ID>     : lexval = k  type = 2  bind = _int2
       Tree<3>::4::Node<INT>    : lexval = 2
-======================
+=======Symbol Table======
     Lexeme    T   RT    L   Sp              Key          Binding  Line  || Func Parameters
          j    2   -2    0    0               j0            _int1     2  ||
          k    2   -2    0    0               k0            _int2     4  ||
          i    2   -2    0    0               i0            _int0     1  ||
-error: `i' is already declared.
- note: `i' is first declared at line 1
-==EXTERNAL STATEMENT==
+ERROR::901: `i' is already declared.
+>>>NOTE>>>: `i' is first declared at line 1
+=======AST::External Statment=======
 Tree<0>::6::Node<DECLAR>
   Tree<1>::6::Node<TYPE>   : lexval = float
   Tree<1>::6::Node<ASSIGN>
     Tree<2>::6::Node<ID>     : lexval = i  type = -1  
     Tree<2>::6::Node<FLOAT>  : lexval = 1.200000
-======================
+=======Symbol Table======
     Lexeme    T   RT    L   Sp              Key          Binding  Line  || Func Parameters
          j    2   -2    0    0               j0            _int1     2  ||
          k    2   -2    0    0               k0            _int2     4  ||
          i    2   -2    0    0               i0            _int0     1  ||
-error: `j' is already declared.
- note: `j' is first declared at line 2
-==EXTERNAL STATEMENT==
+ERROR::901: `j' is already declared.
+>>>NOTE>>>: `j' is first declared at line 2
+=======AST::External Statment=======
 Tree<0>::7::Node<DECLAR>
   Tree<1>::7::Node<TYPE>   : lexval = float
   Tree<1>::7::Node<ASSIGN>
     Tree<2>::7::Node<ID>     : lexval = j  type = -1  
     Tree<2>::7::Node<FLOAT>  : lexval = 0.900000
-======================
+=======Symbol Table======
     Lexeme    T   RT    L   Sp              Key          Binding  Line  || Func Parameters
          j    2   -2    0    0               j0            _int1     2  ||
          k    2   -2    0    0               k0            _int2     4  ||
          i    2   -2    0    0               i0            _int0     1  ||
-==EXTERNAL STATEMENT==
+=======AST::External Statment=======
 Tree<0>::9::Node<DECLAR>
   Tree<1>::9::Node<TYPE>   : lexval = str
   Tree<1>::10::Node<ASSIGN>
     Tree<2>::10::Node<ID>     : lexval = s  type = 4  bind = _str5
     Tree<2>::10::Node<STRING> : lexval = abcd
-======================
+=======Symbol Table======
     Lexeme    T   RT    L   Sp              Key          Binding  Line  || Func Parameters
          s    4   -2    0    0               s0            _str5    10  ||
          j    2   -2    0    0               j0            _int1     2  ||
          k    2   -2    0    0               k0            _int2     4  ||
          i    2   -2    0    0               i0            _int0     1  ||
-error: `x' is not declared before.
-error: `l' is not declared before.
-error: `p' is not declared before.
-==EXTERNAL STATEMENT==
+ERROR::902: `x' is not declared before.
+ERROR::902: `l' is not declared before.
+ERROR::902: `p' is not declared before.
+=======AST::External Statment=======
 Tree<0>::12::Node<COMP_STAT>
   Tree<1>::13::Node<STAT_LIST>
     Tree<2>::13::Node<STAT_LIST>
@@ -94,7 +95,7 @@ Tree<0>::12::Node<COMP_STAT>
     Tree<2>::25::Node<ADD_ASSIGN>
       Tree<3>::25::Node<ID>     : lexval = a  type = 3  bind = _float6
       Tree<3>::25::Node<INT>    : lexval = 1
-======================
+=======Symbol Table======
     Lexeme    T   RT    L   Sp              Key          Binding  Line  || Func Parameters
          s    4   -2    0    0               s0            _str5    10  ||
          b    3   -2    1    1               b1          _float7    13  ||
@@ -104,11 +105,11 @@ Tree<0>::12::Node<COMP_STAT>
          p    2   -2    2    2               p2            _int9    22  ||
          k    2   -2    0    0               k0            _int2     4  ||
          i    2   -2    0    0               i0            _int0     1  ||
-==EXTERNAL STATEMENT==
+=======AST::External Statment=======
 Tree<0>::28::Node<ADD_ASSIGN>
   Tree<1>::28::Node<ID>     : lexval = k  type = 2  bind = _int2
   Tree<1>::28::Node<INT>    : lexval = 2
-======================
+=======Symbol Table======
     Lexeme    T   RT    L   Sp              Key          Binding  Line  || Func Parameters
          s    4   -2    0    0               s0            _str5    10  ||
          b    3   -2    1    1               b1          _float7    13  ||
@@ -118,12 +119,12 @@ Tree<0>::28::Node<ADD_ASSIGN>
          p    2   -2    2    2               p2            _int9    22  ||
          k    2   -2    0    0               k0            _int2     4  ||
          i    2   -2    0    0               i0            _int0     1  ||
-==EXTERNAL STATEMENT==
+=======AST::External Statment=======
 Tree<0>::30::Node<COMP_STAT>
   Tree<1>::31::Node<MUL_ASSIGN>
     Tree<2>::31::Node<ID>     : lexval = j  type = 2  bind = _int1
     Tree<2>::31::Node<INT>    : lexval = 2
-======================
+=======Symbol Table======
     Lexeme    T   RT    L   Sp              Key          Binding  Line  || Func Parameters
          s    4   -2    0    0               s0            _str5    10  ||
          b    3   -2    1    1               b1          _float7    13  ||
@@ -133,3 +134,12 @@ Tree<0>::30::Node<COMP_STAT>
          p    2   -2    2    2               p2            _int9    22  ||
          k    2   -2    0    0               k0            _int2     4  ||
          i    2   -2    0    0               i0            _int0     1  ||
+DEBUG: Try to destroy Symbol Table
+DEBUG: Destroy Entry:          s    4   -2    0    0               s0            _str5    10  ||
+DEBUG: Destroy Entry:          b    3   -2    1    1               b1          _float7    13  ||
+DEBUG: Destroy Entry:          i    3   -2    1    1               i1          _float8    14  ||
+DEBUG: Destroy Entry:          j    2   -2    0    0               j0            _int1     2  ||
+DEBUG: Destroy Entry:          a    3   -2    1    1               a1          _float6    13  ||
+DEBUG: Destroy Entry:          p    2   -2    2    2               p2            _int9    22  ||
+DEBUG: Destroy Entry:          k    2   -2    0    0               k0            _int2     4  ||
+DEBUG: Destroy Entry:          i    2   -2    0    0               i0            _int0     1  ||

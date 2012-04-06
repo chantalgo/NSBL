@@ -1,15 +1,16 @@
-==EXTERNAL STATEMENT==
+DEBUG: Symbol Table Initialized.
+=======AST::External Statment=======
 Tree<0>::1::Node<DECLAR>
   Tree<1>::1::Node<TYPE>   : lexval = int
   Tree<1>::1::Node<ASSIGN>
     Tree<2>::1::Node<ID>     : lexval = i  type = 2  bind = _int0
     Tree<2>::1::Node<INT>    : lexval = 0
-======================
+=======Symbol Table======
     Lexeme    T   RT    L   Sp              Key          Binding  Line  || Func Parameters
          i    2   -2    0    0               i0            _int0     1  ||
-error: `x' is not declared before.
-error: `g' is not declared before.
-==EXTERNAL STATEMENT==
+ERROR::902: `x' is not declared before.
+ERROR::902: `g' is not declared before.
+=======AST::External Statment=======
 Tree<0>::2::Node<IFELSE_STAT>
   Tree<1>::3::Node<Ne>
     Tree<2>::3::Node<ID>     : lexval = i  type = 2  bind = _int0
@@ -42,26 +43,26 @@ Tree<0>::2::Node<IFELSE_STAT>
       Tree<3>::11::Node<ADD_ASSIGN>
         Tree<4>::11::Node<ID>     : lexval = i  type = 2  bind = _int0
         Tree<4>::11::Node<INT>    : lexval = 1
-======================
+=======Symbol Table======
     Lexeme    T   RT    L   Sp              Key          Binding  Line  || Func Parameters
          g    8   -2    1    1               g1          _graph2     5  ||
          l    5   -2    1    1               l1           _list1     4  ||
          x    3   -2    1    1               x1          _float3     6  ||
          i    2   -2    0    0               i0            _int0     1  ||
-==EXTERNAL STATEMENT==
+=======AST::External Statment=======
 Tree<0>::14::Node<DECLAR>
   Tree<1>::14::Node<TYPE>   : lexval = float
   Tree<1>::14::Node<ASSIGN>
     Tree<2>::14::Node<ID>     : lexval = s  type = 3  bind = _float4
     Tree<2>::14::Node<FLOAT>  : lexval = 0.100000
-======================
+=======Symbol Table======
     Lexeme    T   RT    L   Sp              Key          Binding  Line  || Func Parameters
          g    8   -2    1    1               g1          _graph2     5  ||
          l    5   -2    1    1               l1           _list1     4  ||
          x    3   -2    1    1               x1          _float3     6  ||
          s    3   -2    0    0               s0          _float4    14  ||
          i    2   -2    0    0               i0            _int0     1  ||
-==EXTERNAL STATEMENT==
+=======AST::External Statment=======
 Tree<0>::15::Node<FOR_STAT>
   Tree<1>::15::Node<ASSIGN>
     Tree<2>::15::Node<ID>     : lexval = i  type = 2  bind = _int0
@@ -75,14 +76,14 @@ Tree<0>::15::Node<FOR_STAT>
   Tree<1>::15::Node<ADD_ASSIGN>
     Tree<2>::15::Node<ID>     : lexval = s  type = 3  bind = _float4
     Tree<2>::15::Node<FLOAT>  : lexval = 1.000000
-======================
+=======Symbol Table======
     Lexeme    T   RT    L   Sp              Key          Binding  Line  || Func Parameters
          g    8   -2    1    1               g1          _graph2     5  ||
          l    5   -2    1    1               l1           _list1     4  ||
          x    3   -2    1    1               x1          _float3     6  ||
          s    3   -2    0    0               s0          _float4    14  ||
          i    2   -2    0    0               i0            _int0     1  ||
-==EXTERNAL STATEMENT==
+=======AST::External Statment=======
 Tree<0>::17::Node<FOR_STAT>
   Tree<1>::17::Node<ASSIGN>
     Tree<2>::17::Node<ID>     : lexval = i  type = 2  bind = _int0
@@ -107,7 +108,7 @@ Tree<0>::17::Node<FOR_STAT>
         Tree<4>::20::Node<MUL>
           Tree<5>::20::Node<ID>     : lexval = i  type = 2  bind = _int0
           Tree<5>::20::Node<ID>     : lexval = j  type = 2  bind = _int5
-======================
+=======Symbol Table======
     Lexeme    T   RT    L   Sp              Key          Binding  Line  || Func Parameters
          g    8   -2    1    1               g1          _graph2     5  ||
          l    5   -2    1    1               l1           _list1     4  ||
@@ -115,7 +116,7 @@ Tree<0>::17::Node<FOR_STAT>
          s    3   -2    0    0               s0          _float4    14  ||
          j    2   -2    1    3               j3            _int5    18  ||
          i    2   -2    0    0               i0            _int0     1  ||
-==EXTERNAL STATEMENT==
+=======AST::External Statment=======
 Tree<0>::23::Node<WHILE_STAT>
   Tree<1>::23::Node<Ne>
     Tree<2>::23::Node<ID>     : lexval = i  type = 2  bind = _int0
@@ -140,7 +141,7 @@ Tree<0>::23::Node<WHILE_STAT>
           Tree<5>::28::Node<ID>     : lexval = d  type = 3  bind = _float6
           Tree<5>::28::Node<INT>    : lexval = 100
         Tree<4>::28::Node<BREAK>
-======================
+=======Symbol Table======
     Lexeme    T   RT    L   Sp              Key          Binding  Line  || Func Parameters
          d    3   -2    1    4               d4          _float6    24  ||
          g    8   -2    1    1               g1          _graph2     5  ||
@@ -149,3 +150,11 @@ Tree<0>::23::Node<WHILE_STAT>
          s    3   -2    0    0               s0          _float4    14  ||
          j    2   -2    1    3               j3            _int5    18  ||
          i    2   -2    0    0               i0            _int0     1  ||
+DEBUG: Try to destroy Symbol Table
+DEBUG: Destroy Entry:          d    3   -2    1    4               d4          _float6    24  ||
+DEBUG: Destroy Entry:          g    8   -2    1    1               g1          _graph2     5  ||
+DEBUG: Destroy Entry:          l    5   -2    1    1               l1           _list1     4  ||
+DEBUG: Destroy Entry:          x    3   -2    1    1               x1          _float3     6  ||
+DEBUG: Destroy Entry:          s    3   -2    0    0               s0          _float4    14  ||
+DEBUG: Destroy Entry:          j    2   -2    1    3               j3            _int5    18  ||
+DEBUG: Destroy Entry:          i    2   -2    0    0               i0            _int0     1  ||

@@ -1,4 +1,5 @@
-==EXTERNAL STATEMENT==
+DEBUG: Symbol Table Initialized.
+=======AST::External Statment=======
 Tree<0>::1::Node<DECLAR>
   Tree<1>::1::Node<TYPE>   : lexval = int
   Tree<1>::1::Node<COMMA>
@@ -6,12 +7,12 @@ Tree<0>::1::Node<DECLAR>
       Tree<3>::1::Node<ID>     : lexval = i  type = 2  bind = _int0
       Tree<3>::1::Node<ID>     : lexval = j  type = 2  bind = _int1
     Tree<2>::1::Node<ID>     : lexval = ff  type = 2  bind = _int2
-======================
+=======Symbol Table======
     Lexeme    T   RT    L   Sp              Key          Binding  Line  || Func Parameters
          j    2   -2    0    0               j0            _int1     1  ||
         ff    2   -2    0    0              ff0            _int2     1  ||
          i    2   -2    0    0               i0            _int0     1  ||
-==FUNCTION DEFINITION==
+=======AST::Function Definition=======
 Tree<0>::3::Node<FUNCTION>
   Tree<1>::3::Node<TYPE>   : lexval = int
   Tree<1>::3::Node<FUNC_DECLARATOR>
@@ -42,7 +43,7 @@ Tree<0>::3::Node<FUNCTION>
               Tree<7>::8::Node<ID>     : lexval = a  type = 1  bind = _bool4
             Tree<6>::8::Node<ID>     : lexval = x  type = 3  bind = _float6
           Tree<5>::8::Node<ID>     : lexval = y  type = 3  bind = _float7
-=======================
+=======Symbol Table======
     Lexeme    T   RT    L   Sp              Key          Binding  Line  || Func Parameters
          j    2   -2    0    0               j0            _int1     1  ||
          i    2   -2    1    1               i1            _int3     4  ||
@@ -52,12 +53,12 @@ Tree<0>::3::Node<FUNCTION>
         ff    2   -2    0    0              ff0            _int2     1  ||
          y    3   -2    1    1               y1          _float7     7  ||
          i    2   -2    0    0               i0            _int0     1  ||
-error: `x' is not declared before.
-==EXTERNAL STATEMENT==
+ERROR::902: `x' is not declared before.
+=======AST::External Statment=======
 Tree<0>::11::Node<ADD_ASSIGN>
   Tree<1>::11::Node<ID>     : lexval = x  type = -1  
   Tree<1>::11::Node<INT>    : lexval = 1
-======================
+=======Symbol Table======
     Lexeme    T   RT    L   Sp              Key          Binding  Line  || Func Parameters
          j    2   -2    0    0               j0            _int1     1  ||
          i    2   -2    1    1               i1            _int3     4  ||
@@ -67,9 +68,9 @@ Tree<0>::11::Node<ADD_ASSIGN>
         ff    2   -2    0    0              ff0            _int2     1  ||
          y    3   -2    1    1               y1          _float7     7  ||
          i    2   -2    0    0               i0            _int0     1  ||
-error: `ff' is already declared.
- note: `ff' is first declared at line 1
-==FUNCTION DEFINITION==
+ERROR::901: `ff' is already declared.
+>>>NOTE>>>: `ff' is first declared at line 1
+=======AST::Function Definition=======
 Tree<0>::13::Node<FUNCTION>
   Tree<1>::13::Node<TYPE>   : lexval = int
   Tree<1>::13::Node<FUNC_DECLARATOR>
@@ -80,7 +81,7 @@ Tree<0>::13::Node<FUNCTION>
   Tree<1>::14::Node<COMP_STAT>
     Tree<2>::16::Node<RETRUN>
       Tree<3>::16::Node<ID>     : lexval = j  type = 2  bind = _int8
-=======================
+=======Symbol Table======
     Lexeme    T   RT    L   Sp              Key          Binding  Line  || Func Parameters
          j    2   -2    0    0               j0            _int1     1  ||
          i    2   -2    1    1               i1            _int3     4  ||
@@ -91,3 +92,113 @@ Tree<0>::13::Node<FUNCTION>
         ff    2   -2    0    0              ff0            _int2     1  ||
          y    3   -2    1    1               y1          _float7     7  ||
          i    2   -2    0    0               i0            _int0     1  ||
+=======AST::External Statment=======
+Tree<0>::19::Node<DECLAR>
+  Tree<1>::19::Node<TYPE>   : lexval = bool
+  Tree<1>::19::Node<ASSIGN>
+    Tree<2>::19::Node<ID>     : lexval = x  type = 1  bind = _bool10
+    Tree<2>::19::Node<TRUE> 
+=======Symbol Table======
+    Lexeme    T   RT    L   Sp              Key          Binding  Line  || Func Parameters
+         x    1   -2    0    0               x0          _bool10    19  ||
+         j    2   -2    0    0               j0            _int1     1  ||
+         i    2   -2    1    1               i1            _int3     4  ||
+         x    3   -2    1    1               x1          _float6     7  ||
+      text   10    2    0    0            text0           _func5     3  ||    2    1
+         a    1   -2    1    1               a1           _bool4     5  ||
+         j    2   -2    1    2               j2            _int8    14  ||
+        ff    2   -2    0    0              ff0            _int2     1  ||
+         y    3   -2    1    1               y1          _float7     7  ||
+         i    2   -2    0    0               i0            _int0     1  ||
+=======AST::External Statment=======
+Tree<0>::20::Node<FUNC_CALL>  :bind = _func5
+  Tree<1>::20::Node<ID>     : lexval = text  type = -1  
+  Tree<1>::20::Node<COMMA>
+    Tree<2>::20::Node<ARGUMENT_EXP>
+      Tree<3>::20::Node<ID>     : lexval = i  type = 2  bind = _int0
+    Tree<2>::20::Node<ARGUMENT_EXP>
+      Tree<3>::20::Node<ID>     : lexval = x  type = 1  bind = _bool10
+=======Symbol Table======
+    Lexeme    T   RT    L   Sp              Key          Binding  Line  || Func Parameters
+         x    1   -2    0    0               x0          _bool10    19  ||
+         j    2   -2    0    0               j0            _int1     1  ||
+         i    2   -2    1    1               i1            _int3     4  ||
+         x    3   -2    1    1               x1          _float6     7  ||
+      text   10    2    0    0            text0           _func5     3  ||    2    1
+         a    1   -2    1    1               a1           _bool4     5  ||
+         j    2   -2    1    2               j2            _int8    14  ||
+        ff    2   -2    0    0              ff0            _int2     1  ||
+         y    3   -2    1    1               y1          _float7     7  ||
+         i    2   -2    0    0               i0            _int0     1  ||
+ERROR::904: function Call `text(int)' has inconsistent number of arguments to its declaration.
+>>>NOTE>>>: function `text(int,bool)' first declared at line 3
+=======AST::External Statment=======
+Tree<0>::22::Node<FUNC_CALL>  :
+  Tree<1>::22::Node<ID>     : lexval = text  type = -1  
+  Tree<1>::22::Node<ARGUMENT_EXP>
+    Tree<2>::22::Node<ID>     : lexval = i  type = 2  bind = _int0
+=======Symbol Table======
+    Lexeme    T   RT    L   Sp              Key          Binding  Line  || Func Parameters
+         x    1   -2    0    0               x0          _bool10    19  ||
+         j    2   -2    0    0               j0            _int1     1  ||
+         i    2   -2    1    1               i1            _int3     4  ||
+         x    3   -2    1    1               x1          _float6     7  ||
+      text   10    2    0    0            text0           _func5     3  ||    2    1
+         a    1   -2    1    1               a1           _bool4     5  ||
+         j    2   -2    1    2               j2            _int8    14  ||
+        ff    2   -2    0    0              ff0            _int2     1  ||
+         y    3   -2    1    1               y1          _float7     7  ||
+         i    2   -2    0    0               i0            _int0     1  ||
+ERROR::905: function Call `text(int,int)' has incompatible arguments to its declaration.
+>>>NOTE>>>: function `text(int,bool)' first declared at line 3
+=======AST::External Statment=======
+Tree<0>::24::Node<FUNC_CALL>  :
+  Tree<1>::24::Node<ID>     : lexval = text  type = -1  
+  Tree<1>::24::Node<COMMA>
+    Tree<2>::24::Node<ARGUMENT_EXP>
+      Tree<3>::24::Node<ID>     : lexval = i  type = 2  bind = _int0
+    Tree<2>::24::Node<ARGUMENT_EXP>
+      Tree<3>::24::Node<ID>     : lexval = j  type = 2  bind = _int1
+=======Symbol Table======
+    Lexeme    T   RT    L   Sp              Key          Binding  Line  || Func Parameters
+         x    1   -2    0    0               x0          _bool10    19  ||
+         j    2   -2    0    0               j0            _int1     1  ||
+         i    2   -2    1    1               i1            _int3     4  ||
+         x    3   -2    1    1               x1          _float6     7  ||
+      text   10    2    0    0            text0           _func5     3  ||    2    1
+         a    1   -2    1    1               a1           _bool4     5  ||
+         j    2   -2    1    2               j2            _int8    14  ||
+        ff    2   -2    0    0              ff0            _int2     1  ||
+         y    3   -2    1    1               y1          _float7     7  ||
+         i    2   -2    0    0               i0            _int0     1  ||
+ERROR::903: `ff' is not declared as a function
+>>>NOTE>>>: `ff' is first declared at line 1
+=======AST::External Statment=======
+Tree<0>::26::Node<FUNC_CALL>  :
+  Tree<1>::26::Node<ID>     : lexval = ff  type = -1  
+  Tree<1>::26::Node<ARGUMENT_EXP>
+    Tree<2>::26::Node<ID>     : lexval = i  type = 2  bind = _int0
+=======Symbol Table======
+    Lexeme    T   RT    L   Sp              Key          Binding  Line  || Func Parameters
+         x    1   -2    0    0               x0          _bool10    19  ||
+         j    2   -2    0    0               j0            _int1     1  ||
+         i    2   -2    1    1               i1            _int3     4  ||
+         x    3   -2    1    1               x1          _float6     7  ||
+      text   10    2    0    0            text0           _func5     3  ||    2    1
+         a    1   -2    1    1               a1           _bool4     5  ||
+         j    2   -2    1    2               j2            _int8    14  ||
+        ff    2   -2    0    0              ff0            _int2     1  ||
+         y    3   -2    1    1               y1          _float7     7  ||
+         i    2   -2    0    0               i0            _int0     1  ||
+DEBUG: Try to destroy Symbol Table
+DEBUG: Destroy Entry:          x    1   -2    0    0               x0          _bool10    19  ||
+DEBUG: Destroy Entry:          j    2   -2    0    0               j0            _int1     1  ||
+DEBUG: Destroy Entry:          i    2   -2    1    1               i1            _int3     4  ||
+DEBUG: Destroy Entry:          x    3   -2    1    1               x1          _float6     7  ||
+DEBUG: Destroy Entry:       text   10    2    0    0            text0           _func5     3  ||    2    1
+ >> destroy typeCon... 
+DEBUG: Destroy Entry:          a    1   -2    1    1               a1           _bool4     5  ||
+DEBUG: Destroy Entry:          j    2   -2    1    2               j2            _int8    14  ||
+DEBUG: Destroy Entry:         ff    2   -2    0    0              ff0            _int2     1  ||
+DEBUG: Destroy Entry:          y    3   -2    1    1               y1          _float7     7  ||
+DEBUG: Destroy Entry:          i    2   -2    0    0               i0            _int0     1  ||
