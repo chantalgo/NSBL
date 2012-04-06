@@ -17,16 +17,16 @@ int ff(                         // ERROR
 }
 
 boolean x=true;
-text(i,x);
+text(i,x);                      // OK
 
-text(i);
+text(i);                        // ERROR
 
-text(i,j);
+text(i,j);                      // ERROR
 
-ff(i);
+ff(i);                          // ERROR
 
 
-int recur(int i) {
+int recur(int i) {              // OK
     if(i>0){
         i-=1;
         return recur(i);
@@ -38,4 +38,4 @@ int noArg(){
     return 0;
 }
 
-noArg();
+noArg();                        // OK
