@@ -15,10 +15,12 @@ extern FILE* DEBUGIO;
 /** create a leaf in AST */
 struct Node* ast_new_leaf(int token, void * ptr, long long line) {
     struct Node* node = (struct Node *) malloc ( sizeof (struct Node) );   // free in ast_free_tree
-    node->nch = 0;
-    node->child = NULL;
+    node->typeCon = NULL;
+    node->nch = 0;                  // Leaf has no child
+    node->child = NULL;             
     node->symbol = NULL;            // default null
-    node->line = line;
+    node->line = line;              // line # in source
+    node->code = NULL;              // no code assigned
     switch (token) {
         case INTEGER_CONSTANT :
             node->token = INTEGER_CONSTANT;
@@ -88,14 +90,16 @@ struct Node** ast_all_children(int n, ...){
     return child;
 }
 
-struct Node* ast_new_node(int token, int nch, struct Node** child){
+struct Node* ast_new_node(int token, int nch, struct Node** child, long long line){
     struct Node* node = (struct Node *) malloc ( sizeof (struct Node) );  // free in ast_free_tree
     node->token = token;
-    node->line = LEXLINECOUNTER;
-    node->type = UNKNOWN_T;
-    node->nch = nch;
-    node->child = child;
-    node->symbol = NULL;
+    node->type = UNKNOWN_T;             // default
+    node->typeCon = NULL;
+    node->nch = nch;                    // assign children
+    node->child = child;        
+    node->symbol = NULL;                // default NULL
+    node->line = line;                  // line # in source (for corresponding token)
+    node->code = NULL;                  
 #ifdef _AST_DEBUG_EXTRA
     debugInfo("ast_new_node :: create \n");
     debugInfo("==DEBUG INFO==\n");
@@ -141,149 +145,154 @@ void ast_free_tree(struct Node* node) {
 
 void ast_output_node(struct Node* node, FILE* out, const char * sep) {
     if(node==NULL) return;
+    fprintf(out,"%d::",node->line);
     switch (node->token) {
         case INTEGER_CONSTANT :
-            fprintf(out, "Node<INT>    : lexval = %d%s", node->lexval.ival, sep);break;
+            fprintf(out, "Node<INT>    : lexval = %d", node->lexval.ival);break;
         case FLOAT_CONSTANT :
-            fprintf(out, "Node<FLOAT>  : lexval = %f%s", node->lexval.fval, sep);break;
-        case TRUE :
-            fprintf(out, "Node<TRUE> %s", sep); break;
-        case FALSE :
-            fprintf(out, "Node<FALSE> %s", sep); break;
+            fprintf(out, "Node<FLOAT>  : lexval = %f", node->lexval.fval);break;
+        case BOOL_TRUE :
+            fprintf(out, "Node<TRUE> "); break;
+        case BOOL_FALSE :
+            fprintf(out, "Node<FALSE> "); break;
         case STRING_LITERAL :
-            fprintf(out, "Node<STRING> : lexval = %s%s", node->lexval.sval, sep);break;
+            fprintf(out, "Node<STRING> : lexval = %s", node->lexval.sval);break;
         case IDENTIFIER :
             fprintf(out, "Node<ID>     : lexval = %s  type = %d  ", node->lexval.sval, node->type);
             if(node->symbol!=NULL) fprintf(out, "bind = %s", node->symbol->bind);
-            fprintf(out, "%s", sep);
             break;
         case AST_TYPE_SPECIFIER :
-            fprintf(out, "Node<TYPE>   : lexval = %s%s", s_table_type_name(node->lexval.ival), sep);break;
+            fprintf(out, "Node<TYPE>   : lexval = %s", s_table_type_name(node->lexval.ival));break;
         case AST_DECLARATION :
-            fprintf(out, "Node<DECLAR>%s", sep);break;
+            fprintf(out, "Node<DECLAR>");break;
         case AST_FUNC_DECLARATOR :
-            fprintf(out, "Node<FUNC_DECLARATOR>%s", sep);break;
+            fprintf(out, "Node<FUNC_DECLARATOR>");break;
         case BELONG :
-            fprintf(out, "Node<BELONG>%s", sep);break;
+            fprintf(out, "Node<BELONG>");break;
         case AST_PARA_DECLARATION :
-            fprintf(out, "Node<PARA_DECLARATION>%s", sep);break;
+            fprintf(out, "Node<PARA_DECLARATION>");break;
         case AST_LIST_INIT :
-            fprintf(out, "Node<LIST_INIT>%s", sep);break;
+            fprintf(out, "Node<LIST_INIT>");break;
         case AST_COMMA :
-            fprintf(out, "Node<COMMA>%s", sep);break;
+            fprintf(out, "Node<COMMA>");break;
         case AST_ASSIGN :
-            fprintf(out, "Node<ASSIGN>%s", sep);break;
+            fprintf(out, "Node<ASSIGN>");break;
         case ADD_ASSIGN :
-            fprintf(out, "Node<ADD_ASSIGN>%s", sep);break;
+            fprintf(out, "Node<ADD_ASSIGN>");break;
         case SUB_ASSIGN :
-            fprintf(out, "Node<SUB_ASSIGN>%s", sep);break;
+            fprintf(out, "Node<SUB_ASSIGN>");break;
         case MUL_ASSIGN :
-            fprintf(out, "Node<MUL_ASSIGN>%s", sep);break;
+            fprintf(out, "Node<MUL_ASSIGN>");break;
         case DIV_ASSIGN :
-            fprintf(out, "Node<DIV_ASSIGN>%s", sep);break;
+            fprintf(out, "Node<DIV_ASSIGN>");break;
 		case APPEND :
-			fprintf(out, "Node<APPEND>%s", sep);break;
+			fprintf(out, "Node<APPEND>");break;
         case OR :
-            fprintf(out, "Node<OR>%s", sep);break;
+            fprintf(out, "Node<OR>");break;
         case AND :
-            fprintf(out, "Node<AND>%s", sep);break;
+            fprintf(out, "Node<AND>");break;
         case EQ :
-            fprintf(out, "Node<EQ>%s", sep);break;
+            fprintf(out, "Node<EQ>");break;
         case NE :
-            fprintf(out, "Node<Ne>%s", sep);break;
+            fprintf(out, "Node<Ne>");break;
         case LT :
-            fprintf(out, "Node<LT>%s", sep);break;
+            fprintf(out, "Node<LT>");break;
         case GT :
-            fprintf(out, "Node<GT>%s", sep);break;
+            fprintf(out, "Node<GT>");break;
         case LE :
-            fprintf(out, "Node<LE>%s", sep);break;
+            fprintf(out, "Node<LE>");break;
         case GE :
-            fprintf(out, "Node<GE>%s", sep);break;
+            fprintf(out, "Node<GE>");break;
         case ADD :
-            fprintf(out, "Node<ADD>%s", sep);break;
+            fprintf(out, "Node<ADD>");break;
         case SUB :
-            fprintf(out, "Node<SUB>%s", sep);break;
+            fprintf(out, "Node<SUB>");break;
         case MUL :
-            fprintf(out, "Node<MUL>%s", sep);break;
+            fprintf(out, "Node<MUL>");break;
         case DIV :
-            fprintf(out, "Node<DIV>%s", sep);break;
+            fprintf(out, "Node<DIV>");break;
         case AST_CAST :
-            fprintf(out, "Node<CAST>%s", sep);break;
+            fprintf(out, "Node<CAST>");break;
         case AST_UNARY_PLUS :
-            fprintf(out, "Node<UNARY_PLUS>%s", sep);break;
+            fprintf(out, "Node<UNARY_PLUS>");break;
         case AST_UNARY_MINUS :
-            fprintf(out, "Node<UNARY_MINUS>%s", sep);break;
+            fprintf(out, "Node<UNARY_MINUS>");break;
         case AST_UNARY_NOT :
-            fprintf(out, "Node<UNARY_NOT>%s", sep);break;
+            fprintf(out, "Node<UNARY_NOT>");break;
         case ARROW :
-            fprintf(out, "Node<ARROW>%s", sep);break;
+            fprintf(out, "Node<ARROW>");break;
         case PIPE :
-            fprintf(out, "Node<PIPE>%s", sep);break;
+            fprintf(out, "Node<PIPE>");break;
         case AST_MATCH :
-            fprintf(out, "Node<MATCH>%s", sep);break;
+            fprintf(out, "Node<MATCH>");break;
         case AST_ATTIBUTE :
-            fprintf(out, "Node<ATTRIBUTE>%s", sep);break;
+            fprintf(out, "Node<ATTRIBUTE>");break;
         case AST_GRAPH_PROP :
-            fprintf(out, "Node<GRAPH_PROP>%s", sep);break;
+            fprintf(out, "Node<GRAPH_PROP>");break;
         case AST_STAT_LIST :
-            fprintf(out, "Node<STAT_LIST>%s", sep);break;
+            fprintf(out, "Node<STAT_LIST>");break;
         case AST_COMP_STAT :
-            fprintf(out, "Node<COMP_STAT>%s", sep);break;
+            fprintf(out, "Node<COMP_STAT>");break;
         case AST_EXT_STAT_COMMA :
-            fprintf(out, "Node<EXT_STAT_COMMA>%s", sep);break;
+            fprintf(out, "Node<EXT_STAT_COMMA>");break;
 		case AST_FUNC :
-			fprintf(out, "Node<FUNCTION>%s" , sep);break;
+			fprintf(out, "Node<FUNCTION>" );break;
 		case FUNC_LITERAL:
-			fprintf(out, "Node<FUNC_LITERAL>%s" , sep);break;
+			fprintf(out, "Node<FUNC_LITERAL>" );break;
 		case AST_IF_STAT :
-			fprintf(out, "Node<IF_STAT>%s", sep);break;
+			fprintf(out, "Node<IF_STAT>");break;
 		case AST_IFELSE_STAT :
-			fprintf(out, "Node<IFELSE_STAT>%s", sep);break;
+			fprintf(out, "Node<IFELSE_STAT>");break;
 		case AST_WHILE :
-			fprintf(out, "Node<WHILE_STAT>%s", sep);break;
+			fprintf(out, "Node<WHILE_STAT>");break;
 		case AST_FOREACH :
-			fprintf(out, "Node<FOREACH_STAT>%s", sep);break;
+			fprintf(out, "Node<FOREACH_STAT>");break;
 		case AST_FOR_XXX :
-			fprintf(out, "Node<FOR_STAT>%s", sep);break;
+			fprintf(out, "Node<FOR_STAT>");break;
 		case AST_FOR_XXO :
-			fprintf(out, "Node<FOR_STAT>%s", sep);break;
+			fprintf(out, "Node<FOR_STAT>");break;
 		case AST_FOR_XOX :
-			fprintf(out, "Node<FOR_STAT>%s", sep);break;
+			fprintf(out, "Node<FOR_STAT>");break;
 		case AST_FOR_XOO :
-			fprintf(out, "Node<FOR_STAT>%s", sep);break;
+			fprintf(out, "Node<FOR_STAT>");break;
 		case AST_FOR_OXX :
-			fprintf(out, "Node<FOR_STAT>%s", sep);break;
+			fprintf(out, "Node<FOR_STAT>");break;
 		case AST_FOR_OXO :
-			fprintf(out, "Node<FOR_STAT>%s", sep);break;
+			fprintf(out, "Node<FOR_STAT>");break;
 		case AST_FOR_OOX :
-			fprintf(out, "Node<FOR_STAT>%s", sep);break;
+			fprintf(out, "Node<FOR_STAT>");break;
 		case AST_FOR_OOO :
-			fprintf(out, "Node<FOR_STAT>%s", sep);break;
+			fprintf(out, "Node<FOR_STAT>");break;
 		case AST_JUMP_CONTINUE:
-			fprintf(out, "Node<CONTINUE>%s", sep);break;
+			fprintf(out, "Node<CONTINUE>");break;
 		case AST_JUMP_BREAK:
-			fprintf(out, "Node<BREAK>%s", sep);break;
+			fprintf(out, "Node<BREAK>");break;
 		case AST_JUMP_RETURN:
-			fprintf(out, "Node<RETRUN>%s", sep);break;
-		case AST_POSTFIX_EPR:
-			fprintf(out, "Node<POSTFIX_EXPRESSION>%s", sep);break;
+			fprintf(out, "Node<RETRUN>");break;
+		case AST_FUNC_CALL:
+			fprintf(out, "Node<FUNC_CALL>  :");
+            if(node->symbol!=NULL) fprintf(out, "bind = %s", node->symbol->bind);
+            break;
 		case ALL_VERTICES :
-			fprintf(out, "Node<ALL_VERTICES>%s", sep);break;
+			fprintf(out, "Node<ALL_VERTICES>");break;
 		case OUTCOMING_EDGES :
-			fprintf(out, "Node<OUTEDGES>%s", sep);break;
+			fprintf(out, "Node<OUTEDGES>");break;
 		case STARTING_VERTICES :
-			fprintf(out, "Node<STARTING_VERTICES>%s", sep);break;
+			fprintf(out, "Node<STARTING_VERTICES>");break;
 		case ENDING_VERTICES :
-			fprintf(out, "Node<ENDING_VERTICES>%s", sep);break;
+			fprintf(out, "Node<ENDING_VERTICES>");break;
 		case ALL_EDGES :
-			fprintf(out, "Node<ALL_EDGES>%s", sep);break;
+			fprintf(out, "Node<ALL_EDGES>");break;
 		case INCOMING_EDGES:
-			fprintf(out, "Node<INCOMING_EDGES>%s", sep);break;
+			fprintf(out, "Node<INCOMING_EDGES>");break;
 		case AT :
-			fprintf(out, "Node<AT_ATTRIBUTE>%s", sep);break;
+			fprintf(out, "Node<AT_ATTRIBUTE>");break;
+        case AST_ARG_EXPS :
+            fprintf(out, "Node<ARGUMENT_EXP>");break;
         default :
-            fprintf(out, "Node<UNKNOWN> !!!!!!!!!!!!!!!!\n");
+            fprintf(out, "Node<UNKNOWN> !!!!!!!!!!!!!!!!");
     }
+    fprintf(out, "%s", sep);
     return;
 }
     
@@ -295,9 +304,55 @@ void ast_output_tree(struct Node* node, FILE* out, int level) {
 	while(indent-->0){
 		fprintf(out, "  ");
 	}
-    fprintf(out, "TreeLevel<%4d>:: ",level);
+    fprintf(out, "Tree<%d>::",level);
     ast_output_node(node, out, "\n");
     for(i=0; i<node->nch; ++i) {
         ast_output_tree(node->child[i],out,level+1);
     }
+}
+
+/** find the leftmost child */
+struct Node* ast_leftmost_child(struct Node* node) {
+    if( node == NULL ) return NULL;
+    if( node->nch <= 0 ) return node;
+    return ast_leftmost_child(node->child[0]);
+}
+
+/** create type construct for parameter_list */
+GArray* ast_type_construct_parameter_list(struct Node* node, GArray* ga) {
+    if(ga==NULL) ga = g_array_new (1,1,sizeof(int));                // destroy in SymbolTable.c
+    if(node==NULL) return ga;
+    if(node->token == AST_COMMA) {
+        ast_type_construct_parameter_list(node->child[0],ga);      // left
+        ast_type_construct_parameter_list(node->child[1],ga);      // right
+    }
+    else if(node->token == AST_PARA_DECLARATION ||
+                node->token == FUNC_LITERAL ) {
+        g_array_append_vals ( ga, (gconstpointer) & (node->type), 1 ); 
+    }
+    else {
+        fprintf(stderr,"Error: ast_type_construct_parameter_list :: see unknown token : %d\n", node->token);
+    }
+    return ga;
+}
+
+/** create type construct for argument_expression_list */
+GArray* ast_type_construct_argument_expression_list(struct Node* node, GArray* ga) {
+    if(ga==NULL) ga = g_array_new (1,1,sizeof(int));                        // destory by ast_free_type_construct
+    if(node==NULL) return ga;
+    if(node->token == AST_COMMA) {
+        ast_type_construct_argument_expression_list(node->child[0],ga);      // left
+        ast_type_construct_argument_expression_list(node->child[1],ga);      // right
+    }
+    else if(node->token == AST_ARG_EXPS) {
+        g_array_append_vals ( ga, (gconstpointer) & (node->type), 1 );
+    }
+    else {
+        fprintf(stderr,"Error: ast_type_construct_argument_expression_list :: see unknown token : %d\n", node->token);
+    }
+    return ga;
+}
+
+void ast_free_type_construct(GArray* ga) {
+    if(ga!=NULL) g_array_free(ga, 1);
 }

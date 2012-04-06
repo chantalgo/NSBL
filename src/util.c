@@ -1,6 +1,11 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <stdarg.h>
 #include "util.h"
+extern SymbolTable*            s_table;
+extern SymbolTableStack*       s_stack;
+extern int ERRNO;
 
 #ifdef _DEBUG
 FILE* DEBUGIO;
@@ -24,31 +29,49 @@ void init_util() {
 }
 
 void debugInfo(char* fmt, ...){
+#ifdef _DEBUG
     va_list args;
     va_start(args, fmt);
-#ifdef _DEBUG
+    fprintf(DEBUGIO,"DEBUG: ");
     vfprintf(DEBUGIO, fmt, args);
-#endif
     va_end(args);
+#endif
     return;
 }
+
+void debugInfoExt(char* fmt, ...){
+#ifdef _DEBUG
+    va_list args;
+    va_start(args, fmt);
+    vfprintf(DEBUGIO, fmt, args);
+    va_end(args);
+#endif
+    return;
+}
+
 
 void logInfo(char* fmt, ...){
-    va_list args;
-    va_start(args, fmt);
 #ifndef _NO_LOG
-    vfprintf(LOGIO, fmt, args);
-#endif
-    va_end(args);
-    return;
-}
-
-void errorInfo(char* fmt, ...){
     va_list args;
     va_start(args, fmt);
-    fprintf(ERRORIO,"error: ");
-    vfprintf(ERRORIO, fmt, args);
+    vfprintf(LOGIO, fmt, args);
     va_end(args);
+#endif
     return;
 }
 
+char* strCatAlloc(const char* s1, const char* s2) {
+    size_t ll = strlen(s1)+strlen(s2)+1;
+    char* ss = (char *) malloc (ll);
+    sprintf(ss, "%s%s\0", s1, s2);
+    return ss;
+}
+
+void showASTandST(struct Node* node, const char * head) {
+#ifndef _NO_LOG
+    logInfo("=======AST::%s=======\n", head);
+    astOutTree(node, LOGIO, 0);
+    logInfo("=======Symbol Table======\n");
+    sTableShow(LOGIO);
+#endif
+}

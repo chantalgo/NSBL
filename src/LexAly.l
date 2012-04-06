@@ -9,6 +9,7 @@
 #define MYECHO 
 #endif
 void  myecho();
+void countLine(const char* ptr);
 #include "util.h"
 #include "global.h"
 %}
@@ -67,16 +68,16 @@ comment         (\/\*([^\*]|(\*+([^\*\/])))*\*+\/)|(\/\/.*)
 "|"             { MYECHO; yylval.LString.l = LEXLINECOUNTER; return PIPE; }
 "@"             { MYECHO; yylval.LString.l = LEXLINECOUNTER; return AT; }
 
-"{"             { MYECHO; return '{'; }
-"}"             { MYECHO; return '}'; }
-"("             { MYECHO; return '('; }
-")"             { MYECHO; return ')'; }
-"["             { MYECHO; return '['; }
-"]"             { MYECHO; return ']'; }
-";"             { MYECHO; return ';'; }
-","             { MYECHO; return ','; }
-":"             { MYECHO; return ':'; }
-"."             { MYECHO; return '.'; }
+"{"             { MYECHO; yylval.LString.l = LEXLINECOUNTER; return '{'; }
+"}"             { MYECHO; yylval.LString.l = LEXLINECOUNTER; return '}'; }
+"("             { MYECHO; yylval.LString.l = LEXLINECOUNTER; return '('; }
+")"             { MYECHO; yylval.LString.l = LEXLINECOUNTER; return ')'; }
+"["             { MYECHO; yylval.LString.l = LEXLINECOUNTER; return '['; }
+"]"             { MYECHO; yylval.LString.l = LEXLINECOUNTER; return ']'; }
+";"             { MYECHO; yylval.LString.l = LEXLINECOUNTER; return ';'; }
+","             { MYECHO; yylval.LString.l = LEXLINECOUNTER; return ','; }
+":"             { MYECHO; yylval.LString.l = LEXLINECOUNTER; return ':'; }
+"."             { MYECHO; yylval.LString.l = LEXLINECOUNTER; return '.'; }
 "!"             { MYECHO; yylval.LString.l = LEXLINECOUNTER; return '!'; }
 "+"             { MYECHO; yylval.LString.l = LEXLINECOUNTER; return ADD; }
 "-"             { MYECHO; yylval.LString.l = LEXLINECOUNTER; return SUB; }

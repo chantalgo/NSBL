@@ -2,6 +2,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include "SymbolTable.h"
+#ifdef _DEBUG
+extern FILE* DEBUGIO;
+#endif
 
 /************************************************
  * global variables (see SymbolTable.h)         *
@@ -15,10 +18,13 @@ SymbolTableStack*       s_stack;
 // init Symbol Table
 void s_table_init (SymbolTable** table) {
     *table = g_hash_table_new (g_str_hash, g_str_equal);
+    debugInfo("Symbol Table Initialized.\n");
 }
 
 // destroy Symbol Table
 void s_table_destroy (SymbolTable* table) {
+    debugInfo("Try to destroy Symbol Table\n");
+    g_hash_table_foreach(table, &s_destroy_entry, NULL);
     g_hash_table_destroy ( table );
 }
 
@@ -31,8 +37,10 @@ int s_table_insert (SymbolTable* table, SymbolTableEntry* entry) {
 }
 
 // remove an entry (with key) from ST
-bool s_table_remove (SymbolTable* table, SymbolTableEntry* entry) {
-    return g_hash_table_remove(table, (gpointer) (entry->key));
+bool s_table_remove (SymbolTable* table, SymbolTableEntry* entry, bool keepEntry) {
+    bool flag = g_hash_table_remove(table, (gpointer) (entry->key));
+    if(!keepEntry) sDestroyEntry ( entry );
+    return flag;
 }
 
 // find an entry with key
@@ -47,44 +55,57 @@ int s_table_check_key_exsit (SymbolTable* table, SymbolTableKey key) {
 }
 
 // Output an entry
-void s_entry_show  (gpointer key, gpointer entry, gpointer out) {
+void s_show_entry  (gpointer key, gpointer entry, gpointer out) {
     SymbolTableEntry * e = (SymbolTableEntry*) entry;
-    fprintf( (FILE*) out, "%10s  %3d  %3d  %3d  %15s  %15s  %4d\n",
-        e->lex, e->type, e->scope[0], e->scope[1], e->key, e->bind, e->line );
+    fprintf( (FILE*) out, "%10s  %3d  %3d  %3d  %3d  %15s  %15s  %4d  ||",
+        e->lex, e->type, e->rtype, e->scope[0], e->scope[1], e->key, e->bind, e->line );
+    if(e->typeCon!=NULL) {
+        int ii, ll = e->typeCon->len;
+        for (ii=0; ii<ll; ++ii)
+            fprintf( (FILE*) out, "  %3d", g_array_index(e->typeCon, ScopeId, ii) );
+    }
+    fprintf( (FILE*) out, "\n" );
 }
 
 // show entire ST
 void s_table_show (SymbolTable* table, FILE* out) {
-    fprintf(out, "%10s  %3s  %3s  %3s  %15s  %15s  %4s\n",
-        "Lexeme", "T", "L", "Sp", "Key", "Binding", "Line");
-    g_hash_table_foreach(table, &s_entry_show, (gpointer) out);
+    fprintf(out, "%10s  %3s  %3s  %3s  %3s  %15s  %15s  %4s  || %15s\n",
+        "Lexeme", "T", "RT", "L", "Sp", "Key", "Binding", "Line", "Func Parameters");
+    g_hash_table_foreach(table, &s_show_entry, (gpointer) out);
 }
 
+// convert type MACRO to char *
 char* s_table_type_name (int type) {
     switch (type) {
-        case VOID_T:    return "void";
-        case BOOL_T:    return "bool";
-        case INT_T:     return "int";
-        case FLOAT_T:   return "float";
-        case STRING_T:  return "str";
-        case LIST_T:    return "list";
-        case VERTEX_T:  return "vertex";
-        case EDGE_T:    return "edge";
-        case GRAPH_T:   return "graph";
-        default:        return NULL;
+        case VOID_T:            return "void";
+        case BOOL_T:            return "bool";
+        case INT_T:             return "int";
+        case FLOAT_T:           return "float";
+        case STRING_T:          return "str";
+        case LIST_T:            return "list";
+        case VERTEX_T:          return "vertex";
+        case EDGE_T:            return "edge";
+        case GRAPH_T:           return "graph";
+        case DYNAMIC_T:         return "dyn";
+        case FUNC_T:            return "func";
+        case FUNC_LITERAL_T:    return "fl";
+        default:                return NULL;
     }
 }
 
+// get new binder Id
 int s_table_new_bindid () {
     static int tid = 0;
     return tid++;
 }
 
+// get new scope Id
 ScopeId s_table_new_scopeid () {
     static ScopeId sid = 0;
     return sid++;
 }
 
+// init Scope Stack 
 int s_stack_init (SymbolTableStack** stack) {
     SymbolTableStack* tstack = (SymbolTableStack*) malloc ( sizeof(SymbolTableStack) );
     tstack->stack = g_array_new (1,1,sizeof(ScopeId));
@@ -95,18 +116,21 @@ int s_stack_init (SymbolTableStack** stack) {
     return 0;
 }
 
+// destroy Scope Stack
 int s_stack_destroy (SymbolTableStack* stack) {
     g_array_free ( stack->stack, 1 );
     free(stack);
     return 0;
 }
 
+// push in one Scope Id
 int s_stack_push (SymbolTableStack* stack, ScopeId sid) {
     stack->stack = g_array_append_vals ( stack->stack, (gconstpointer) (&sid), 1 );
     stack->top ++;
     return 0;
 }
 
+// pop out
 ScopeId s_stack_pop (SymbolTableStack* stack) {
     ScopeId val = g_array_index ( stack->stack, ScopeId, stack->top );
     stack->stack = g_array_remove_index ( stack->stack, stack->top );
@@ -114,25 +138,36 @@ ScopeId s_stack_pop (SymbolTableStack* stack) {
     return val;
 }
 
+// get the Scope Id on the top of stack
 ScopeId s_stack_top_id (SymbolTableStack* stack) {
     return g_array_index ( stack->stack, ScopeId, stack->top );
 }
 
+
+// return scope id pointed by `present' and `present' move downward 
 ScopeId s_stack_down (SymbolTableStack* stack) {
     if(stack->present == -1) return -1; //stack bottom
     return g_array_index ( stack->stack, ScopeId, (stack->present)-- );
 }
 
+// reset ptr `present' to the top
 int s_stack_reset (SymbolTableStack* stack) {
     stack->present = stack->top;
     return 0;
 }
 
-SymbolTableEntry* s_entry_new (Lexeme lex, int type, long long line) {
+// create variable Symbol Table entry
+SymbolTableEntry* s_new_var_entry (Lexeme lex, int type, long long line) {
+    if( type==FUNC_T || type==FUNC_LITERAL_T ) {
+        fprintf(stderr, "Hey wrong call to s_new_var_entry!\n");
+        return NULL;
+    }
     SymbolTableEntry* entry = (SymbolTableEntry*) malloc ( sizeof (SymbolTableEntry) );
     strcpy ((char *) entry->lex, lex);
     entry->line = line;
     entry->type = type;
+    entry->rtype = NOT_AVAIL;
+    entry->typeCon = NULL;
     entry->scope[0] = sStackLevel;
     entry->scope[1] = sStackTopId;
     s_new_key ( entry->lex, entry->scope[1], entry->key );
@@ -140,11 +175,49 @@ SymbolTableEntry* s_entry_new (Lexeme lex, int type, long long line) {
     return entry;
 }
 
+// create function Symbol Table entry
+SymbolTableEntry* s_new_fun_entry (Lexeme lex, int type, int rtype, GArray* typeCon, ScopeId sLevel, ScopeId sId, long long line  ) {
+    if( type!=FUNC_T && type!=FUNC_LITERAL_T ) {
+        fprintf(stderr, "Hey wrong call to s_new_fun_entry!\n");
+        return NULL;
+    }
+    SymbolTableEntry* entry = (SymbolTableEntry*) malloc ( sizeof (SymbolTableEntry) );
+    strcpy ((char *) entry->lex, lex);
+    entry->line = line;
+    entry->type = type;
+    entry->rtype = rtype;
+    entry->typeCon = typeCon;
+    entry->scope[0] = sLevel;
+    entry->scope[1] = sId;
+    s_new_key ( entry->lex, entry->scope[1], entry->key );
+    s_new_bind ( entry, entry->bind );
+    return entry;
+}
+
+// destroy Symbol Table entry
+void s_destroy_entry ( gpointer dummy1, gpointer entry, gpointer dummy2 ) {
+#ifdef _DEBUG
+    debugInfo("Destroy Entry: ");
+    s_show_entry(NULL, entry, DEBUGIO);
+#endif
+    SymbolTableEntry* e = ( SymbolTableEntry* ) entry ; 
+    if (e->typeCon != NULL) {
+        g_array_free( e->typeCon, 1 );
+#ifdef _DEBUG
+        debugInfoExt(" >> destroy typeCon... \n");
+#endif
+    }
+
+    free( e );
+}
+
+// create new key 
 int s_new_key ( Lexeme lex, ScopeId scope, SymbolTableKey key) {
     sprintf( key, "%s%d\0", lex, scope );
     return 0;
 }
 
+// create new binder
 int s_new_bind ( SymbolTableEntry* entry, Binding bind) {
     char * typename = s_table_type_name( entry->type );
     int tmpid = s_table_new_bindid();

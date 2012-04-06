@@ -1,4 +1,3 @@
-03/15/2012
 /********************
  * How to compile?  *
  ********************/
@@ -16,7 +15,8 @@ YACC : version 2.4.1 work (1.9 buggy!!!)
 ADD symbol table : SymbolTable.c SymbolTable.h testST.c
 ADD abstract syntax tree : ASTree.c ASTree.h
 
-STATUS: AST is working, EXCEPT for function, function literal, statements
+STATUS: 
+>>AST is working, EXCEPT for function, function literal, statements
 
 04/04/2012
 util.c :                wrapper for log Output
@@ -28,14 +28,26 @@ SymbolTable.h :         call wapper
 LexAly.l :              add line number
 
 STATUS:
-AST should work;
-declaration check partially work;
-Type check needed;
-assign #line to Leaf: ok
-assign #line in Node: NOT done
+>>AST should work;
+>>declaration check partially work;
+>>Type check needed;
+>>assign #line to Leaf: ok
+>>assign #line in Node: NOT done
 
+04/05/2012
+STATUS:
+>>AST completely works now
+>>variable declaration DONE
+>>function declaration DONE 
+>>#line completely works
+>>scope completely works
+>>Symbol Table works for variable, function, BUT func_literal
+>>Type check: partial 
 
+>>testST.c  broken as Interface changed!!!
 
+DESIGN:
+>>function should pass by reference
 
 
 

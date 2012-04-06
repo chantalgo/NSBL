@@ -1,11 +1,25 @@
 #ifndef ERROR_H___NSBL_
 #define ERROR_H___NSBL_
 
+/*******************
+ * Internal Errors *
+ *******************/
+#define ErrorSymbolTableKeyAlreadyExsit                 -301
 
-#define ErrorSymbolTableKeyAlreadyExsit             -30001
+/******************
+ * Compiler Error *
+ ******************/
+#define ErrorIdentifierAlreadyDeclared                  +901
+#define ErrorIdentifierUsedBeforeDeclaration            +902
+#define ErrorFunctionCalledBeforeDeclaration            +903
+#define ErrorFunctionCallNOTEqualNumberOfParameters     +904
+#define ErrorFunctionCallIncompatibleParameterType      +905
 
-
-
-#define ErrorIdentifierAlreadyDeclared              +90001
-#define ErrorIdentifierUsedBeforeDeclaration        +90002
+/**********
+ * output *
+ **********/
+// ATTENTION: always set ERRNO before calling errorInfo
+void errorInfo(char* fmt, ...);
+void errorInfoExt(char* fmt, ...);
+void errorInfoNote(char* fmt, ...);
 #endif
