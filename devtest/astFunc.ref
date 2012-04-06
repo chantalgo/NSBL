@@ -190,8 +190,93 @@ Tree<0>::26::Node<FUNC_CALL>  :
         ff    2   -2    0    0              ff0            _int2     1  ||
          y    3   -2    1    1               y1          _float7     7  ||
          i    2   -2    0    0               i0            _int0     1  ||
+=======AST::Function Definition=======
+Tree<0>::29::Node<FUNCTION>
+  Tree<1>::29::Node<TYPE>   : lexval = int
+  Tree<1>::29::Node<FUNC_DECLARATOR>
+    Tree<2>::29::Node<ID>     : lexval = recur  type = -1  
+    Tree<2>::29::Node<PARA_DECLARATION>
+      Tree<3>::29::Node<TYPE>   : lexval = int
+      Tree<3>::29::Node<ID>     : lexval = i  type = 2  bind = _int11
+  Tree<1>::29::Node<COMP_STAT>
+    Tree<2>::30::Node<STAT_LIST>
+      Tree<3>::30::Node<IF_STAT>
+        Tree<4>::30::Node<GT>
+          Tree<5>::30::Node<ID>     : lexval = i  type = 2  bind = _int11
+          Tree<5>::30::Node<INT>    : lexval = 0
+        Tree<4>::30::Node<COMP_STAT>
+          Tree<5>::31::Node<STAT_LIST>
+            Tree<6>::31::Node<SUB_ASSIGN>
+              Tree<7>::31::Node<ID>     : lexval = i  type = 2  bind = _int11
+              Tree<7>::31::Node<INT>    : lexval = 1
+            Tree<6>::32::Node<RETRUN>
+              Tree<7>::32::Node<FUNC_CALL>  :bind = _func12
+                Tree<8>::32::Node<ID>     : lexval = recur  type = -1  
+                Tree<8>::32::Node<ARGUMENT_EXP>
+                  Tree<9>::32::Node<ID>     : lexval = i  type = 2  bind = _int11
+      Tree<3>::34::Node<RETRUN>
+        Tree<4>::34::Node<INT>    : lexval = 0
+=======Symbol Table======
+    Lexeme    T   RT    L   Sp              Key          Binding  Line  || Func Parameters
+         x    1   -2    0    0               x0          _bool10    19  ||
+     recur   10    2    0    0           recur0          _func12    29  ||    2
+         j    2   -2    0    0               j0            _int1     1  ||
+         i    2   -2    1    1               i1            _int3     4  ||
+         x    3   -2    1    1               x1          _float6     7  ||
+      text   10    2    0    0            text0           _func5     3  ||    2    1
+         a    1   -2    1    1               a1           _bool4     5  ||
+         j    2   -2    1    2               j2            _int8    14  ||
+        ff    2   -2    0    0              ff0            _int2     1  ||
+         y    3   -2    1    1               y1          _float7     7  ||
+         i    2   -2    1    3               i3           _int11    29  ||
+         i    2   -2    0    0               i0            _int0     1  ||
+=======AST::Function Definition=======
+Tree<0>::37::Node<FUNCTION>
+  Tree<1>::37::Node<TYPE>   : lexval = int
+  Tree<1>::37::Node<FUNC_DECLARATOR>
+    Tree<2>::37::Node<ID>     : lexval = noArg  type = -1  
+  Tree<1>::37::Node<COMP_STAT>
+    Tree<2>::38::Node<RETRUN>
+      Tree<3>::38::Node<INT>    : lexval = 0
+=======Symbol Table======
+    Lexeme    T   RT    L   Sp              Key          Binding  Line  || Func Parameters
+         x    1   -2    0    0               x0          _bool10    19  ||
+     recur   10    2    0    0           recur0          _func12    29  ||    2
+     noArg   10    2    0    0           noArg0          _func13    37  ||
+         j    2   -2    0    0               j0            _int1     1  ||
+         i    2   -2    1    1               i1            _int3     4  ||
+         x    3   -2    1    1               x1          _float6     7  ||
+      text   10    2    0    0            text0           _func5     3  ||    2    1
+         a    1   -2    1    1               a1           _bool4     5  ||
+         j    2   -2    1    2               j2            _int8    14  ||
+        ff    2   -2    0    0              ff0            _int2     1  ||
+         y    3   -2    1    1               y1          _float7     7  ||
+         i    2   -2    1    3               i3           _int11    29  ||
+         i    2   -2    0    0               i0            _int0     1  ||
+=======AST::External Statment=======
+Tree<0>::41::Node<FUNC_CALL>  :bind = _func13
+  Tree<1>::41::Node<ID>     : lexval = noArg  type = -1  
+=======Symbol Table======
+    Lexeme    T   RT    L   Sp              Key          Binding  Line  || Func Parameters
+         x    1   -2    0    0               x0          _bool10    19  ||
+     recur   10    2    0    0           recur0          _func12    29  ||    2
+     noArg   10    2    0    0           noArg0          _func13    37  ||
+         j    2   -2    0    0               j0            _int1     1  ||
+         i    2   -2    1    1               i1            _int3     4  ||
+         x    3   -2    1    1               x1          _float6     7  ||
+      text   10    2    0    0            text0           _func5     3  ||    2    1
+         a    1   -2    1    1               a1           _bool4     5  ||
+         j    2   -2    1    2               j2            _int8    14  ||
+        ff    2   -2    0    0              ff0            _int2     1  ||
+         y    3   -2    1    1               y1          _float7     7  ||
+         i    2   -2    1    3               i3           _int11    29  ||
+         i    2   -2    0    0               i0            _int0     1  ||
 DEBUG: Try to destroy Symbol Table
 DEBUG: Destroy Entry:          x    1   -2    0    0               x0          _bool10    19  ||
+DEBUG: Destroy Entry:      recur   10    2    0    0           recur0          _func12    29  ||    2
+ >> destroy typeCon... 
+DEBUG: Destroy Entry:      noArg   10    2    0    0           noArg0          _func13    37  ||
+ >> destroy typeCon... 
 DEBUG: Destroy Entry:          j    2   -2    0    0               j0            _int1     1  ||
 DEBUG: Destroy Entry:          i    2   -2    1    1               i1            _int3     4  ||
 DEBUG: Destroy Entry:          x    3   -2    1    1               x1          _float6     7  ||
@@ -201,4 +286,5 @@ DEBUG: Destroy Entry:          a    1   -2    1    1               a1           
 DEBUG: Destroy Entry:          j    2   -2    1    2               j2            _int8    14  ||
 DEBUG: Destroy Entry:         ff    2   -2    0    0              ff0            _int2     1  ||
 DEBUG: Destroy Entry:          y    3   -2    1    1               y1          _float7     7  ||
+DEBUG: Destroy Entry:          i    2   -2    1    3               i3           _int11    29  ||
 DEBUG: Destroy Entry:          i    2   -2    0    0               i0            _int0     1  ||
