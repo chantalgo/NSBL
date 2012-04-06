@@ -355,6 +355,10 @@ postfix_expression
     | IDENTIFIER '(' ')' {
         struct Node* tn = astNewLeaf(IDENTIFIER, $1.s, $1.l);
         $$ = astNewNode(AST_FUNC_CALL, 1, astAllChildren(1, tn), tn->line);
+        $$->typeCon = astTypeConArgList(NULL, NULL);    // empty
+        sTableLookupFunc($$);
+        astFreeTypeCon($$->typeCon);
+        $$->typeCon = NULL;
     }
     | postfix_expression PIPE pipe_property {
         $$ = astNewNode ( PIPE, 2, astAllChildren(2, $1, $3), $2.l );
