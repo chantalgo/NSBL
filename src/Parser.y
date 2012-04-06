@@ -74,7 +74,7 @@ extern int yyparse(void); /* Parser function. */
  *      TOKEN LIST        *
  **************************/
 /* TYPE RELATED */
-%token VOID BOOLEAN INTEGER FLOAT STRING LIST VERTEX EDGE GRAPH
+%token VOID BOOLEAN INTEGER FLOAT STRING LIST VERTEX EDGE GRAPH DYN_ATTRIBUTE
 %token IDENTIFIER INTEGER_CONSTANT FLOAT_CONSTANT STRING_LITERAL
 %token BOOL_TRUE BOOL_FALSE
 /* FUNCTIONS RELATED */
@@ -363,8 +363,8 @@ postfix_expression
     | postfix_expression PIPE pipe_property {
         $$ = astNewNode ( PIPE, 2, astAllChildren(2, $1, $3), $2.l );
     }
-    | postfix_expression '[' logical_OR_expression ']' {
-        $$ = astNewNode ( AST_MATCH, 2, astAllChildren(2, $1, $3), $2.l );
+    | postfix_expression '[' no_type_check_on_dynamic_left dynamic_scope_left scope_in logical_OR_expression scope_out dynamic_scope_right no_type_check_on_dynamic_right ']' {
+        $$ = astNewNode ( AST_MATCH, 2, astAllChildren(2, $1, $6), $2.l );
     }
     | postfix_expression '.' IDENTIFIER {
         $$ = astNewNode ( AST_ATTIBUTE, 2, astAllChildren(2, $1, astNewLeaf(IDENTIFIER, $3.s, $3.l)), $2.l );
@@ -375,7 +375,21 @@ postfix_expression
     ;
 
 primary_expression
-    : attribute             { $$ = $1; }
+    : attribute             { 
+        $$ = $1; 
+        if(isNoTypeCheck==0){   // Func_Literal
+            sTableLookupId($$);                 // Lookup ATTRIBUTE
+        }
+        else {  // Match operator
+            // As here we may use `attribute' directly without declaration,
+            // so it must be inserted into symbol table when first meets an `attribute'
+            $$->type = DYNAMIC_T;                       // 1. set type 
+            $$->symbol = sTableTryLookupId($$);         // 2. try look up myself in symtable
+            if ( $$->symbol==NULL ) {                   // if not exsit, insert it
+                sTableInsertId($$, DYNAMIC_T);
+            }
+        }
+    }
     | IDENTIFIER            { 
         $$ = astNewLeaf(IDENTIFIER, $1.s, $1.l); 
         sTableLookupId($$);                 // Lookup IDENTIFIER in Symbol Table 
@@ -418,7 +432,11 @@ argument_expression
 
 attribute
     : AT IDENTIFIER{ 
-        $$ = astNewNode ( AT, 1, astAllChildren(1, astNewLeaf(IDENTIFIER, $2.s, $2.l)),$1.l  );
+        if (isDynamicScope==0) {
+            ERRNO = ErrorDynamicAttributeUsedInNonDynamicScope;
+            errorInfo("dynamic attribute `%s' is used in non-dynamic scope\n", $2.s);
+        }
+        $$ = astNewLeaf ( DYN_ATTRIBUTE, $2.s, $2.l );
     }
     ;
 
@@ -434,11 +452,15 @@ constant
  **************************/
 
 function_literal_declaration
-    : function_literal_type_specifier func_declarator '=' compound_statement_no_scope ';' scope_out {
-        $$ = astNewNode($1.i, 2, astAllChildren(2, $2, $4), $1.l);
+    : function_literal_type_specifier dynamic_scope_left func_declarator '=' compound_statement_no_scope ';' scope_out dynamic_scope_right {
+        // not used anymore
     }
-    | function_literal_type_specifier func_declarator ':' declaration_specifiers '=' compound_statement_no_scope scope_out ';' {
-        $$ = astNewNode($1.i, 3, astAllChildren(3, $2, $4, $6), $1.l);
+    | function_literal_type_specifier dynamic_scope_left func_declarator ':' declaration_specifiers '=' compound_statement_no_scope scope_out dynamic_scope_right ';' {
+        $$ = astNewNode($1.i, 3, astAllChildren(3, $3, $5, $7), $1.l);
+        $$->typeCon = $3->typeCon;
+        $$->tmp[0] = $3->tmp[0];
+        $$->tmp[1] = $3->tmp[1];
+        sTableDeclare($$);
     }
     ;
 
@@ -459,7 +481,6 @@ function_head
         // tmp no longer needed after here
     }
     ;
-
 
 function_literal_type_specifier
     : FUNC_LITERAL        { $$.i = FUNC_LITERAL; $$.l = $1.l; }
@@ -556,6 +577,11 @@ parameter_declaration
         sTableDeclare($$);
         $$->type = tn->type;
     }
+    | declaration_specifiers attribute {
+        $$ = astNewNode( AST_PARA_DECLARATION, 2, astAllChildren(2, $1, $2), $1->line);
+        sTableDeclare($$);
+        $$->type = $2->type;
+    }
     | function_literal_type_specifier IDENTIFIER {
         $$ = astNewNode( FUNC_LITERAL, 1, astAllChildren(1, astNewLeaf(IDENTIFIER, $2.s, $2.l)), $1.l);
         $$->type = FUNC_LITERAL_T;
@@ -593,6 +619,21 @@ scope_out
     :       { sStackPop(); }
     ;
 
+dynamic_scope_left
+    :       { isDynamicScope = 1; }
+    ;
+
+dynamic_scope_right
+    :       { isDynamicScope = 0; }
+    ;
+
+no_type_check_on_dynamic_left
+    :       { isNoTypeCheck = 1; }
+    ;
+
+no_type_check_on_dynamic_right
+    :       { isNoTypeCheck = 0; }
+    ;
 %%
 
 void yyerror(char *s) {
@@ -603,6 +644,8 @@ void main_init() {
     init_util();
     sTableInit();
     sStackInit();
+    isDynamicScope = 0;
+    isNoTypeCheck = 0;
 }
 
 void main_clean() {

@@ -52,6 +52,11 @@ struct Node* ast_new_leaf(int token, void * ptr, long long line) {
             node->type = UNKNOWN_T;
             node->lexval.sval = (char *) ptr;
             break;
+        case DYN_ATTRIBUTE :
+            node->token = DYN_ATTRIBUTE;
+            node->type = UNKNOWN_T;
+            node->lexval.sval = (char *) ptr;
+            break;
         case AST_TYPE_SPECIFIER :
             node->token = AST_TYPE_SPECIFIER;
             node->type = UNKNOWN_T;
@@ -161,6 +166,10 @@ void ast_output_node(struct Node* node, FILE* out, const char * sep) {
             fprintf(out, "Node<ID>     : lexval = %s  type = %d  ", node->lexval.sval, node->type);
             if(node->symbol!=NULL) fprintf(out, "bind = %s", node->symbol->bind);
             break;
+        case DYN_ATTRIBUTE:
+            fprintf(out, "node<DYN_ATTR>: lexval = %s  type = %d ", node->lexval.sval, node->type);
+            if(node->symbol!=NULL) fprintf(out, "bind = %s", node->symbol->bind);
+            break; 
         case AST_TYPE_SPECIFIER :
             fprintf(out, "Node<TYPE>   : lexval = %s", s_table_type_name(node->lexval.ival));break;
         case AST_DECLARATION :

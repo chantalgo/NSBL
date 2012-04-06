@@ -5,6 +5,7 @@
 #include "SymbolTableUtil.h"
 #include "Error.h"
 
+/** declare the variables or parameters */
 int sTableDeclare(struct Node* node) {
     if(node->token == AST_DECLARATION ||
             node->token == AST_PARA_DECLARATION) {    // var declaration
@@ -16,30 +17,38 @@ int sTableDeclare(struct Node* node) {
     if(node->token == AST_FUNC ) { // func declaration
         sTableInsertFunc(node);
     }
+    if(node->token == FUNC_LITERAL ) { // func_literal
+        sTableInsertFuncLiteral(node);
+    }
     return 0;
 }
 
+/** insert all IDENTIFIER or DYN_ATTRIBUTE in the subtree */
 int sTableInsertTree(struct Node* node, int ttype) {
     if(node == NULL) return;
-    if(node->token != IDENTIFIER) {
+    if(node->token == IDENTIFIER){
+        sTableInsertId(node, ttype);
+    }
+    else if(node->token == DYN_ATTRIBUTE){
+        sTableInsertId(node, -ttype);
+    }
+    else {
         int i; for(i=0; i<node->nch; ++i) {
             sTableInsertTree( node->child[i], ttype );
         }
     }
-    else {
-        sTableInsertId(node, ttype);
-    }
     return 0;
 }
 
+/** insert one IDENTIFIER or DYN_ATTRIBUTE */
 int sTableInsertId(struct Node* node, int ttype) {
     SymbolTableEntry* entry = sNewVarEty ( node->lexval.sval, ttype, node->line );
     if ( sTableInsert( entry ) == ErrorSymbolTableKeyAlreadyExsit ) {
         SymbolTableEntry * te = sTableLookup(entry->key);
         ERRNO = ErrorIdentifierAlreadyDeclared;
-        errorInfo("`%s' is already declared.\n", node->lexval.sval);
+        errorInfo("`%s%s' is already declared.\n",(ttype<0)?"@":"", node->lexval.sval);
         errorInfoNote("`%s' is first declared at line %d\n", 
-           node->lexval.sval, te->line);
+           (ttype<0)?"@":"",node->lexval.sval, te->line);
         return ERRNO;
         // should tell where first declared
     }
@@ -48,6 +57,7 @@ int sTableInsertId(struct Node* node, int ttype) {
     return 0;
 }
 
+/** insert a function */
 int sTableInsertFunc(struct Node* node) {
     // declaration_specifiers   : node->child[0]
     // func_declarator          : node->child[1]
@@ -68,9 +78,42 @@ int sTableInsertFunc(struct Node* node) {
     return 0;
 }
 
+/** insert a func_literal */
+int sTableInsertFuncLiteral(struct Node* node) {
+    struct Node* declSpec = node->child[1];
+    struct Node* funcId   = node->child[0]->child[0];
+    SymbolTableEntry* entry = sNewFunEty ( funcId->lexval.sval, FUNC_LITERAL_T, declSpec->lexval.ival, node->typeCon, node->tmp[0], node->tmp[1], node->line );
+    if ( sTableInsert( entry ) == ErrorSymbolTableKeyAlreadyExsit ) {
+        SymbolTableEntry * te = sTableLookup(entry->key);
+        ERRNO = ErrorIdentifierAlreadyDeclared;
+        errorInfo("`%s' is already declared.\n", funcId->lexval.sval);
+        errorInfoNote("`%s' is first declared at line %d\n",
+           funcId->lexval.sval, te->line);
+        return ERRNO;
+    }
+    node->symbol = entry;
+    node->type = FUNC_T;
+    return 0;
+}
+
+/** lookup an Id from symtable, if not found report compiling error */
 int sTableLookupId(struct Node* node) {
-    if(node->token != IDENTIFIER) {
-        fprintf(stderr,"error: sTableLookupId: argument must be IDENTIFIER\n");
+    SymbolTableEntry* entry = sTableTryLookupId(node);
+    if(entry == NULL) {
+        ERRNO = ErrorIdentifierUsedBeforeDeclaration;
+        errorInfo("`%s' is not declared before.\n", node->lexval.sval);
+        return ERRNO;
+    }
+    node->symbol = entry;
+    node->type = entry->type;
+    return 0;
+}
+
+/** lookup an Id from symtable, return the entry */
+SymbolTableEntry* sTableTryLookupId(struct Node* node) {
+    if( node->token != IDENTIFIER &&
+            node->token != DYN_ATTRIBUTE ) {
+        fprintf(stderr,"error: sTableLookupId: argument must be IDENTIFIER or DYN_ATTRIBUTE\n");
         exit(EXIT_FAILURE);
     }
     SymbolTableKey key;
@@ -82,16 +125,10 @@ int sTableLookupId(struct Node* node) {
         if ( (entry = sTableLookup(key)) != NULL ) break;
         id = sStackDown();
     }
-    if(entry == NULL) {
-        ERRNO = ErrorIdentifierUsedBeforeDeclaration;
-        errorInfo("`%s' is not declared before.\n", node->lexval.sval);
-        return ERRNO;
-    }
-    node->symbol = entry;
-    node->type = entry->type;
-    return 0;
+    return entry;
 }
 
+/** lookup a func or func_literal, if not found report compiling error */
 int sTableLookupFunc(struct Node* node) {
     if(node->token != AST_FUNC_CALL) {
         fprintf(stderr,"error: sTableLookupFunc: argument must be AST_FUNC_CALL\n");
@@ -111,31 +148,42 @@ int sTableLookupFunc(struct Node* node) {
         errorInfoExt("' is not declared before.\n");
         return ERRNO;
     }
-    if (entry->type != FUNC_T) {
-        ERRNO = ErrorFunctionCalledBeforeDeclaration;
-        errorInfo("`%s' is not declared as a function\n",funcId->lexval.sval );
-        errorInfoNote("`%s' is first declared at line %d\n",funcId->lexval.sval,entry->line);
-        return ERRNO;
-    }
     // if found, check parameter types
     GArray* caller = node->typeCon;
     GArray* ref    = entry->typeCon;
-    if(caller->len != ref->len) {
-        ERRNO = ErrorFunctionCallNOTEqualNumberOfParameters;
-        errorInfo("function Call `");
-        FuncHead(funcId->lexval.sval, caller, ERRORIO);
-        errorInfoExt("' has inconsistent number of arguments to its declaration.\n");
-    }
-    else {
-        if ( checkTwoTypeCons(caller, ref) == 0 ) { // not equal
-            ERRNO = ErrorFunctionCallIncompatibleParameterType;
+    if(entry->type == FUNC_T) {   // if function
+        if(caller->len != ref->len) {
+            ERRNO = ErrorFunctionCallNOTEqualNumberOfParameters;
             errorInfo("function Call `");
+            FuncHead(funcId->lexval.sval, caller, ERRORIO);
+            errorInfoExt("' has inconsistent number of arguments to its declaration.\n");
+        }
+        else {
+            if ( checkTwoTypeCons(caller, ref) == 0 ) { // not equal
+                ERRNO = ErrorFunctionCallIncompatibleParameterType;
+                errorInfo("function Call `");
+                FuncHead(funcId->lexval.sval, caller, ERRORIO);
+                errorInfoExt("' has incompatible arguments to its declaration.\n");
+            }
+        }
+    }
+    else if(entry->type == FUNC_LITERAL_T) { // func_literal
+        if ( checkTwoTypeConsExceptDyn(caller, ref) == 0 ) { // not equal
+            ERRNO = ErrorFuncLiteralCallIncompatibleParameterType;
+            errorInfo("function literal Call `");
             FuncHead(funcId->lexval.sval, caller, ERRORIO);
             errorInfoExt("' has incompatible arguments to its declaration.\n");
         }
     }
+    else {
+        ERRNO = ErrorFunctionCalledBeforeDeclaration;
+        errorInfo("`%s' is not declared as a function or function literal\n",funcId->lexval.sval );
+        errorInfoNote("`%s' is first declared at line %d\n",funcId->lexval.sval,entry->line);
+        return ERRNO;
+    }
     if (ERRNO == ErrorFunctionCallNOTEqualNumberOfParameters ||
-            ERRNO == ErrorFunctionCallIncompatibleParameterType ) {
+            ERRNO == ErrorFunctionCallIncompatibleParameterType ||
+                ERRNO == ErrorFuncLiteralCallIncompatibleParameterType ) {
         errorInfoNote("function `");
         FuncHead(funcId->lexval.sval, ref, ERRORIO);
         errorInfoExt("' first declared at line %d\n",entry->line);    
@@ -146,6 +194,7 @@ int sTableLookupFunc(struct Node* node) {
     node->type = entry->rtype;
 }
 
+/** output function heading */
 void FuncHead(char* funcId, GArray* typeCon, FILE* out) {
     fprintf(out, "%s(", funcId);
     int i, ll=typeCon->len;
@@ -154,6 +203,7 @@ void FuncHead(char* funcId, GArray* typeCon, FILE* out) {
     fprintf(out,"%s)", sTypeName( g_array_index(typeCon, int, ll-1) ) );
 }
 
+/** check equivalence of two type constructors */
 int checkTwoTypeCons(GArray* t1, GArray* t2) {
     if (t1->len!=t2->len) return 0;
     int i;
@@ -162,4 +212,26 @@ int checkTwoTypeCons(GArray* t1, GArray* t2) {
             return 0;
     }
     return 1;
+}
+
+/** remove dynamic type from type constructors */
+GArray* rmDynFromTypeCon(GArray* t) {
+    int i;
+    GArray* tga = g_array_new ( 1, 1, sizeof(int) );
+    for (i=0; i<t->len; ++i) {
+        int type = g_array_index(t, int, i);
+        if (type>=0) g_array_append_vals ( tga, (gconstpointer) & type, 1);
+    }
+    return tga;
+}
+
+/** check equivalence of two type constructors, ignore dynamic types */
+int checkTwoTypeConsExceptDyn(GArray* t1, GArray* t2) {
+    GArray *ft1,*ft2;
+    ft1 = rmDynFromTypeCon(t1); 
+    ft2 = rmDynFromTypeCon(t2);
+    int rlt = checkTwoTypeCons(ft1,ft2);
+    g_array_free(ft1,1);
+    g_array_free(ft2,1);
+    return rlt;
 }

@@ -14,6 +14,10 @@
 #define ErrorFunctionCalledBeforeDeclaration            +903
 #define ErrorFunctionCallNOTEqualNumberOfParameters     +904
 #define ErrorFunctionCallIncompatibleParameterType      +905
+#define ErrorFuncLiteralCallIncompatibleParameterType   +906
+
+#define ErrorDynamicAttributeUsedInNonDynamicScope      +920
+
 
 /**********
  * output *

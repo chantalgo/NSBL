@@ -14,6 +14,8 @@ extern FILE* DEBUGIO;
 /** Global Variables */
 SymbolTable*            s_table;
 SymbolTableStack*       s_stack;
+int                     isDynamicScope;
+int                     isNoTypeCheck;
 
 // init Symbol Table
 void s_table_init (SymbolTable** table) {
@@ -81,7 +83,7 @@ char* s_table_type_name (int type) {
         case BOOL_T:            return "bool";
         case INT_T:             return "int";
         case FLOAT_T:           return "float";
-        case STRING_T:          return "str";
+        case STRING_T:          return "string";
         case LIST_T:            return "list";
         case VERTEX_T:          return "vertex";
         case EDGE_T:            return "edge";
@@ -89,6 +91,14 @@ char* s_table_type_name (int type) {
         case DYNAMIC_T:         return "dyn";
         case FUNC_T:            return "func";
         case FUNC_LITERAL_T:    return "fl";
+        case DYN_BOOL_T:        return "D_bool";
+        case DYN_INT_T:         return "D_int";
+        case DYN_FLOAT_T:       return "D_float";
+        case DYN_STRING_T:      return "D_string";
+        case DYN_LIST_T:        return "D_list";
+        case DYN_VERTEX_T:      return "D_vertex";
+        case DYN_EDGE_T:        return "D_edge";
+        case DYN_GRAPH_T:       return "D_graph";
         default:                return NULL;
     }
 }
@@ -219,9 +229,14 @@ int s_new_key ( Lexeme lex, ScopeId scope, SymbolTableKey key) {
 
 // create new binder
 int s_new_bind ( SymbolTableEntry* entry, Binding bind) {
-    char * typename = s_table_type_name( entry->type );
-    int tmpid = s_table_new_bindid();
-    sprintf( bind, "_%s%d\0", typename, tmpid );
+    if(entry->type >= 0) {
+        char * typename = s_table_type_name( entry->type );
+        int tmpid = s_table_new_bindid();
+        sprintf( bind, "_%s%d\0", typename, tmpid );
+    }
+    else {
+        sprintf( bind, "_D_%s\0", entry->lex);
+    }
     return 0;
 }
 

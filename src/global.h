@@ -16,6 +16,8 @@ extern long long LEXLINECOUNTER;
 /** SymbolTable */
 extern SymbolTable*            s_table;
 extern SymbolTableStack*       s_stack;
+extern int                     isDynamicScope;
+extern int                     isNoTypeCheck;
 
 /** Error */
 extern int ERRNO;
