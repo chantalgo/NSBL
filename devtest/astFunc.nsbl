@@ -1,0 +1,26 @@
+int i,j,ff;                                                        // scope 0
+
+int text(                                       
+    int i,                                                      // scope 1
+        boolean a)
+                    {
+    float x=1, y=2;
+    return i+a+x+y;
+}
+
+x+=1;                           // ERROR
+
+int ff(                         // ERROR
+    int j)  {
+
+    return j;
+}
+
+boolean x=true;
+text(i,x);
+
+text(i);
+
+text(i,j);
+
+ff(i);

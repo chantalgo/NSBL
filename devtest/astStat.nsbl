@@ -1,0 +1,32 @@
+int i=0;                                                        // scope 0
+if 
+    (i!=0) {                                                    // scope 1 
+    list l = [];
+    graph g;
+    float x=0.1;
+}
+else {                                                          // scope 2
+    x+=1;                   // ERROR :: not declared
+    g.allV;                 // ERROR :: not declared
+    i+=1;                   // OK
+}
+
+float s=0.1;
+for (i=0; i<10; i+=1) s+=1.0;    // OK
+
+for (i=0; i<10; i+=1) {          // OK
+    int j;
+    j+=1;
+    s=i*j;
+}
+
+while (i!=0) {                  // OK
+    float d=0;
+    d+=i;
+    i-=1;
+
+    if (d>100) break;           // OK
+}
+
+
+

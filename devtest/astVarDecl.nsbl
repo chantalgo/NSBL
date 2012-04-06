@@ -1,0 +1,33 @@
+int i,                                                  // scope 0
+        j,
+
+k=2;                    // OK
+
+float   i=1.2;          // ERROR :: redeclaration
+float   j=0.9;          // ERROR :: redeclaration
+
+string 
+s = "abcd";             // OK
+
+{                                                       // scope 1
+    float a=10, b=30,   // OK
+            i;          // shadow i in scope 0
+    s = "";             // OK
+    x                   // not declared
+       + i;
+    {                                                   // scope 2
+        j               // j in scope 0
+          + i;          // i in scope 1
+        l;              // ERROR :: not declared
+        int p;          // OK
+    }
+    p=1;                // ERROR :: not declared
+    a+=1;               // OK
+}
+
+k+=2;                   // k in scope 0
+
+{
+    j*=2;               // j in scope 0
+}
+

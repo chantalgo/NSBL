@@ -1,0 +1,135 @@
+==EXTERNAL STATEMENT==
+Tree<0>::1::Node<DECLAR>
+  Tree<1>::1::Node<TYPE>   : lexval = int
+  Tree<1>::2::Node<COMMA>
+    Tree<2>::1::Node<COMMA>
+      Tree<3>::1::Node<ID>     : lexval = i  type = 2  bind = _int0
+      Tree<3>::2::Node<ID>     : lexval = j  type = 2  bind = _int1
+    Tree<2>::4::Node<ASSIGN>
+      Tree<3>::4::Node<ID>     : lexval = k  type = 2  bind = _int2
+      Tree<3>::4::Node<INT>    : lexval = 2
+======================
+    Lexeme    T   RT    L   Sp              Key          Binding  Line  || Func Parameters
+         j    2   -2    0    0               j0            _int1     2  ||
+         k    2   -2    0    0               k0            _int2     4  ||
+         i    2   -2    0    0               i0            _int0     1  ||
+error: `i' is already declared.
+ note: `i' is first declared at line 1
+==EXTERNAL STATEMENT==
+Tree<0>::6::Node<DECLAR>
+  Tree<1>::6::Node<TYPE>   : lexval = float
+  Tree<1>::6::Node<ASSIGN>
+    Tree<2>::6::Node<ID>     : lexval = i  type = -1  
+    Tree<2>::6::Node<FLOAT>  : lexval = 1.200000
+======================
+    Lexeme    T   RT    L   Sp              Key          Binding  Line  || Func Parameters
+         j    2   -2    0    0               j0            _int1     2  ||
+         k    2   -2    0    0               k0            _int2     4  ||
+         i    2   -2    0    0               i0            _int0     1  ||
+error: `j' is already declared.
+ note: `j' is first declared at line 2
+==EXTERNAL STATEMENT==
+Tree<0>::7::Node<DECLAR>
+  Tree<1>::7::Node<TYPE>   : lexval = float
+  Tree<1>::7::Node<ASSIGN>
+    Tree<2>::7::Node<ID>     : lexval = j  type = -1  
+    Tree<2>::7::Node<FLOAT>  : lexval = 0.900000
+======================
+    Lexeme    T   RT    L   Sp              Key          Binding  Line  || Func Parameters
+         j    2   -2    0    0               j0            _int1     2  ||
+         k    2   -2    0    0               k0            _int2     4  ||
+         i    2   -2    0    0               i0            _int0     1  ||
+==EXTERNAL STATEMENT==
+Tree<0>::9::Node<DECLAR>
+  Tree<1>::9::Node<TYPE>   : lexval = str
+  Tree<1>::10::Node<ASSIGN>
+    Tree<2>::10::Node<ID>     : lexval = s  type = 4  bind = _str5
+    Tree<2>::10::Node<STRING> : lexval = abcd
+======================
+    Lexeme    T   RT    L   Sp              Key          Binding  Line  || Func Parameters
+         s    4   -2    0    0               s0            _str5    10  ||
+         j    2   -2    0    0               j0            _int1     2  ||
+         k    2   -2    0    0               k0            _int2     4  ||
+         i    2   -2    0    0               i0            _int0     1  ||
+error: `x' is not declared before.
+error: `l' is not declared before.
+error: `p' is not declared before.
+==EXTERNAL STATEMENT==
+Tree<0>::12::Node<COMP_STAT>
+  Tree<1>::13::Node<STAT_LIST>
+    Tree<2>::13::Node<STAT_LIST>
+      Tree<3>::13::Node<STAT_LIST>
+        Tree<4>::13::Node<STAT_LIST>
+          Tree<5>::13::Node<STAT_LIST>
+            Tree<6>::13::Node<DECLAR>
+              Tree<7>::13::Node<TYPE>   : lexval = float
+              Tree<7>::13::Node<COMMA>
+                Tree<8>::13::Node<COMMA>
+                  Tree<9>::13::Node<ASSIGN>
+                    Tree<10>::13::Node<ID>     : lexval = a  type = 3  bind = _float6
+                    Tree<10>::13::Node<INT>    : lexval = 10
+                  Tree<9>::13::Node<ASSIGN>
+                    Tree<10>::13::Node<ID>     : lexval = b  type = 3  bind = _float7
+                    Tree<10>::13::Node<INT>    : lexval = 30
+                Tree<8>::14::Node<ID>     : lexval = i  type = 3  bind = _float8
+            Tree<6>::15::Node<ASSIGN>
+              Tree<7>::15::Node<ID>     : lexval = s  type = 4  bind = _str5
+              Tree<7>::15::Node<STRING> : lexval = 
+          Tree<5>::17::Node<ADD>
+            Tree<6>::16::Node<ID>     : lexval = x  type = -1  
+            Tree<6>::17::Node<ID>     : lexval = i  type = 3  bind = _float8
+        Tree<4>::18::Node<COMP_STAT>
+          Tree<5>::19::Node<STAT_LIST>
+            Tree<6>::19::Node<STAT_LIST>
+              Tree<7>::20::Node<ADD>
+                Tree<8>::19::Node<ID>     : lexval = j  type = 2  bind = _int1
+                Tree<8>::20::Node<ID>     : lexval = i  type = 3  bind = _float8
+              Tree<7>::21::Node<ID>     : lexval = l  type = -1  
+            Tree<6>::22::Node<DECLAR>
+              Tree<7>::22::Node<TYPE>   : lexval = int
+              Tree<7>::22::Node<ID>     : lexval = p  type = 2  bind = _int9
+      Tree<3>::24::Node<ASSIGN>
+        Tree<4>::24::Node<ID>     : lexval = p  type = -1  
+        Tree<4>::24::Node<INT>    : lexval = 1
+    Tree<2>::25::Node<ADD_ASSIGN>
+      Tree<3>::25::Node<ID>     : lexval = a  type = 3  bind = _float6
+      Tree<3>::25::Node<INT>    : lexval = 1
+======================
+    Lexeme    T   RT    L   Sp              Key          Binding  Line  || Func Parameters
+         s    4   -2    0    0               s0            _str5    10  ||
+         b    3   -2    1    1               b1          _float7    13  ||
+         i    3   -2    1    1               i1          _float8    14  ||
+         j    2   -2    0    0               j0            _int1     2  ||
+         a    3   -2    1    1               a1          _float6    13  ||
+         p    2   -2    2    2               p2            _int9    22  ||
+         k    2   -2    0    0               k0            _int2     4  ||
+         i    2   -2    0    0               i0            _int0     1  ||
+==EXTERNAL STATEMENT==
+Tree<0>::28::Node<ADD_ASSIGN>
+  Tree<1>::28::Node<ID>     : lexval = k  type = 2  bind = _int2
+  Tree<1>::28::Node<INT>    : lexval = 2
+======================
+    Lexeme    T   RT    L   Sp              Key          Binding  Line  || Func Parameters
+         s    4   -2    0    0               s0            _str5    10  ||
+         b    3   -2    1    1               b1          _float7    13  ||
+         i    3   -2    1    1               i1          _float8    14  ||
+         j    2   -2    0    0               j0            _int1     2  ||
+         a    3   -2    1    1               a1          _float6    13  ||
+         p    2   -2    2    2               p2            _int9    22  ||
+         k    2   -2    0    0               k0            _int2     4  ||
+         i    2   -2    0    0               i0            _int0     1  ||
+==EXTERNAL STATEMENT==
+Tree<0>::30::Node<COMP_STAT>
+  Tree<1>::31::Node<MUL_ASSIGN>
+    Tree<2>::31::Node<ID>     : lexval = j  type = 2  bind = _int1
+    Tree<2>::31::Node<INT>    : lexval = 2
+======================
+    Lexeme    T   RT    L   Sp              Key          Binding  Line  || Func Parameters
+         s    4   -2    0    0               s0            _str5    10  ||
+         b    3   -2    1    1               b1          _float7    13  ||
+         i    3   -2    1    1               i1          _float8    14  ||
+         j    2   -2    0    0               j0            _int1     2  ||
+         a    3   -2    1    1               a1          _float6    13  ||
+         p    2   -2    2    2               p2            _int9    22  ||
+         k    2   -2    0    0               k0            _int2     4  ||
+         i    2   -2    0    0               i0            _int0     1  ||
