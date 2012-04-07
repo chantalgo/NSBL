@@ -1,0 +1,13 @@
+func tt(int i, float x):boolean = { return i==x; };
+
+func dd(int @age, string @name):boolean = { return @age > 23;};
+
+graph g;
+g.allV[@age>23];
+
+int i,j;
+float x, z;
+tt(j,z);
+
+dd();
+dd(i);
