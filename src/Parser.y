@@ -107,7 +107,7 @@ extern int yyparse(void); /* Parser function. */
 %token AST_IF_STAT AST_IFELSE_STAT
 %token AST_WHILE AST_FOR_XXX AST_FOR_XXO AST_FOR_XOX AST_FOR_XOO AST_FOR_OXX AST_FOR_OXO AST_FOR_OOX AST_FOR_OOO AST_FOREACH
 %token AST_JUMP_CONTINUE AST_JUMP_BREAK AST_JUMP_RETURN
-%token AST_FUNC_CALL AST_ARG_EXPS
+%token AST_FUNC_CALL AST_ARG_EXPS AST_EXP_STAT
 /**************************
  *  PRECEDENCE & ASSOC    *
  **************************/
@@ -151,7 +151,9 @@ external_statement
     }
     | statement{ 
         $$ = $1; 
+        codeGen($$);
         showASTandST($$,"External Statment");
+        if($$->code != NULL) exportCode($$->code);
     }
     ;
 
@@ -165,8 +167,10 @@ statement
     ;
 
 expression_statement
-    : expression ';'                { $$ = $1; }
-    | ';'                           { $$ = NULL; }
+    : expression ';'{ 
+        $$ = astNewNode( AST_EXP_STAT, 1, astAllChildren(1, $1), $1->line);
+    }
+    | ';' { $$ = astNewNode( AST_EXP_STAT, 0, NULL, $1.l); }
     ;
 
 statement_list
@@ -198,9 +202,9 @@ compound_statement_no_scope
     ;
 
 selection_statement
-    : IF '(' expression ')' statement {
+    : IF '(' expression ')' statement  {
         $$ = astNewNode(AST_IF_STAT, 2, astAllChildren(2, $3, $5), $1.l );
-    } %prec LOWER_THAN_ELSE ;    
+    } %prec LOWER_THAN_ELSE ;
     | IF '(' expression ')' statement ELSE statement {
         $$ = astNewNode(AST_IFELSE_STAT, 3, astAllChildren(3,$3, $5, $7), $1.l);
     }
@@ -347,18 +351,16 @@ postfix_expression
     | IDENTIFIER '(' argument_expression_list ')' {
         struct Node* tn = astNewLeaf(IDENTIFIER, $1.s, $1.l);
         $$ = astNewNode(AST_FUNC_CALL, 2, astAllChildren(2, tn, $3), tn->line);
-        $$->typeCon = astTypeConArgList($3,NULL);   // type construct for arguments
-        sTableLookupFunc($$);                       // Lookup this func
-        astFreeTypeCon($$->typeCon);
-        $$->typeCon = NULL;
+        //$$->typeCon = astTypeConArgList($3,NULL);   // type construct for arguments
+        //sTableLookupFunc($$);                       // Lookup this func
+        //astFreeTypeCon($$->typeCon);
     }
     | IDENTIFIER '(' ')' {
         struct Node* tn = astNewLeaf(IDENTIFIER, $1.s, $1.l);
         $$ = astNewNode(AST_FUNC_CALL, 1, astAllChildren(1, tn), tn->line);
-        $$->typeCon = astTypeConArgList(NULL, NULL);    // empty
-        sTableLookupFunc($$);
-        astFreeTypeCon($$->typeCon);
-        $$->typeCon = NULL;
+        //$$->typeCon = astTypeConArgList(NULL, NULL);    // empty
+        //sTableLookupFunc($$);
+        //astFreeTypeCon($$->typeCon);
     }
     | postfix_expression PIPE pipe_property {
         $$ = astNewNode ( PIPE, 2, astAllChildren(2, $1, $3), $2.l );
@@ -426,7 +428,7 @@ argument_expression_list
 argument_expression
     : assignment_expression {
         $$ = astNewNode ( AST_ARG_EXPS, 1, astAllChildren(1, $1), $1->line );
-        $$->type = $1->type;
+        //$$->type = $1->type;
     }
     ;
 
@@ -434,7 +436,7 @@ attribute
     : AT IDENTIFIER{ 
         if (isDynamicScope==0) {
             ERRNO = ErrorDynamicAttributeUsedInNonDynamicScope;
-            errorInfo("dynamic attribute `%s' is used in non-dynamic scope\n", $2.s);
+            errorInfo(ERRNO, $2.l, "dynamic attribute `%s' is used in non-dynamic scope\n", $2.s);
         }
         $$ = astNewLeaf ( DYN_ATTRIBUTE, $2.s, $2.l );
     }
@@ -640,17 +642,21 @@ void yyerror(char *s) {
     printf("%s\n", s);
 }
 
-void main_init() {
+void main_init(char * fileName) {
     init_util();
     sTableInit();
     sStackInit();
     isDynamicScope = 0;
     isNoTypeCheck = 0;
+    char * outfile = strCatAlloc("",2,fileName,".c");
+    OUTFILESTREAM = fopen(outfile,"w");
+    free(outfile);
 }
 
 void main_clean() {
     sTableDestroy();
     sStackDestroy();
+    fclose(OUTFILESTREAM);
 }
 
 int main(int argc, char * const * argv) {
@@ -658,8 +664,9 @@ int main(int argc, char * const * argv) {
         fprintf(stdout, "missing input file\n");
         exit(1);
     }
-    main_init();
+    main_init(argv[1]);
     yyin = fopen(argv[1], "r");
+    
     yyparse();
     fclose(yyin);
     main_clean();

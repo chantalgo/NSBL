@@ -22,7 +22,7 @@ CC = gcc $(CFLAGS) $(GLIBINCLUDE)
 LEX = flex
 YACC = yacc
 
-OBJ = Parser.tab.o LexAly.yy.o ASTree.o SymbolTable.o SymbolTableUtil.o util.o Error.o
+OBJ = Parser.tab.o LexAly.yy.o ASTree.o SymbolTable.o SymbolTableUtil.o util.o Error.o CodeGen.o
 
 toy.exe : $(OBJ)
 	$(CC) -o toy.exe $(OBJ) -lfl -ly $(GLIBLINK)
@@ -52,6 +52,8 @@ util.o:	util.h util.c
 	$(CC) -c util.c
 Error.o: Error.c
 	$(CC) -c Error.c
+CodeGen.o:	CodeGen.h CodeGen.c
+	$(CC) -c CodeGen.c
 
 test : toy.exe
 	$(BINDIR)/toy.exe $(TESTDIR)/syntax-test.nsbl 

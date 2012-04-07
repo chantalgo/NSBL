@@ -80,6 +80,7 @@ int                     s_table_check_key_exsit (SymbolTable* table, SymbolTable
 void                    s_table_show        (SymbolTable* table, FILE* out);
 
 char*                   s_table_type_name   (int type);
+char*                   s_table_short_type_name   (int type);
 ScopeId                 s_table_new_scopeid ();
 
 int                     s_stack_init        (SymbolTableStack** s_stack);
@@ -94,6 +95,7 @@ SymbolTableEntry*       s_new_var_entry     (Lexeme lex, int type, long long lin
 SymbolTableEntry*       s_new_fun_entry     (Lexeme lex, int type, int rtype, GArray* typeCon, ScopeId sLevel, ScopeId sId, long long line);
 void                    s_destroy_entry     (gpointer dummy1, gpointer entry, gpointer dummy2);
 void                    s_show_entry        (gpointer key, gpointer entry, gpointer out);
+void                    s_show_typeCon      (GArray* tc, FILE* out);
 int                     s_new_key           (Lexeme lex, ScopeId scope2, SymbolTableKey key);
 int                     s_new_bind          (SymbolTableEntry* entry, Binding bind);
 
@@ -110,6 +112,7 @@ int                     s_new_bind          (SymbolTableEntry* entry, Binding bi
 #define sTableShow(o)       s_table_show( s_table, o )
 
 #define sTypeName(t)        s_table_type_name(t)
+#define sShortTypeName(t)   s_table_short_type_name(t)
 #define sNewScopeId()       s_table_new_scopeid()
 
 #define sStackInit()        s_stack_init( &s_stack )

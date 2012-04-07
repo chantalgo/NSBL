@@ -1,4 +1,5 @@
 int i=0;                                                        // scope 0
+
 if 
     (i!=0) {                                                    // scope 1 
     list l = [];
@@ -6,8 +7,8 @@ if
     float x=0.1;
 }
 else {                                                          // scope 2
-    x+=1;                   // ERROR :: not declared
-    g.allV;                 // ERROR :: not declared
+    //x+=1;                   // ERROR :: not declared
+    //g.allV;                 // ERROR :: not declared
     i+=1;                   // OK
 }
 

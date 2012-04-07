@@ -110,14 +110,15 @@ comment         (\/\*([^\*]|(\*+([^\*\/])))*\*+\/)|(\/\/.*)
 {strliteral}    { MYECHO; 
                   yylval.LString.s = (char *) malloc ( strlen(yytext) ); 
                   yylval.LString.l = LEXLINECOUNTER;
-                  strncpy( yylval.LString.s, yytext+1, strlen(yytext)-2  ); 
+                  strncpy( yylval.LString.s, yytext, strlen(yytext)  ); 
+                  yylval.LString.s[strlen(yytext)]='\0';
                   return STRING_LITERAL; 
                 }
 {comment}       { MYECHO; countLine(yytext); }
 
 [ \t]           { }
 [\n]            { LEXLINECOUNTER++; }
-.               { errorInfo("error :%d: unrecognized lexeme `%s'\n", LEXLINECOUNTER, yytext);
+.               { errorInfo(ErrorUnrecognizedLexeme, LEXLINECOUNTER, "error :%d: unrecognized lexeme `%s'\n", LEXLINECOUNTER, yytext);
                 }
 
 %%

@@ -1,12 +1,12 @@
 #include <stdio.h>
 #include <stdarg.h>
-int ERRNO;
 FILE* ERRORIO;
+int ERRNO;
 
-void errorInfo(char* fmt, ...){
+void errorInfo(int eno, long long line, char* fmt, ...){
     va_list args;
     va_start(args, fmt);
-    fprintf(ERRORIO,"ERROR::%d: ",ERRNO);
+    fprintf(ERRORIO,"ERROR:%d:%d: ",line, eno);
     vfprintf(ERRORIO, fmt, args);
     va_end(args);
     return;

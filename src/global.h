@@ -22,4 +22,7 @@ extern int                     isNoTypeCheck;
 /** Error */
 extern int ERRNO;
 extern FILE* ERRORIO;
+
+/** code */
+extern FILE * OUTFILESTREAM;
 #endif

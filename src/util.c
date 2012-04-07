@@ -60,13 +60,6 @@ void logInfo(char* fmt, ...){
     return;
 }
 
-char* strCatAlloc(const char* s1, const char* s2) {
-    size_t ll = strlen(s1)+strlen(s2)+1;
-    char* ss = (char *) malloc (ll);
-    sprintf(ss, "%s%s\0", s1, s2);
-    return ss;
-}
-
 void showASTandST(struct Node* node, const char * head) {
 #ifndef _NO_LOG
     logInfo("=======AST::%s=======\n", head);

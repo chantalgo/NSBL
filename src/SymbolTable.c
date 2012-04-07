@@ -61,14 +61,16 @@ void s_show_entry  (gpointer key, gpointer entry, gpointer out) {
     SymbolTableEntry * e = (SymbolTableEntry*) entry;
     fprintf( (FILE*) out, "%10s  %3d  %3d  %3d  %3d  %15s  %15s  %4d  ||",
         e->lex, e->type, e->rtype, e->scope[0], e->scope[1], e->key, e->bind, e->line );
-    if(e->typeCon!=NULL) {
-        int ii, ll = e->typeCon->len;
-        for (ii=0; ii<ll; ++ii)
-            fprintf( (FILE*) out, "  %3d", g_array_index(e->typeCon, ScopeId, ii) );
-    }
+    s_show_typeCon(e->typeCon, out);
     fprintf( (FILE*) out, "\n" );
 }
 
+void s_show_typeCon (GArray* tc, FILE* out){
+    if (tc==NULL) return;
+    int ii, ll = tc->len;
+    for (ii=0; ii<ll; ++ii)
+        fprintf( (FILE*) out, "  %3d", g_array_index(tc, ScopeId, ii) );
+}
 // show entire ST
 void s_table_show (SymbolTable* table, FILE* out) {
     fprintf(out, "%10s  %3s  %3s  %3s  %3s  %15s  %15s  %4s  || %15s\n",
@@ -102,6 +104,33 @@ char* s_table_type_name (int type) {
         default:                return NULL;
     }
 }
+
+char* s_table_short_type_name (int type) {
+    switch (type) {
+        case VOID_T:            return "v";
+        case BOOL_T:            return "b";
+        case INT_T:             return "i";
+        case FLOAT_T:           return "f";
+        case STRING_T:          return "s";
+        case LIST_T:            return "l";
+        case VERTEX_T:          return "v";
+        case EDGE_T:            return "e";
+        case GRAPH_T:           return "g";
+        case DYNAMIC_T:         return "DD";
+        case FUNC_T:            return "fc";
+        case FUNC_LITERAL_T:    return "fl";
+        case DYN_BOOL_T:        return "Db";
+        case DYN_INT_T:         return "Di";
+        case DYN_FLOAT_T:       return "Df";
+        case DYN_STRING_T:      return "Ds";
+        case DYN_LIST_T:        return "Dl";
+        case DYN_VERTEX_T:      return "Dv";
+        case DYN_EDGE_T:        return "De";
+        case DYN_GRAPH_T:       return "Dg";
+        default:                return NULL;
+    }
+}
+
 
 // get new binder Id
 int s_table_new_bindid () {
@@ -230,12 +259,12 @@ int s_new_key ( Lexeme lex, ScopeId scope, SymbolTableKey key) {
 // create new binder
 int s_new_bind ( SymbolTableEntry* entry, Binding bind) {
     if(entry->type >= 0) {
-        char * typename = s_table_type_name( entry->type );
+        char * typename = s_table_short_type_name( entry->type );
         int tmpid = s_table_new_bindid();
-        sprintf( bind, "_%s%d\0", typename, tmpid );
+        sprintf( bind, "%s_%s%d\0", entry->lex,typename, tmpid );
     }
     else {
-        sprintf( bind, "_D_%s\0", entry->lex);
+        sprintf( bind, "D_%s\0", entry->lex);
     }
     return 0;
 }

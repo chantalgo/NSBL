@@ -8,7 +8,7 @@ int text(
     return i+a+x+y;
 }
 
-x+=1;                           // ERROR
+//x+=1;                           // ERROR
 
 int ff(                         // ERROR
     int j)  {
@@ -19,11 +19,11 @@ int ff(                         // ERROR
 boolean x=true;
 text(i,x);                      // OK
 
-text(i);                        // ERROR
+//text(i);                        // ERROR
 
-text(i,j);                      // ERROR
+//text(i,j);                      // ERROR
 
-ff(i);                          // ERROR
+//ff(i);                          // ERROR
 
 
 int recur(int i) {              // OK

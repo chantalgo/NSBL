@@ -24,6 +24,7 @@ int sTableDeclare(struct Node* node) {
 }
 
 /** insert all IDENTIFIER or DYN_ATTRIBUTE in the subtree */
+/*
 int sTableInsertTree(struct Node* node, int ttype) {
     if(node == NULL) return;
     if(node->token == IDENTIFIER){
@@ -38,6 +39,24 @@ int sTableInsertTree(struct Node* node, int ttype) {
         }
     }
     return 0;
+}*/ // buggy
+
+int sTableInsertTree(struct Node* node, int ttype) {
+    if(node == NULL) return;
+    switch (node->token) {
+        case IDENTIFIER :
+            sTableInsertId(node, ttype);break;
+        case DYN_ATTRIBUTE :
+            sTableInsertId(node, -ttype);break;
+        case AST_COMMA :
+            sTableInsertTree(node->child[0], ttype);
+            sTableInsertTree(node->child[1], ttype);break;
+        case AST_ASSIGN :
+            sTableInsertTree(node->child[0], ttype);break;
+        default :
+            fprintf(stderr, "sTableInsertTree : unknown token %d\n",node->token);
+    }
+    return 0;
 }
 
 /** insert one IDENTIFIER or DYN_ATTRIBUTE */
@@ -46,8 +65,8 @@ int sTableInsertId(struct Node* node, int ttype) {
     if ( sTableInsert( entry ) == ErrorSymbolTableKeyAlreadyExsit ) {
         SymbolTableEntry * te = sTableLookup(entry->key);
         ERRNO = ErrorIdentifierAlreadyDeclared;
-        errorInfo("`%s%s' is already declared.\n",(ttype<0)?"@":"", node->lexval.sval);
-        errorInfoNote("`%s' is first declared at line %d\n", 
+        errorInfo(ERRNO, node->line,"`%s%s' is already declared.\n",(ttype<0)?"@":"", node->lexval.sval);
+        errorInfoNote("`%s%s' is first declared at line %d\n", 
            (ttype<0)?"@":"",node->lexval.sval, te->line);
         return ERRNO;
         // should tell where first declared
@@ -68,7 +87,7 @@ int sTableInsertFunc(struct Node* node) {
     if ( sTableInsert( entry ) == ErrorSymbolTableKeyAlreadyExsit ) {
         SymbolTableEntry * te = sTableLookup(entry->key);
         ERRNO = ErrorIdentifierAlreadyDeclared;
-        errorInfo("`%s' is already declared.\n", funcId->lexval.sval);
+        errorInfo(ERRNO, node->line,"`%s' is already declared.\n", funcId->lexval.sval);
         errorInfoNote("`%s' is first declared at line %d\n",
            funcId->lexval.sval, te->line);
         return ERRNO;
@@ -86,7 +105,7 @@ int sTableInsertFuncLiteral(struct Node* node) {
     if ( sTableInsert( entry ) == ErrorSymbolTableKeyAlreadyExsit ) {
         SymbolTableEntry * te = sTableLookup(entry->key);
         ERRNO = ErrorIdentifierAlreadyDeclared;
-        errorInfo("`%s' is already declared.\n", funcId->lexval.sval);
+        errorInfo(ERRNO, node->line,"`%s' is already declared.\n", funcId->lexval.sval);
         errorInfoNote("`%s' is first declared at line %d\n",
            funcId->lexval.sval, te->line);
         return ERRNO;
@@ -101,7 +120,7 @@ int sTableLookupId(struct Node* node) {
     SymbolTableEntry* entry = sTableTryLookupId(node);
     if(entry == NULL) {
         ERRNO = ErrorIdentifierUsedBeforeDeclaration;
-        errorInfo("`%s' is not declared before.\n", node->lexval.sval);
+        errorInfo(ERRNO, node->line,"`%s' is not declared before.\n", node->lexval.sval);
         return ERRNO;
     }
     node->symbol = entry;
@@ -143,7 +162,7 @@ int sTableLookupFunc(struct Node* node) {
     entry = sTableLookup(key);
     if(entry == NULL) {
         ERRNO = ErrorFunctionCalledBeforeDeclaration;
-        errorInfo("`");
+        errorInfo(ERRNO, node->line, "`");
         FuncHead(funcId->lexval.sval, node->typeCon, ERRORIO);
         errorInfoExt("' is not declared before.\n");
         return ERRNO;
@@ -154,14 +173,14 @@ int sTableLookupFunc(struct Node* node) {
     if(entry->type == FUNC_T) {   // if function
         if(caller->len != ref->len) {
             ERRNO = ErrorFunctionCallNOTEqualNumberOfParameters;
-            errorInfo("function Call `");
+            errorInfo(ERRNO, node->line, "function Call `");
             FuncHead(funcId->lexval.sval, caller, ERRORIO);
             errorInfoExt("' has inconsistent number of arguments to its declaration.\n");
         }
         else {
             if ( checkTwoTypeCons(caller, ref) == 0 ) { // not equal
                 ERRNO = ErrorFunctionCallIncompatibleParameterType;
-                errorInfo("function Call `");
+                errorInfo(ERRNO, node->line, "function Call `");
                 FuncHead(funcId->lexval.sval, caller, ERRORIO);
                 errorInfoExt("' has incompatible arguments to its declaration.\n");
             }
@@ -170,14 +189,14 @@ int sTableLookupFunc(struct Node* node) {
     else if(entry->type == FUNC_LITERAL_T) { // func_literal
         if ( checkTwoTypeConsExceptDyn(caller, ref) == 0 ) { // not equal
             ERRNO = ErrorFuncLiteralCallIncompatibleParameterType;
-            errorInfo("function literal Call `");
+            errorInfo(ERRNO, node->line, "function literal Call `");
             FuncHead(funcId->lexval.sval, caller, ERRORIO);
             errorInfoExt("' has incompatible arguments to its declaration.\n");
         }
     }
     else {
         ERRNO = ErrorFunctionCalledBeforeDeclaration;
-        errorInfo("`%s' is not declared as a function or function literal\n",funcId->lexval.sval );
+        errorInfo(ERRNO, node->line,"`%s' is not declared as a function or function literal\n",funcId->lexval.sval );
         errorInfoNote("`%s' is first declared at line %d\n",funcId->lexval.sval,entry->line);
         return ERRNO;
     }
@@ -192,6 +211,7 @@ int sTableLookupFunc(struct Node* node) {
     // found correct one
     node->symbol = entry;
     node->type = entry->rtype;
+    return 0;
 }
 
 /** output function heading */

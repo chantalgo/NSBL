@@ -5,6 +5,7 @@
 #include <stdarg.h>
 #include "ASTree.h"
 #include "util.h"
+#include "CodeGen.h"
 
 extern long long LEXLINECOUNTER;
 
@@ -26,26 +27,31 @@ struct Node* ast_new_leaf(int token, void * ptr, long long line) {
             node->token = INTEGER_CONSTANT;
             node->type  = INT_T;
             node->lexval.ival = atoi( (const char *) ptr );
+            node->code = strCatAlloc("", 1, (const char *)ptr);
             break;
         case FLOAT_CONSTANT :
             node->token = FLOAT_CONSTANT;
             node->type = FLOAT_T;
             node->lexval.fval = atof( (const char *) ptr );
+            node->code = strCatAlloc("", 1, (const char *)ptr);
             break;
         case BOOL_TRUE :
             node->token = BOOL_TRUE;
             node->type = BOOL_T;
             node->lexval.bval = true;
+            node->code = strCatAlloc("", 1, "true");
             break;
         case BOOL_FALSE :
             node->token = BOOL_FALSE;
             node->type = BOOL_T;
             node->lexval.bval = false;
+            node->code = strCatAlloc("", 1, "false");
             break;
         case STRING_LITERAL :
             node->token = STRING_LITERAL;
             node->type = STRING_T;
             node->lexval.sval = (char *) ptr;
+            node->code = strCatAlloc("", 1, (const char *)ptr);
             break;
         case IDENTIFIER :
             node->token = IDENTIFIER;
@@ -125,6 +131,13 @@ void ast_free_tree(struct Node* node) {
         debugInfo("FREE sval: %s\n",node->lexval.sval); 
 #endif
         free(node->lexval.sval);        // malloc by LexAly.l
+    }
+    /* free code */
+    if ( node->code != NULL ) {
+#ifdef _AST_DEBUG_MEMORY
+        debugInfo("FREE code: %s\n", node->code);
+#endif
+        free(node->code);
     }
     /* if child exsits, free child first */
     if ( node->nch > 0 && node->child != NULL ) {
@@ -298,9 +311,12 @@ void ast_output_node(struct Node* node, FILE* out, const char * sep) {
 			fprintf(out, "Node<AT_ATTRIBUTE>");break;
         case AST_ARG_EXPS :
             fprintf(out, "Node<ARGUMENT_EXP>");break;
+        case AST_EXP_STAT :
+            fprintf(out, "Node<EXP_STAT>");break;
         default :
             fprintf(out, "Node<UNKNOWN> !!!!!!!!!!!!!!!!");
     }
+    if(node->code != NULL) fprintf(out," code =`%s`", node->code);
     fprintf(out, "%s", sep);
     return;
 }
@@ -363,5 +379,8 @@ GArray* ast_type_construct_argument_expression_list(struct Node* node, GArray* g
 }
 
 void ast_free_type_construct(GArray* ga) {
-    if(ga!=NULL) g_array_free(ga, 1);
+    if(ga!=NULL) { 
+        g_array_free(ga, 1);
+        ga = NULL;
+    }
 }
