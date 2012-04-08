@@ -16,6 +16,7 @@ SymbolTable*            s_table;
 SymbolTableStack*       s_stack;
 int                     isDynamicScope;
 int                     isNoTypeCheck;
+int                     maxLevel;
 
 // init Symbol Table
 void s_table_init (SymbolTable** table) {
@@ -76,6 +77,15 @@ void s_table_show (SymbolTable* table, FILE* out) {
     fprintf(out, "%10s  %3s  %3s  %3s  %3s  %15s  %15s  %4s  || %15s\n",
         "Lexeme", "T", "RT", "L", "Sp", "Key", "Binding", "Line", "Func Parameters");
     g_hash_table_foreach(table, &s_show_entry, (gpointer) out);
+}
+
+void s_entry_compare_levle  (gpointer key, gpointer entry, gpointer mlevel){
+    SymbolTableEntry* e = (SymbolTableEntry*) entry;
+    if ( e->scope[0] > *(int *) mlevel ) *(int *) mlevel = e->scope[0];
+}
+
+void s_table_max_level (SymbolTable* table, int* mlevel) {
+    g_hash_table_foreach(table, &s_entry_compare_levle, (gpointer) mlevel);
 }
 
 // convert type MACRO to char *
@@ -261,7 +271,7 @@ int s_new_bind ( SymbolTableEntry* entry, Binding bind) {
     if(entry->type >= 0) {
         char * typename = s_table_short_type_name( entry->type );
         int tmpid = s_table_new_bindid();
-        sprintf( bind, "%s_%s%d\0", entry->lex,typename, tmpid );
+        sprintf( bind, "%s_%s%d_s%d\0", entry->lex,typename, tmpid, entry->scope[1] );
     }
     else {
         sprintf( bind, "D_%s\0", entry->lex);

@@ -83,7 +83,7 @@ int sTableInsertFunc(struct Node* node) {
     // func_id                  : node->child[1]->child[0]
     struct Node* declSpec = node->child[0];
     struct Node* funcId   = node->child[1]->child[0];
-    SymbolTableEntry* entry = sNewFunEty ( funcId->lexval.sval, FUNC_T, declSpec->lexval.ival, node->typeCon, node->tmp[0], node->tmp[1], node->line );
+    SymbolTableEntry* entry = sNewFunEty ( funcId->lexval.sval, FUNC_T, declSpec->lexval.ival, node->typeCon, node->scope[0], node->scope[1], node->line );
     if ( sTableInsert( entry ) == ErrorSymbolTableKeyAlreadyExsit ) {
         SymbolTableEntry * te = sTableLookup(entry->key);
         ERRNO = ErrorIdentifierAlreadyDeclared;
@@ -101,7 +101,7 @@ int sTableInsertFunc(struct Node* node) {
 int sTableInsertFuncLiteral(struct Node* node) {
     struct Node* declSpec = node->child[1];
     struct Node* funcId   = node->child[0]->child[0];
-    SymbolTableEntry* entry = sNewFunEty ( funcId->lexval.sval, FUNC_LITERAL_T, declSpec->lexval.ival, node->typeCon, node->tmp[0], node->tmp[1], node->line );
+    SymbolTableEntry* entry = sNewFunEty ( funcId->lexval.sval, FUNC_LITERAL_T, declSpec->lexval.ival, node->typeCon, node->scope[0], node->scope[1], node->line );
     if ( sTableInsert( entry ) == ErrorSymbolTableKeyAlreadyExsit ) {
         SymbolTableEntry * te = sTableLookup(entry->key);
         ERRNO = ErrorIdentifierAlreadyDeclared;
@@ -170,16 +170,17 @@ int sTableLookupFunc(struct Node* node) {
     // if found, check parameter types
     GArray* caller = node->typeCon;
     GArray* ref    = entry->typeCon;
+    int flag = 0;
     if(entry->type == FUNC_T) {   // if function
         if(caller->len != ref->len) {
-            ERRNO = ErrorFunctionCallNOTEqualNumberOfParameters;
+            flag = (ERRNO = ErrorFunctionCallNOTEqualNumberOfParameters); 
             errorInfo(ERRNO, node->line, "function Call `");
             FuncHead(funcId->lexval.sval, caller, ERRORIO);
             errorInfoExt("' has inconsistent number of arguments to its declaration.\n");
         }
         else {
             if ( checkTwoTypeCons(caller, ref) == 0 ) { // not equal
-                ERRNO = ErrorFunctionCallIncompatibleParameterType;
+                flag = (ERRNO = ErrorFunctionCallIncompatibleParameterType);
                 errorInfo(ERRNO, node->line, "function Call `");
                 FuncHead(funcId->lexval.sval, caller, ERRORIO);
                 errorInfoExt("' has incompatible arguments to its declaration.\n");
@@ -188,21 +189,21 @@ int sTableLookupFunc(struct Node* node) {
     }
     else if(entry->type == FUNC_LITERAL_T) { // func_literal
         if ( checkTwoTypeConsExceptDyn(caller, ref) == 0 ) { // not equal
-            ERRNO = ErrorFuncLiteralCallIncompatibleParameterType;
+            flag = (ERRNO = ErrorFuncLiteralCallIncompatibleParameterType);
             errorInfo(ERRNO, node->line, "function literal Call `");
             FuncHead(funcId->lexval.sval, caller, ERRORIO);
             errorInfoExt("' has incompatible arguments to its declaration.\n");
         }
     }
     else {
-        ERRNO = ErrorFunctionCalledBeforeDeclaration;
+        flag = (ERRNO = ErrorFunctionCalledBeforeDeclaration);
         errorInfo(ERRNO, node->line,"`%s' is not declared as a function or function literal\n",funcId->lexval.sval );
         errorInfoNote("`%s' is first declared at line %d\n",funcId->lexval.sval,entry->line);
         return ERRNO;
     }
-    if (ERRNO == ErrorFunctionCallNOTEqualNumberOfParameters ||
-            ERRNO == ErrorFunctionCallIncompatibleParameterType ||
-                ERRNO == ErrorFuncLiteralCallIncompatibleParameterType ) {
+    if (flag == ErrorFunctionCallNOTEqualNumberOfParameters ||
+            flag == ErrorFunctionCallIncompatibleParameterType ||
+                flag == ErrorFuncLiteralCallIncompatibleParameterType ) {
         errorInfoNote("function `");
         FuncHead(funcId->lexval.sval, ref, ERRORIO);
         errorInfoExt("' first declared at line %d\n",entry->line);    

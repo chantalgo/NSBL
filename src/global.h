@@ -18,6 +18,7 @@ extern SymbolTable*            s_table;
 extern SymbolTableStack*       s_stack;
 extern int                     isDynamicScope;
 extern int                     isNoTypeCheck;
+extern int                     maxLevel;
 
 /** Error */
 extern int ERRNO;
@@ -25,4 +26,6 @@ extern FILE* ERRORIO;
 
 /** code */
 extern FILE * OUTFILESTREAM;
+char ** INDENT;
+int  inLoop, inFunc;
 #endif

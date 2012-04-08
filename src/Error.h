@@ -5,6 +5,8 @@
  * Internal Errors *
  *******************/
 #define ErrorSymbolTableKeyAlreadyExsit                 -301
+#define ErrorNoBinderForId                              -302
+#define ErrorNoBinderForAttribute                       -303
 
 /******************
  * Compiler Error *
@@ -21,6 +23,10 @@
 #define ErrorFunctionCallNOTEqualNumberOfParameters     +54
 #define ErrorFunctionCallIncompatibleParameterType      +55
 #define ErrorFuncLiteralCallIncompatibleParameterType   +56
+
+#define ErrorCallBreakOutsideOfLoop                     +60
+#define ErrorCallContinueOutsideOfLoop                  +61
+#define ErrorCallReturnOutsideOfFunc                    +62
 
 #define ErrorDynamicAttributeUsedInNonDynamicScope      +71
 

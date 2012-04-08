@@ -36,6 +36,8 @@ struct Node {
     SymbolTableEntry*   symbol;         // default NULL
     long long           line;           // # line in source
     char*               code;           // three-address code
+    char*               codetmp;        
+    ScopeId             scope[2];       // scopeLevel, scopeId
     int                 tmp[10];        // temp storage
 };
 

@@ -78,6 +78,7 @@ bool                    s_table_remove      (SymbolTable* s_table,   SymbolTable
 SymbolTableEntry*       s_table_lookup      (SymbolTable* s_table,   SymbolTableKey key);
 int                     s_table_check_key_exsit (SymbolTable* table, SymbolTableKey key);
 void                    s_table_show        (SymbolTable* table, FILE* out);
+void                    s_table_max_level   (SymbolTable* table, int* mlevel);
 
 char*                   s_table_type_name   (int type);
 char*                   s_table_short_type_name   (int type);
@@ -110,6 +111,7 @@ int                     s_new_bind          (SymbolTableEntry* entry, Binding bi
 #define sTableRemoveKeep(e) s_table_remove( s_table, e, true )    
 #define sTableLookup(k)     s_table_lookup( s_table, k )
 #define sTableShow(o)       s_table_show( s_table, o )
+#define sTableMaxLevel(l)   s_table_max_level( s_table, l)
 
 #define sTypeName(t)        s_table_type_name(t)
 #define sShortTypeName(t)   s_table_short_type_name(t)

@@ -1,13 +1,18 @@
 func tt(int i, float x):boolean = { return i==x; };
 
-func dd(int @age, string @name):boolean = { return @age > 23;};
+func dd(int @a, string @b):int = { return @a; };
+
+int ff() {
+    int ffvar;
+    func xx():void = {};
+}
 
 graph g;
-g.allV[@age>23];
+//g.allV[@age>23];
 
 int i,j;
 float x, z;
 tt(j,z);
 
 dd();
-dd(i);
+//dd(i);

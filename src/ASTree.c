@@ -3,11 +3,9 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdarg.h>
-#include "ASTree.h"
 #include "util.h"
 #include "CodeGen.h"
-
-extern long long LEXLINECOUNTER;
+#include "global.h"
 
 #ifdef _AST_DEBUG_BASE
 extern FILE* DEBUGIO;
@@ -22,6 +20,9 @@ struct Node* ast_new_leaf(int token, void * ptr, long long line) {
     node->symbol = NULL;            // default null
     node->line = line;              // line # in source
     node->code = NULL;              // no code assigned
+    node->codetmp = NULL;
+    node->scope[0] = sStackLevel;
+    node->scope[1] = sStackTopId;
     switch (token) {
         case INTEGER_CONSTANT :
             node->token = INTEGER_CONSTANT;
@@ -111,6 +112,9 @@ struct Node* ast_new_node(int token, int nch, struct Node** child, long long lin
     node->symbol = NULL;                // default NULL
     node->line = line;                  // line # in source (for corresponding token)
     node->code = NULL;                  
+    node->codetmp = NULL;
+    node->scope[0] = sStackLevel;
+    node->scope[1] = sStackTopId;
 #ifdef _AST_DEBUG_EXTRA
     debugInfo("ast_new_node :: create \n");
     debugInfo("==DEBUG INFO==\n");
@@ -255,6 +259,8 @@ void ast_output_node(struct Node* node, FILE* out, const char * sep) {
             fprintf(out, "Node<STAT_LIST>");break;
         case AST_COMP_STAT :
             fprintf(out, "Node<COMP_STAT>");break;
+        case AST_COMP_STAT_NO_SCOPE :
+            fprintf(out, "Node<COMP_STAT_NO_SCOPE>");break;
         case AST_EXT_STAT_COMMA :
             fprintf(out, "Node<EXT_STAT_COMMA>");break;
 		case AST_FUNC :
@@ -269,21 +275,7 @@ void ast_output_node(struct Node* node, FILE* out, const char * sep) {
 			fprintf(out, "Node<WHILE_STAT>");break;
 		case AST_FOREACH :
 			fprintf(out, "Node<FOREACH_STAT>");break;
-		case AST_FOR_XXX :
-			fprintf(out, "Node<FOR_STAT>");break;
-		case AST_FOR_XXO :
-			fprintf(out, "Node<FOR_STAT>");break;
-		case AST_FOR_XOX :
-			fprintf(out, "Node<FOR_STAT>");break;
-		case AST_FOR_XOO :
-			fprintf(out, "Node<FOR_STAT>");break;
-		case AST_FOR_OXX :
-			fprintf(out, "Node<FOR_STAT>");break;
-		case AST_FOR_OXO :
-			fprintf(out, "Node<FOR_STAT>");break;
-		case AST_FOR_OOX :
-			fprintf(out, "Node<FOR_STAT>");break;
-		case AST_FOR_OOO :
+		case AST_FOR :
 			fprintf(out, "Node<FOR_STAT>");break;
 		case AST_JUMP_CONTINUE:
 			fprintf(out, "Node<CONTINUE>");break;
@@ -316,6 +308,7 @@ void ast_output_node(struct Node* node, FILE* out, const char * sep) {
         default :
             fprintf(out, "Node<UNKNOWN> !!!!!!!!!!!!!!!!");
     }
+    fprintf(out," lvl=%d ",node->scope[0]);
     if(node->code != NULL) fprintf(out," code =`%s`", node->code);
     fprintf(out, "%s", sep);
     return;

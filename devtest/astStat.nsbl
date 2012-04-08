@@ -2,8 +2,8 @@ int i=0;                                                        // scope 0
 
 if 
     (i!=0) {                                                    // scope 1 
-    list l = [];
-    graph g;
+    //list l = [];
+    //graph g;
     float x=0.1;
 }
 else {                                                          // scope 2

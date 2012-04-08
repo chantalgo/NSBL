@@ -24,7 +24,7 @@ comment         (\/\*([^\*]|(\*+([^\*\/])))*\*+\/)|(\/\/.*)
 
 %%
 "void"          { MYECHO; yylval.LString.l = LEXLINECOUNTER; return VOID; }
-"boolean"       { MYECHO; yylval.LString.l = LEXLINECOUNTER; return BOOLEAN; }
+"bool"|"boolean"       { MYECHO; yylval.LString.l = LEXLINECOUNTER; return BOOLEAN; }
 "int"           { MYECHO; yylval.LString.l = LEXLINECOUNTER; return INTEGER; }
 "float"         { MYECHO; yylval.LString.l = LEXLINECOUNTER; return FLOAT; }
 "string"        { MYECHO; yylval.LString.l = LEXLINECOUNTER; return STRING; }

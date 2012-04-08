@@ -1,7 +1,7 @@
 BINDIR = ../bin
 TESTDIR = ../devtest
 
-CFLAGS = -D_DEBUG 
+CFLAGS = -D_NO_LOG 
 ##### CFLAGS Options ############
 # -D_AST_DEBUG
 # -D_AST_DEBUG_ALL
@@ -13,9 +13,12 @@ XFLAGS = -7
 # -7			: 7bit ASCII
 # -D_MYECHO 	: for LEX DEBUG 
 #################################  
-YFLAGS =
+YFLAGS = 
+##### CFLAGS Options ############
+#  # -D_DEBUG
+#################################
 
-GLIBINCLUDE = -I/usr/include/glib-2.0/ -I/usr/lib64/glib-2.0/include
+GLIBINCLUDE = -I/usr/include/glib-2.0/ -I/usr/lib64/glib-2.0/include -I/usr/lib/glib-2.0/include
 GLIBLINK = `pkg-config --cflags --libs glib-2.0`
 
 CC = gcc $(CFLAGS) $(GLIBINCLUDE) 

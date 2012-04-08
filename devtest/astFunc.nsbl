@@ -5,12 +5,12 @@ int text(
         boolean a)
                     {
     float x=1, y=2;
-    return i+a+x+y;
+    if(a) return i+x;
+    else  return i+y;
 }
 
 //x+=1;                           // ERROR
-
-int ff(                         // ERROR
+int ffxx(                         
     int j)  {
 
     return j;
@@ -19,11 +19,11 @@ int ff(                         // ERROR
 boolean x=true;
 text(i,x);                      // OK
 
-//text(i);                        // ERROR
+text(i);                        // ERROR
 
-//text(i,j);                      // ERROR
+text(i,j);                      // ERROR
 
-//ff(i);                          // ERROR
+ff(i);                          // ERROR
 
 
 int recur(int i) {              // OK
@@ -39,3 +39,8 @@ int noArg(){
 }
 
 noArg();                        // OK
+
+return;
+//return i;
+//break;
+//continue;

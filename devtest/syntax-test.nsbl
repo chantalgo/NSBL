@@ -64,6 +64,7 @@ e3:v1->v3;
 e1.weight = 14;
 
 //LIST
+vertex v4,v5;
 lv <: v4;		// append one element
 lv[0] = v5; 	// memeber operation
 
@@ -78,7 +79,6 @@ g2 <: v2;
 g2 <: e1;
 
 //LIST operation
-vertex v4,v5;
 lv <: v4;                       //append operation
 lv[1] = v5;                     //member
 
@@ -166,13 +166,13 @@ for(i=1;i<=j;i=i+1){
             break;
         else
             continue;
-        boolean bool = true;
-        bool = false;
+        bool b = true;
+        b = false;
     }
 }
 
 //FOREACH loop
-foreach (i:g.allV){}
+//foreach (i:g.allV){}
 
 //WHILE loop
 a=100;
@@ -184,8 +184,8 @@ while(a>0){
         m=n+2;
         int l=2;
         for(i=10; i<100; i=i+10){
-            boolean bool = true;
-            bool = false;
+            bool b = true;
+            b = false;
         }
     }
 }
@@ -198,10 +198,10 @@ while(a>0){
 
 // GRAPH statement
 //get all VERTICES
-g.allV;
+//g.allV;
 list glist = g.allV;
 //get all EDGEs
-g.allE;
+//g.allE;
 
 //PIPE operation
 g.allV|outE;
@@ -213,7 +213,7 @@ g.allV[@id==3];
 g.allV[@isfemale&&(@name=="TOM"||@age>28)]|outE[@weight==3]|endV;
 
 //FUNCTION LITERAL + FOREACH + PIPE + MATCH
-func cond():boolean = { return (@name=="TOM"||@age>28); };
+func cond():bool = { return (@name=="TOM"||@age>28); };
 foreach (item : g.allV[cond()&&@isfemale] ) {
    print( item|outE[@weight==3]|endV );
 }
@@ -244,6 +244,6 @@ void testvoid(){}
 func addition(int a, float b):int = { return (int)a+b; };
 xx = addition(a,b);
 
-boolean check(int c, int a, int b, func addition) {
+bool check(int c, int a, int b, func addition) {
 	return c==addition(a,b);
 }

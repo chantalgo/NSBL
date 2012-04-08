@@ -8,12 +8,14 @@ extern int yywrap(void); /* Our version. */
 extern int yylex(void); /* Lexical analyzer function. */
 extern int yyparse(void); /* Parser function. */
 
-#include "global.h"
 #include "ASTree.h"
 #include "SymbolTable.h"
 #include "SymbolTableUtil.h"
 #include "util.h"
+#include "CodeGen.h"
+#include "global.h"
 %}
+
 
 /**************************
  * Field names            *
@@ -102,10 +104,10 @@ extern int yyparse(void); /* Parser function. */
 %token AST_FUNC_DECLARATOR AST_PARA_DECLARATION AST_FUNC 
 %token AST_INIT_ASSGN AST_LIST_INIT
 %token AST_MATCH AST_ATTIBUTE AST_GRAPH_PROP
-%token AST_STAT_LIST AST_COMP_STAT AST_EXT_STAT_COMMA
+%token AST_STAT_LIST AST_COMP_STAT AST_COMP_STAT_NO_SCOPE AST_EXT_STAT_COMMA
 
 %token AST_IF_STAT AST_IFELSE_STAT
-%token AST_WHILE AST_FOR_XXX AST_FOR_XXO AST_FOR_XOX AST_FOR_XOO AST_FOR_OXX AST_FOR_OXO AST_FOR_OOX AST_FOR_OOO AST_FOREACH
+%token AST_WHILE AST_FOR AST_FOREACH
 %token AST_JUMP_CONTINUE AST_JUMP_BREAK AST_JUMP_RETURN
 %token AST_FUNC_CALL AST_ARG_EXPS AST_EXP_STAT
 /**************************
@@ -127,7 +129,29 @@ extern int yyparse(void); /* Parser function. */
 start_nonterminal
     : translation_unit {
         $$ = $1;
+        showASTandST($$,"Syntax + Semantic P1");
+        if(!ERRNO) {// no syntax error, or declaration error
+            char *mainBodyCode=NULL, *funCode=NULL,*mainCode;
+            char *globalDecl=NULL;
+            codeIndentInit();
+            codeAllGen($$, &mainBodyCode, &funCode);
+            codeAllFuncLiteral($$, &funCode);
+            codeAllGlobal($$,&globalDecl);
+            mainCode = wapperMainCode(mainBodyCode);        
+            codeIndentFree();
+            showASTandST($$,"Semantic P2 + Code Gen");
+            if(!ERRNO){
+                if(globalDecl!=NULL) exportCode(globalDecl);    // global
+                if(funCode!=NULL) exportCode(funCode);          // func
+                exportCode(mainCode);                           // main
+            }
+            free(mainBodyCode);
+            free(funCode);
+            free(mainCode);
+            free(globalDecl);
+        }
         astFreeTree($$);            // destroy AST
+        
     }
     ;
 
@@ -147,14 +171,14 @@ translation_unit
 external_statement
     : function_definition{
         $$ = $1;
-        showASTandST($$,"Function Definition");
     }
     | statement{ 
-        $$ = $1; 
-        codeGen($$);
-        showASTandST($$,"External Statment");
-        if($$->code != NULL) exportCode($$->code);
+        $$ = $1;
     }
+    ;
+
+statement_with_scope
+    : scope_in  statement scope_out
     ;
 
 statement
@@ -194,10 +218,10 @@ compound_statement
 
 compound_statement_no_scope
     : '{' '}' {
-        $$ = astNewNode( AST_COMP_STAT, 0, NULL, $1.l );
+        $$ = astNewNode( AST_COMP_STAT_NO_SCOPE, 0, NULL, $1.l );
     }
     | '{' statement_list '}'   {
-        $$ = astNewNode( AST_COMP_STAT, 1, astAllChildren(1, $2), $1.l );
+        $$ = astNewNode( AST_COMP_STAT_NO_SCOPE, 1, astAllChildren(1, $2), $1.l );
     }
     ;
 
@@ -211,16 +235,36 @@ selection_statement
     ;
 
 iteration_statement
-    : WHILE '(' expression ')' statement                                {$$ = astNewNode(AST_WHILE, 2, astAllChildren(2, $3, $5), $1.l);}
-    | FOR '(' expression ';' expression ';' expression ')' statement    {$$ = astNewNode(AST_FOR_XXX, 4, astAllChildren(4, $3, $5, $7, $9), $1.l);}
-    | FOR '(' expression ';' expression ';' ')' statement               {$$ = astNewNode(AST_FOR_XXO, 3, astAllChildren(3, $3, $5, $8), $1.l);}
-    | FOR '(' expression ';' ';' expression ')' statement               {$$ = astNewNode(AST_FOR_XOX, 3, astAllChildren(3, $3, $6, $8), $1.l);}
-    | FOR '(' expression ';' ';' ')' statement                          {$$ = astNewNode(AST_FOR_XOO, 2, astAllChildren(2, $3, $7), $1.l);}
-    | FOR '(' ';' expression ';' expression ')' statement               {$$ = astNewNode(AST_FOR_OXX, 3, astAllChildren(3, $4, $6, $8), $1.l);}
-    | FOR '(' ';' expression ';' ')' statement                          {$$ = astNewNode(AST_FOR_OXO, 2, astAllChildren(2, $4, $7), $1.l);}
-    | FOR '(' ';' ';' expression ')' statement                          {$$ = astNewNode(AST_FOR_OOX, 2, astAllChildren(2, $5, $7), $1.l);}
-    | FOR '(' ';' ';' ')' statement                                     {$$ = astNewNode(AST_FOR_OOO, 1, astAllChildren(1, $6), $1.l);}
-    | FOREACH '(' IDENTIFIER ':' postfix_expression ')' statement       {$$ = astNewNode(AST_FOREACH, 3, astAllChildren(3, astNewLeaf(IDENTIFIER, $3.s, $3.l), $5, $7), $1.l);}
+    : WHILE '(' expression ')' statement {
+        $$ = astNewNode(AST_WHILE, 2, astAllChildren(2, $3, $5), $1.l);
+    }
+    | FOR '(' expression ';' expression ';' expression ')' statement {
+        $$ = astNewNode(AST_FOR, 4, astAllChildren(4, $3, $5, $7, $9), $1.l);
+    }
+    | FOR '(' expression ';' expression ';' ')' statement {
+        $$ = astNewNode(AST_FOR, 4, astAllChildren(4, $3, $5, NULL, $8), $1.l);
+    }
+    | FOR '(' expression ';' ';' expression ')' statement {
+        $$ = astNewNode(AST_FOR, 4, astAllChildren(4, $3, NULL, $6, $8), $1.l);
+    }
+    | FOR '(' expression ';' ';' ')' statement {
+        $$ = astNewNode(AST_FOR, 4, astAllChildren(4, $3, NULL, NULL, $7), $1.l);
+    }
+    | FOR '(' ';' expression ';' expression ')' statement {
+        $$ = astNewNode(AST_FOR, 4, astAllChildren(4, NULL, $4, $6, $8), $1.l);
+    }
+    | FOR '(' ';' expression ';' ')' statement {
+        $$ = astNewNode(AST_FOR, 4, astAllChildren(4, NULL, $4, NULL, $7), $1.l);
+    }
+    | FOR '(' ';' ';' expression ')' statement {
+        $$ = astNewNode(AST_FOR, 4, astAllChildren(4, NULL, NULL,$5, $7), $1.l);
+    }
+    | FOR '(' ';' ';' ')' statement {
+        $$ = astNewNode(AST_FOR, 4, astAllChildren(4, NULL, NULL, NULL, $6), $1.l);
+    }
+    | FOREACH '(' IDENTIFIER ':' postfix_expression ')' statement {
+        $$ = astNewNode(AST_FOREACH, 3, astAllChildren(3, astNewLeaf(IDENTIFIER, $3.s, $3.l), $5, $7), $1.l);
+    }
     ;
 
 jump_statement
@@ -232,7 +276,7 @@ jump_statement
 
 declaration_statement
     : declaration                       { $$ = $1; }
-    | function_literal_declaration      
+    | function_literal_declaration      { $$ = $1; }
     ;
 
 /**************************
@@ -460,8 +504,8 @@ function_literal_declaration
     | function_literal_type_specifier dynamic_scope_left func_declarator ':' declaration_specifiers '=' compound_statement_no_scope scope_out dynamic_scope_right ';' {
         $$ = astNewNode($1.i, 3, astAllChildren(3, $3, $5, $7), $1.l);
         $$->typeCon = $3->typeCon;
-        $$->tmp[0] = $3->tmp[0];
-        $$->tmp[1] = $3->tmp[1];
+        $$->scope[0] = $3->scope[0];
+        $$->scope[1] = $3->scope[1];
         sTableDeclare($$);
     }
     ;
@@ -477,8 +521,8 @@ function_head
     : declaration_specifiers func_declarator {
         $$ = astNewNode(AST_FUNC, 3, astAllChildren(3, $1, $2, NULL), $2->line); // third field empty
         $$->typeCon = $2->typeCon;
-        $$->tmp[0] = $2->tmp[0];     // Scope Level
-        $$->tmp[1] = $2->tmp[1];     // Scope Id
+        $$->scope[0] = $2->scope[0];     // Scope Level
+        $$->scope[1] = $2->scope[1];     // Scope Id
         sTableDeclare($$);  // We must declare before coming into compound stat, for recursive call
         // tmp no longer needed after here
     }
@@ -541,27 +585,24 @@ simple_declarator
     ;
 
 func_declarator
-    : func_id '(' scope_in parameter_list ')' {
+    : func_id  scope_in '(' parameter_list ')' {
         $$ = astNewNode( AST_FUNC_DECLARATOR, 2, astAllChildren(2, $1, $4), $1->line );
         // generate type Constructor for parameters
         $$->typeCon = astTypeConParaList( $4, NULL );
-        $$->tmp[0] = $1->tmp[0];     // Scope Level
-        $$->tmp[1] = $1->tmp[1];     // Scope Id
+        $$->scope[0] = $1->scope[0];     // Scope Level
+        $$->scope[1] = $1->scope[1];     // Scope Id
     }
-    | func_id '(' scope_in ')' {
+    | func_id scope_in '(' ')' {
         $$ = astNewNode( AST_FUNC_DECLARATOR, 1, astAllChildren(1, $1 ), $1->line );
         $$->typeCon = astTypeConParaList( NULL, NULL );
-        $$->tmp[0] = $1->tmp[0];     // Scope Level
-        $$->tmp[1] = $1->tmp[1];     // Scope Id
+        $$->scope[0] = $1->scope[0];     // Scope Level
+        $$->scope[1] = $1->scope[1];     // Scope Id
     }
     ;
 
 func_id
     : IDENTIFIER {
         $$ = astNewLeaf(IDENTIFIER, $1.s, $1.l);
-        // store scopeLevel and scopeId in temporary storage before the scope change in "func_declarator"
-        $$->tmp[0] = sStackLevel;       
-        $$->tmp[1] = sStackTopId;
     }
     ;
 
@@ -614,7 +655,9 @@ initializer_list
  *************************/
 
 scope_in
-    :       { sStackPush( sNewScopeId() ); }
+    :       { sStackPush( sNewScopeId() ); 
+              maxLevel = (maxLevel<sStackLevel) ? sStackLevel : maxLevel;
+            }
     ;
 
 scope_out
@@ -648,6 +691,9 @@ void main_init(char * fileName) {
     sStackInit();
     isDynamicScope = 0;
     isNoTypeCheck = 0;
+    maxLevel = 0;
+    inLoop = 0;
+    inFunc = 0;
     char * outfile = strCatAlloc("",2,fileName,".c");
     OUTFILESTREAM = fopen(outfile,"w");
     free(outfile);
