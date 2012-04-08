@@ -124,7 +124,7 @@ int codeGen (struct Node * node) {
             break;
         case AST_DECLARATION :
             codeGen( node->child[0] );codeGen( node->child[1] );
-            if(node->scope[0]==0) { // we need to them as external declaration in c
+            if(node->scope[0]==0) { // we need to treat them as external declaration in c
                 node->code = strCatAlloc("",3,INDENT[node->scope[0]],node->child[1]->code,";\n");
                 node->codetmp = strCatAlloc("",5,INDENT[node->scope[0]],node->child[0]->code," ",node->child[1]->codetmp,";\n");
             }

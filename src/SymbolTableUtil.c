@@ -24,23 +24,6 @@ int sTableDeclare(struct Node* node) {
 }
 
 /** insert all IDENTIFIER or DYN_ATTRIBUTE in the subtree */
-/*
-int sTableInsertTree(struct Node* node, int ttype) {
-    if(node == NULL) return;
-    if(node->token == IDENTIFIER){
-        sTableInsertId(node, ttype);
-    }
-    else if(node->token == DYN_ATTRIBUTE){
-        sTableInsertId(node, -ttype);
-    }
-    else {
-        int i; for(i=0; i<node->nch; ++i) {
-            sTableInsertTree( node->child[i], ttype );
-        }
-    }
-    return 0;
-}*/ // buggy
-
 int sTableInsertTree(struct Node* node, int ttype) {
     if(node == NULL) return;
     switch (node->token) {

@@ -179,10 +179,6 @@ external_statement
     }
     ;
 
-statement_with_scope
-    : scope_in  statement scope_out
-    ;
-
 statement
     : expression_statement          { $$ = $1; }
     | compound_statement            { $$ = $1; }
