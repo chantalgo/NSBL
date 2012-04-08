@@ -49,7 +49,16 @@ STATUS:
 DESIGN:
 >>function should pass by reference
 
+04/07/2012
+STATUS:
+>>Code Gen works for static types, operations, func, func_literal.
+>>static type checking works
+>>symbol table completely works
 
+TODO:
+>>graph library
+>>glue interface
+>>i/o
 
 Bugs:
 04/02/2012 LexAly.l : for strliteral, should remove ""     // cleared -Jing
