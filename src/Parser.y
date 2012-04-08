@@ -141,9 +141,11 @@ start_nonterminal
             codeIndentFree();
             showASTandST($$,"Semantic P2 + Code Gen");
             if(!ERRNO){
+                OUTFILESTREAM = fopen(OUTFILE,"w");
                 if(globalDecl!=NULL) exportCode(globalDecl);    // global
                 if(funCode!=NULL) exportCode(funCode);          // func
                 exportCode(mainCode);                           // main
+                fclose(OUTFILESTREAM);
             }
             free(mainBodyCode);
             free(funCode);
@@ -694,15 +696,13 @@ void main_init(char * fileName) {
     maxLevel = 0;
     inLoop = 0;
     inFunc = 0;
-    char * outfile = strCatAlloc("",2,fileName,".c");
-    OUTFILESTREAM = fopen(outfile,"w");
-    free(outfile);
+    OUTFILE = strCatAlloc("",2,fileName,".c");
 }
 
 void main_clean() {
     sTableDestroy();
     sStackDestroy();
-    fclose(OUTFILESTREAM);
+    free(OUTFILE);
 }
 
 int main(int argc, char * const * argv) {

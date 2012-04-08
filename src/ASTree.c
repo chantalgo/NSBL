@@ -143,6 +143,12 @@ void ast_free_tree(struct Node* node) {
 #endif
         free(node->code);
     }
+    if ( node->codetmp != NULL ) {
+#ifdef _AST_DEBUG_MEMORY
+        debugInfo("FREE codetmp: %s\n", node->codetmp);
+#endif
+        free(node->codetmp);
+    }
     /* if child exsits, free child first */
     if ( node->nch > 0 && node->child != NULL ) {
         // free children
@@ -309,7 +315,8 @@ void ast_output_node(struct Node* node, FILE* out, const char * sep) {
             fprintf(out, "Node<UNKNOWN> !!!!!!!!!!!!!!!!");
     }
     fprintf(out," lvl=%d ",node->scope[0]);
-    if(node->code != NULL) fprintf(out," code =`%s`", node->code);
+    if(node->code != NULL) fprintf(out," \n code =`%s`", node->code);
+    if(node->codetmp != NULL) fprintf(out,"\n  codetmp =`%s`", node->codetmp);
     fprintf(out, "%s", sep);
     return;
 }
