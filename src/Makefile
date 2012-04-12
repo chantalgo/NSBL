@@ -59,8 +59,11 @@ CodeGen.o:	CodeGen.h CodeGen.c
 	$(CC) -c CodeGen.c
 
 test : toy.exe
-	$(BINDIR)/toy.exe $(TESTDIR)/syntax-test.nsbl 
-
+#	$(BINDIR)/toy.exe $(TESTDIR)/syntax-test.nsbl 
+#	$(BINDIR)/toy.exe $(TESTDIR)/astFuncLiteral.nsbl 
+	$(BINDIR)/toy.exe $(TESTDIR)/astFunc.nsbl 
+#	$(BINDIR)/toy.exe $(TESTDIR)/astStat.nsbl 
+#	$(BINDIR)/toy.exe $(TESTDIR)/astVarDecl.nsbl 
 
 testsm : SymbolTable.o testST.c
 	$(CC) -c testST.c

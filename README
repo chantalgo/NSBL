@@ -63,3 +63,6 @@ TODO:
 Bugs:
 04/02/2012 LexAly.l : for strliteral, should remove ""     // cleared -Jing
 
+04/12/2012
+STATUS:
+>>graph library added, not tested yet, just give you an idea of what I am doing now.
