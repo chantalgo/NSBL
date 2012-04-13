@@ -1,0 +1,37 @@
+<graph>
+	<graph_id></graph_id>
+	<vertices_list></vertices_list>
+	<edges_list></edges_list>
+
+	<vertices>
+		<vertex>
+			<vertex_id></vertex_id>
+			<outedges></outedges>
+			<inedges></inedges>
+			<vertex_attributes>
+				<vertex_attribute>
+					<vertex_attribute_name></vertex_attribute_name>
+					<vertex_attribute_value></vertes_attribute_value>
+					<vertex_attribute_val_type></vertex_attribute_val_type>
+				</vertex_attribute>
+			</vertex_attributes>
+		</vertex>
+	</vertices>
+
+	
+	<edges>
+		<edge>
+			<edge_id></edge_id>
+			<startV></startV>
+			<endV></endV>
+			<edge_attributes>
+				<edge_attribute>
+					<edge_attribute_name></edge_attribute_name>
+					<edge_attribute_value></edge_attribute_value>
+					<edge_attribute_val_type></edge_attribute_val_type>
+				</edge_attribute>
+			</edge_attributes>
+		</edge>
+	</edges>
+
+</graph>
