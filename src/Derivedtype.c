@@ -122,7 +122,7 @@ int edge_assign_direction(EdgeType* e, VertexType* v1, VertexType v2){
 }
 
 int edge_assign_attribute(EdgeType* e, char* attribute, void* value){
-	g_hash_talbe_insert(e->attributes, attribute, value);
+	g_hash_table_insert(e->attributes, attribute, value);
 	return 0;
 }
 
