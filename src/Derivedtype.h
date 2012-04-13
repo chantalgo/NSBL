@@ -25,6 +25,7 @@ typedef struct{
 	EdgeId id;
 	VertexType* start;
 	VertexType* end;
+    GList* ings;
 	AttributeTable* attributes;
 }EdgeType;
 
@@ -42,9 +43,9 @@ typedef struct{
 	GraphId id;
 	//int number_of_e;
 	//int number_of_v;
-	//GArray* edgeIdList;
+	GList* edgeIdList;
 	GList* vertexIdList;
-	//GHashTable* edges;
+	GHashTable* edges;
 	GHashTable* vertices;
 }GraphType;
 
@@ -75,9 +76,10 @@ GList* get_in_edges(VertexType* v);
 
 GList* get_g_alle(GraphType* g);
 GList* get_g_allv(GraphType* g);
-int remove_edge(EdgeType* e);
-int remove_vertex(GraphType* g, VertexType* v);
+int g_remove_edge(EdgeType* e);
+int g_remove_vertex(GraphType* g, VertexType* v);
 int g_insert_v(GraphType* g, VertexType* v);
+int g_insert_subg(GraphType* g, GraphType* subg);
 
 GList* edge_match(GList* elist, char* attribute, void* value);
 GList* vertex_match(GList* vlist, char* attribute, void* value);

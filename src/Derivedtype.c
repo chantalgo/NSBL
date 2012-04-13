@@ -6,6 +6,7 @@ EdgeType* new_edge(){
 	edge->id = new_edgeId();
 	edge->start = NULL;
 	edge->end = NULL;
+    edge->ings = NULL;
 	edge->attributes = g_hash_table_new(g_str_hash, g_str_equal);
 	return edge;
 }
@@ -27,9 +28,9 @@ GraphType* new_graph(){
 	graph->id = new_graphId();
 	//graph->number_of_e = 0;
 	//graph->number_of_v = 0;
-	//graph->edgeIdList = g_array_new(1, 1);
+	graph->edgeIdList = NULL;
 	graph->vertexIdList = NULL;
-	//graph->edges = g_hash_table_new(g_str_hash, g_str_equal);
+	graph->edges = g_hash_table_new(g_str_hash, g_str_equal);
 	graph->vertices = g_hash_table_new(g_int_hash, g_int_equal);
 	return graph;
 }
@@ -44,14 +45,43 @@ StringType* new_string(){
 
 int destroy_edge(EdgeType* e){
 	g_hash_table_destroy(e->attributes);
+	VertexType* v1 = e->start;
+	VertexType* v2 = e->end;
+	g_list_remove(v1->outEdges, e);
+	g_list_remove(v2->inEdges, e);
+	e->start = NULL;
+	e->end = NULL;
+    int l = g_list_length(e->ings);
+    int n = 0;
+    for(n; n<l; n++){
+        GraphType* g = g_list_nth_data(e->ings);
+        g_remove_edge(g, e);
+    }
 	free(e);
 	return 0;
 }
 
 int destroy_vertex(VertexType* v){
 	g_hash_table_destroy(v->attributes);
-	g_list_free_1(v->outEdges);
-	g_list_free_1(v->inEdges);
+    EdgeType* e;
+    int l = g_list_length(v->outEdges);
+    int n = 0;
+    for(n; n<l; n++){
+        e = g_list_nth_data(v->outEdges);
+        destroy_edge(e);
+    }
+    l = g_list_length(v->inEdges);
+    n = 0;
+    for(n; n<l; n++){
+        e = g_list_nth_data(v->inEdges);
+        destroy_edge(e);
+    }
+    l = g_list_length(v->ings);
+    n = 0;
+    for(n; n<l; n++){
+        GraphType* g = g_list_nth_data(e->ings);
+        g_remove_vertex(g, v);
+    }
 	free(v);
 	return 0;
 }
@@ -148,30 +178,15 @@ GList* get_g_alle(GraphType* g){
 	}
 }
 
-int remove_edge(EdgeType* e){
-	VertexType* v1 = e->start;
-	VertexType* v2 = e->end;
-	g_list_remove(v1->outEdges, e);
-	g_list_remove(v2->inEdges, e);
-	e->start = NULL;
-	e->end = NULL;
-	destroy_edge(e);
-	return 0;
+int g_remove_edge(GraphType* g, EdgeType* e){
+	g_list_remove(g->edgeIdList, &(e-id));
+    g_hash_table_remove(g->edges, e);
+    return 0;
 }
 
-int remove_vertex(GraphType* g, VertexType* v){
-	GList* elist = get_g_alle(g);
-	int l = g_list_length(elist);
-	int n = 0;
-	for(n; n<l; n++){
-		EdgeType* e = g_list_nth_data(elist, n);
-		if((e->start == v)||(e->end == v)){
-			remove_edge(e);
-		}
-	}
-	g_list_remove(g->vertexIdList, &(v->id));
-	g_hash_table_remove(g->vertices, &(v->id));
-	g_list_remove(v->ings, g);
+int g_remove_vertex(GraphType* g, VertexType* v){
+	g_list_remove(g->vertexIdList, &(v-id));
+    g_hash_table_remove(g->vertices, v);
 	return 0;
 }
 
@@ -205,7 +220,7 @@ GList* edge_match(GList* elist, char* attribute, void* value, int vtype){
 					case FLOAT: if((float)*attr_v == (float)*value) result = g_list_append(result, e); break;
 					case STRING: if(strcmp((char*)attr_v, (char*)value)==0) result = g_list_append(result, e); break;
 					default: break;
-				}		
+				}
 		}
 	}
 	return result;
@@ -224,7 +239,7 @@ GList* vertex_match(GList* vlist, char* attribute, void* value, int vtype){
 					case FLOAT: if((float)*attr_v == (float)*value) result = g_list_append(result, v); break;
 					case STRING: if(strcmp((char*)attr_v, (char*)value)==0) result = g_list_append(result, v); break;
 					default: break;
-				}		
+				}
 		}
 	}
 	return result;
