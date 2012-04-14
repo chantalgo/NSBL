@@ -71,6 +71,11 @@ testsm : SymbolTable.o testST.c
 	$(CC) -c testST.c
 	$(CC) -o $(BINDIR)/testsm.exe SymbolTable.o testST.o $(GLIBLINK)
 
+testglib : Derivedtype.o graph_lib_test.c
+	$(CC) -c graph_lib_test.c
+	$(CC) -o $(BINDIR)/graph_lib_test.exe Derivedtype.o graph_lib_test.o $(GLIBLINK)
+
 clean :
 	rm -f Parser.tab.c Parser.tab.h LexAly.yy.c y.output $(BINDIR)/toy.exe *.o
 	rm -f SymbolTable.o testST.o $(BINDIR)/testsm.exe
+	rm -f Derivedtype.o graph_lib_test.o $(BINDIR)/graph_lib_test.exe $(GLIBLINK)

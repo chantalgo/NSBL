@@ -23,9 +23,12 @@ int g_hash_table_contains(GHashTable* t, void* key1){
 	int n = 0;
 	for(n; n<l; n++){
 		void* key2 = g_list_nth_data(list,n);
-		if(*(int*)key1 == *(int*)key2)
+		if(*(int*)key1 == *(int*)key2){
+			g_list_free(list);
 			return 1;
+		}
 	}
+	g_list_free(list);
 	return 0;
 }
 
@@ -141,8 +144,11 @@ int edge_assign_direction(EdgeType* e, VertexType* v1, VertexType* v2){
 	return 0;
 }
 
-int edge_assign_attribute(EdgeType* e, char* attribute, void* value){
-	g_hash_table_insert(e->attributes, attribute, value);
+int edge_assign_attribute(EdgeType* e, char* attribute, void* value, int type){
+	Attribute* attr = (Attribute*) malloc(sizeof(Attribute));
+	attr->type = type;
+	attr->value = value;
+	g_hash_table_insert(e->attributes, attribute, attr);
 	return 0;
 }
 
@@ -158,8 +164,11 @@ VertexType* get_end_vertex(EdgeType* e){
 	return e->end;
 }
 
-int vertex_assign_attribute(VertexType* v, char* attribute, void* value){
-	g_hash_table_insert(v->attributes, attribute, value);
+int vertex_assign_attribute(VertexType* v, char* attribute, void* value, int type){
+	Attribute* attr = (Attribute*) malloc(sizeof(Attribute));
+	attr->type = type;
+	attr->value = value;
+	g_hash_table_insert(v->attributes, attribute, attr);
 	return 0;
 }
 
@@ -240,7 +249,7 @@ int g_insert_v(GraphType* g, VertexType* v){
 	return 0;
 }
 
-int g_insert_e(GraphType* g, VertexType* e){
+int g_insert_e(GraphType* g, EdgeType* e){
 	g->edgeIdList = g_list_append(g->edgeIdList, &(e->id));
 	g_hash_table_insert(g->edges, &(e->id), e);
 	e->ings = g_list_append(e->ings, g);
@@ -274,18 +283,18 @@ int g_insert_subg(GraphType* g, GraphType* subg){
 	}
 }
 
-GList* edge_match(GList* elist, char* attribute, void* value, int vtype){
+GList* edge_match(GList* elist, char* attribute, void* value){
 	int l = g_list_length(elist);
 	int n = 0;
 	GList* result;
 	for(n; n<l; n++){
 		EdgeType* e = g_list_nth_data(elist, n);
-		void* attr_v;
+		Attribute* attr_v;
 		if((attr_v = g_hash_table_lookup(e->attributes, attribute))!=NULL){
-				switch(vtype){
-					case INT: if(*(int*)attr_v == *(int*)value) result = g_list_append(result, e); break;
-					case FLOAT: if(*(float*)attr_v == *(float*)value) result = g_list_append(result, e); break;
-					case STRING: if(strcmp((char*)attr_v, (char*)value)==0) result = g_list_append(result, e); break;
+				switch(attr_v->type){
+					case INT: if(*(int*)attr_v->value == *(int*)value) result = g_list_append(result, e); break;
+					case FLOAT: if(*(float*)attr_v->value == *(float*)value) result = g_list_append(result, e); break;
+					case STRING: if(strcmp((char*)attr_v->value, (char*)value)==0) result = g_list_append(result, e); break;
 					default: break;
 				}
 		}
@@ -293,18 +302,18 @@ GList* edge_match(GList* elist, char* attribute, void* value, int vtype){
 	return result;
 }
 
-GList* vertex_match(GList* vlist, char* attribute, void* value, int vtype){
+GList* vertex_match(GList* vlist, char* attribute, void* value){
 	int l = g_list_length(vlist);
 	int n = 0;
 	GList* result;
 	for(n; n<l; n++){
 		VertexType* v = g_list_nth_data(vlist, n);
-		void* attr_v;
+		Attribute* attr_v;
 		if((attr_v = g_hash_table_lookup(v->attributes, attribute))!=NULL){
-				switch(vtype){
-					case INT: if(*(int*)attr_v == *(int*)value) result = g_list_append(result, v); break;
-					case FLOAT: if(*(float*)attr_v == *(float*)value) result = g_list_append(result, v); break;
-					case STRING: if(strcmp((char*)attr_v, (char*)value)==0) result = g_list_append(result, v); break;
+				switch(attr_v->type){
+					case INT: if(*(int*)attr_v->value == *(int*)value) result = g_list_append(result, v); break;
+					case FLOAT: if(*(float*)attr_v->value == *(float*)value) result = g_list_append(result, v); break;
+					case STRING: if(strcmp((char*)attr_v->value, (char*)value)==0) result = g_list_append(result, v); break;
 					default: break;
 				}
 		}
@@ -312,3 +321,80 @@ GList* vertex_match(GList* vlist, char* attribute, void* value, int vtype){
 	return result;
 }
 
+int print_v(VertexType* v){
+	printf("vid: %d ", v->id);
+	return 0;
+}
+
+int print_e(EdgeType* e){
+	printf("eid %d : %d -> %d ", e->id, e->start->id, e->end->id);
+	return 0;
+}
+
+int print_v_attr(VertexType* v){
+	GList* klist = g_hash_table_get_keys(v->attributes);
+	int l = g_list_length(klist);
+	int n = 0;
+	printf("\nVertex Attributes=======================\n");
+	for(n; n<l; n++){
+		void* key = g_list_nth_data(klist, n);
+		Attribute* value = g_hash_table_lookup(v->attributes, key);
+		switch(value->type){
+			case INT: printf("%s -> %d\n", (char*)key, *(int*)value->value);break;
+			case FLOAT: printf("%s -> %f\n", (char*)key, *(float*)value->value);break;
+			case STRING: printf("%s -> %s\n", (char*)key, (char*)value->value);break;
+			default: break;
+		}
+	}
+	printf("========================================\n");
+	g_list_free(klist);
+	return 0;
+}
+
+int print_e_attr(EdgeType* e){
+	GList* klist = g_hash_table_get_keys(e->attributes);
+	int l = g_list_length(klist);
+	int n = 0;
+	printf("\nEdge Attributes=======================\n");
+	for(n; n<l; n++){
+		void* key = g_list_nth_data(klist, n);
+		Attribute* value = g_hash_table_lookup(e->attributes, key);
+		switch(value->type){
+			case INT: printf("%s -> %d\n", (char*)key, *(int*)value->value);break;
+			case FLOAT: printf("%s -> %f\n", (char*)key, *(float*)value->value);break;
+			case STRING: printf("%s -> %s\n", (char*)key, (char*)value->value);break;
+			default: break;
+		}
+	}
+	printf("========================================\n");
+	g_list_free(klist);
+	return 0;
+}
+
+int print_g(GraphType* g){
+	GList* vlist = get_g_allv(g);
+	GList* elist = get_g_alle(g);
+	int l,n;
+	printf("\nGraph===========================\n");
+	l = g_list_length(vlist);
+	printf("Vertices: \n");
+	for(n=0; n<l; n++){
+		VertexType* v = g_list_nth_data(vlist, n);
+		print_v(v);
+		printf(" | ");
+	}
+	printf("\n");
+
+	l = g_list_length(elist);
+	printf("Edges: \n");
+	for(n=0; n<l; n++){
+		EdgeType* e = g_list_nth_data(elist, n);
+		print_e(e);
+		printf(" | ");
+	}
+	printf("\n");
+	printf("==================================\n");
+	g_list_free(vlist);
+	g_list_free(elist);
+	return 0;
+} 

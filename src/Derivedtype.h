@@ -22,6 +22,11 @@ typedef GList ListType;
 typedef GString StringType;
 
 typedef struct{
+	int type;
+	void* value;
+}Attribute;
+
+typedef struct{
 	VertexId id;
 	AttributeTable* attributes;
 	//int number_of_out;
@@ -64,12 +69,12 @@ int destroy_list(ListType* list);
 int destroy_string(StringType* s);
 
 int edge_assign_direction(EdgeType* e, VertexType* v1, VertexType* v2);
-int edge_assign_attribute(EdgeType* e, char* attribute, void* value);
+int edge_assign_attribute(EdgeType* e, char* attribute, void* value, int type);
 void* edge_get_attribute_value(EdgeType* e, char* attribute);
 VertexType* get_end_vertex(EdgeType* e);
 VertexType* get_start_vertex(EdgeType* e);
 
-int vertex_assign_attribute(VertexType* v, char* attribute, void* value);
+int vertex_assign_attribute(VertexType* v, char* attribute, void* value, int type);
 void* vertex_get_attribute_value(VertexType* v, char* attribute);
 GList* get_v_outedges(VertexType* v);
 GList* get_v_inedges(VertexType* v);
@@ -82,11 +87,20 @@ GList* get_g_allv(GraphType* g);
 int g_remove_edge(GraphType* g, EdgeType* e);
 int g_remove_vertex(GraphType* g, VertexType* v);
 int g_insert_v(GraphType* g, VertexType* v);
-int g_insert_e(GraphType* g, VertexType* v);
+int g_insert_e(GraphType* g, EdgeType* v);
 int g_insert_subg(GraphType* g, GraphType* subg);
 
-GList* edge_match(GList* elist, char* attribute, void* value, int vtype);
-GList* vertex_match(GList* vlist, char* attribute, void* value, int vtype);
+GList* edge_match(GList* elist, char* attribute, void* value);
+GList* vertex_match(GList* vlist, char* attribute, void* value);
+
+/*print functions*/
+int print_g(GraphType* g);
+int print_v(VertexType* v);
+int print_e(EdgeType* e);
+int print_v_attr(VertexType* v);
+int print_e_attr(EdgeType* e);
+
+
 
 //int list_append(ListType* list, void* data);
 //ListType* list_declare(...);
