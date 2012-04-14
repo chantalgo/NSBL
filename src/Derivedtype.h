@@ -22,14 +22,6 @@ typedef GList ListType;
 typedef GString StringType;
 
 typedef struct{
-	EdgeId id;
-	VertexType* start;
-	VertexType* end;
-    GList* ings;
-	AttributeTable* attributes;
-}EdgeType;
-
-typedef struct{
 	VertexId id;
 	AttributeTable* attributes;
 	//int number_of_out;
@@ -38,6 +30,14 @@ typedef struct{
 	GList* outEdges;
 	GList* inEdges;
 }VertexType;
+
+typedef struct{
+	EdgeId id;
+	VertexType* start;
+	VertexType* end;
+    GList* ings;
+	AttributeTable* attributes;
+}EdgeType;
 
 typedef struct{
 	GraphId id;
@@ -79,18 +79,18 @@ GList* get_ving_inedges(GraphType* g, VertexType* v);
 
 GList* get_g_alle(GraphType* g);
 GList* get_g_allv(GraphType* g);
-int g_remove_edge(EdgeType* e);
+int g_remove_edge(GraphType* g, EdgeType* e);
 int g_remove_vertex(GraphType* g, VertexType* v);
 int g_insert_v(GraphType* g, VertexType* v);
 int g_insert_e(GraphType* g, VertexType* v);
 int g_insert_subg(GraphType* g, GraphType* subg);
 
-GList* edge_match(GList* elist, char* attribute, void* value);
-GList* vertex_match(GList* vlist, char* attribute, void* value);
+GList* edge_match(GList* elist, char* attribute, void* value, int vtype);
+GList* vertex_match(GList* vlist, char* attribute, void* value, int vtype);
 
-int list_append(ListType* list, void* data);
-ListType* list_declare(...);
-int list_remove(void* data);
+//int list_append(ListType* list, void* data);
+//ListType* list_declare(...);
+//int list_remove(void* data);
 
-StringType* string_append(StringType* s, const char* seq);
+//StringType* string_append(StringType* s, const char* seq);
 #endif
