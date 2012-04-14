@@ -94,5 +94,9 @@
         mxmlNewElement(edge_attribute_value,1, vertex_get_attribute_value(e, g_list_nth_data(e_attr,y)));
       }
     }
+      fp = fopen("filename.xml", "w");
+      mxmlSaveFile(xml, fp, MXML_NO_CALLBACK);
+      fclose(fp);
+
 
   }
