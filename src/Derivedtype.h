@@ -71,14 +71,18 @@ VertexType* get_start_vertex(EdgeType* e);
 
 int vertex_assign_attribute(VertexType* v, char* attribute, void* value);
 void* vertex_get_attribute_value(VertexType* v, char* attribute);
-GList* get_out_edges(VertexType* v);
-GList* get_in_edges(VertexType* v);
+GList* get_v_outedges(VertexType* v);
+GList* get_v_inedges(VertexType* v);
+
+GList* get_ving_outedges(GraphType* g, VertexType* v);
+GList* get_ving_inedges(GraphType* g, VertexType* v);
 
 GList* get_g_alle(GraphType* g);
 GList* get_g_allv(GraphType* g);
 int g_remove_edge(EdgeType* e);
 int g_remove_vertex(GraphType* g, VertexType* v);
 int g_insert_v(GraphType* g, VertexType* v);
+int g_insert_e(GraphType* g, VertexType* v);
 int g_insert_subg(GraphType* g, GraphType* subg);
 
 GList* edge_match(GList* elist, char* attribute, void* value);

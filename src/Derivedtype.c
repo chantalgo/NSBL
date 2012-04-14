@@ -66,19 +66,17 @@ int destroy_vertex(VertexType* v){
     EdgeType* e;
     int l = g_list_length(v->outEdges);
     int n = 0;
-    for(n; n<l; n++){
+	for(n=0; n<l; n++){
         e = g_list_nth_data(v->outEdges);
         destroy_edge(e);
     }
     l = g_list_length(v->inEdges);
-    n = 0;
-    for(n; n<l; n++){
+    for(n=0; n<l; n++){
         e = g_list_nth_data(v->inEdges);
         destroy_edge(e);
     }
     l = g_list_length(v->ings);
-    n = 0;
-    for(n; n<l; n++){
+    for(n=0; n<l; n++){
         GraphType* g = g_list_nth_data(e->ings);
         g_remove_vertex(g, v);
     }
@@ -87,9 +85,9 @@ int destroy_vertex(VertexType* v){
 }
 
 int destroy_graph(GraphType* g){
-	//g_array_free(g->edgeIdList, 1);
+	g_list_free_1(g->edgeIdList);
 	g_list_free_1(g->vertexIdList);
-	//g_hash_table_destroy(g->edges);
+	g_hash_table_destroy(g->edges);
 	g_hash_table_destroy(g->vertices);
 	free(g);
 	return 0;
@@ -112,12 +110,6 @@ int edge_assign_direction(EdgeType* e, VertexType* v1, VertexType v2){
 	//v1->number_of_out++;
 	g_array_append_val(v2->inEdges, e);
 	//v2->number_of_in++;
-	int l = g_list_length(v1->ings);
-	int n = 0;
-	for(n; n<l; n++){
-		GraphType* g = g_list_nth_data(v1-ings, n);
-		g_insert_v(g, v2);
-	}
 	return 0;
 }
 
@@ -147,12 +139,34 @@ void* vertex_get_attribute_value(VertexType* v, char* attribute){
 	return g_hash_table_lookup(v->attributes, attribute);
 }
 
-GList* get_out_edges(VertexType* v){
+GList* get_v_outedges(VertexType* v){
 	return v->outEdges;
 }
 
-GList* get_in_edges(VertexType* v){
+GList* get_v_inedges(VertexType* v){
 	return v->inEdges;
+}
+
+GList* get_ving_outedges(GraphType* g, VertexType* v){
+	GList* elist = get_v_outedges(v);
+	return get_common_edges(g->edges, elist);
+}
+
+GList* get_ving_inedges(GraphType* g, VertexType* v){
+	GList* elist = get_v_inedges(v);
+	return get_common_edges(g->vertices, elist);
+}
+
+GList* get_common_edges(GHashTable* edges, GList* list){
+	GList* common = NULL;
+	int l = g_list_length(list);
+	int n = 0;
+	for(n; n<l; n++){
+		EdgeType* e = g_list_nth_data(list, n);
+		if(g_hash_table_contains(edges, &(e->id)))
+			common = g_list_append(common, e);
+	}
+	return NULL;
 }
 
 GList* get_g_allv(GraphType* g){
@@ -168,14 +182,15 @@ GList* get_g_allv(GraphType* g){
 }
 
 GList* get_g_alle(GraphType* g){
-	GList* vlist = get_g_allv(g);
-	GList* elist = NULL;
-	int l = g_list_length(vlist);
+	GList* list = NULL;
+	int l = g_list_length(g->edgeIdList);
 	int n = 0;
 	for(n; n<l; n++){
-		VertexType* v = g_list_nth_data(vlist, n);
-		elist = g_list_concat(elist, get_out_edges(v));
+		int* key = g_list_nth_data(g->edgeIdList, n);
+		EdgeType* e = (EdgeType*)g_hash_table_lookup(g->edges, key);
+		list = g_list_append(list, e);
 	}
+	return list;
 }
 
 int g_remove_edge(GraphType* g, EdgeType* e){
@@ -191,19 +206,43 @@ int g_remove_vertex(GraphType* g, VertexType* v){
 }
 
 int g_insert_v(GraphType* g, VertexType* v){
-	if(g_hash_table_contains(g->vertices, &(v->id))){
-		return 0;
-	}
 	g->vertexIdList = g_list_append(g->vertexIdList, &(v->id));
 	g_hash_table_insert(g->vertices, &(v->id), v);
 	v->ings = g_list_append(v->ings, g);
-	GList* out_e_list = get_out_edges(v);
-	int l = g_list_length(out_e_list);
-	int n = 0;
-	for(n; n<l; n++){
-		EdgeType* e = g_list_nth_data(out_e_list);
-		VertexType* vsub = e->end;
-		g_insert_v(g, vsub);
+	return 0;
+}
+
+int g_insert_e(GraphType* g, VertexType* e){
+	g->edgeIdList = g_list_append(g->edgeIdList, &(e->id));
+	g_hash_table_insert(g->edges, &(e->id), e);
+	e->ings = g_list_append(e->ings, g);
+	return 0;
+
+}
+
+int g_insert_subg(GraphType* g, GraphType* subg){
+	int l,n;
+	l = g_list_length(subg->vertexIdList);
+	for(n=0; n<l; n++){
+		int* key = g_list_nth_data(subg->vertexIdList, n);
+		if(g_hash_table_contains(subg->vertices, key))
+			continue;
+		else{
+			g->vertexIdList = g_list_append(g->vertexIdList, key);
+			VertexType* v = g_hash_table_lookup(subg->vertices, key);
+			g_hash_table_insert(g->vertexIdList, key, v);
+		}
+	}
+	l = g_list_length(subg->edgeIdList);
+	for(n=0; n<l; n++){
+		int* key = g_list_nth_data(subg->edgeIdList, n);
+		if(g_hash_table_contains(subg->edges, key))
+			continue;
+		else{
+			g->edgeIdList = g_list_append(g->edgeIdList, key);
+			EdgeType* e = g_hash_table_lookup(subg->edges, key);
+			g_hash_table_insert(g->edgeIdList, key, e);
+		}
 	}
 }
 
