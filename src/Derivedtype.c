@@ -136,6 +136,7 @@ int edge_assign_direction(EdgeType* e, VertexType* v1, VertexType* v2){
 	e->end = v2;
 	v1->outEdges = g_list_append(v1->outEdges, e);
 	//v1->number_of_out++;
+	//
 	v2->inEdges = g_list_append(v2->inEdges, e);
 	//v2->number_of_in++;
 	return 0;
