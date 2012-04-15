@@ -66,3 +66,7 @@ Bugs:
 04/12/2012
 STATUS:
 >>graph library added, not tested yet, just give you an idea of what I am doing now.
+
+04/14/2012
+STATUS:
+Me and Chantal working on I/O part. savegraph is complete but not tested. working on read graph as well. (Kunal)
