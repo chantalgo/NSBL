@@ -7,10 +7,10 @@
 		<vertex>
 			<vertex_id></vertex_id>
 			<outedges>
-				<outedge></outedge>
+				<outedgeID></outedgeID>
 			</outedges>
 			<inedges>
-				<inedge></inedge>
+				<inedgeID></inedgeID>
 			</inedges>
 			<vertex_attributes>
 				<vertex_attribute>
@@ -26,8 +26,8 @@
 	<edges>
 		<edge>
 			<edge_id></edge_id>
-			<startV></startV>
-			<endV></endV>
+			<startVID></startVID>
+			<endVID></endVID>
 			<edge_attributes>
 				<edge_attribute>
 					<edge_attribute_name></edge_attribute_name>
