@@ -6,8 +6,12 @@
 	<vertices>
 		<vertex>
 			<vertex_id></vertex_id>
-			<outedges></outedges>
-			<inedges></inedges>
+			<outedges>
+				<outedge></outedge>
+			</outedges>
+			<inedges>
+				<inedge></inedge>
+			</inedges>
 			<vertex_attributes>
 				<vertex_attribute>
 					<vertex_attribute_name></vertex_attribute_name>
