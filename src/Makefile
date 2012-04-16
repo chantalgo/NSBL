@@ -25,7 +25,7 @@ CC = gcc $(CFLAGS) $(GLIBINCLUDE)
 LEX = flex
 YACC = yacc
 
-OBJ = Parser.tab.o LexAly.yy.o ASTree.o SymbolTable.o SymbolTableUtil.o util.o Error.o CodeGen.o Derivedtype.o
+OBJ = Parser.tab.o LexAly.yy.o ASTree.o SymbolTable.o SymbolTableUtil.o util.o Error.o CodeGen.o Derivedtype.o  FileReadWrite.o
 
 toy.exe : $(OBJ)
 	$(CC) -o toy.exe $(OBJ) -lfl -ly $(GLIBLINK)
@@ -59,7 +59,9 @@ CodeGen.o:	CodeGen.h CodeGen.c
 	$(CC) -c CodeGen.c
 Derivedtype.o : Derivedtype.h Derivedtype.c
 	$(CC) -c Derivedtype.c
-
+FileReadWrite.o: FileReadWrite.h FileReadWrite.c 
+	$(CC) -c FileReadWrite.c
+	
 test : toy.exe
 #	$(BINDIR)/toy.exe $(TESTDIR)/syntax-test.nsbl 
 #	$(BINDIR)/toy.exe $(TESTDIR)/astFuncLiteral.nsbl 
