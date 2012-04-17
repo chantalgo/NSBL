@@ -1,13 +1,14 @@
 <graph>
-	<graph_id></graph_id>
-	<vertices_list></vertices_list>
-	<edges_list></edges_list>
 
 	<vertices>
 		<vertex>
 			<vertex_id></vertex_id>
-			<outedges></outedges>
-			<inedges></inedges>
+			<outedges>
+				<outedgeID></outedgeID>
+			</outedges>
+			<inedges>
+				<inedgeID></inedgeID>
+			</inedges>
 			<vertex_attributes>
 				<vertex_attribute>
 					<vertex_attribute_name></vertex_attribute_name>
@@ -22,8 +23,8 @@
 	<edges>
 		<edge>
 			<edge_id></edge_id>
-			<startV></startV>
-			<endV></endV>
+			<startVID></startVID>
+			<endVID></endVID>
 			<edge_attributes>
 				<edge_attribute>
 					<edge_attribute_name></edge_attribute_name>

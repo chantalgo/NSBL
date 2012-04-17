@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<flexbuilder version="4.0.0" catalyst-version="273393"> 	<locale>en_US</locale>
+	<sdks> 		<sdk location="../../sdks/4.0.0"
+defaultSDK="true" />
+</sdks>
+</flexbuilder>

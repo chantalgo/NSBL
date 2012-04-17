@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<data>	<node> val1</node>
+	<node> val2</node>
+	<node> val3</node>
+	<group>
+		<node> val4</node>
+		<node> val5</node>
+		<node> val6</node>
+</group>
+	<node> val7</node>
+	<node> val8</node>
+</data>

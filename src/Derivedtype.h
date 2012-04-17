@@ -13,16 +13,16 @@
 #define FLOAT 2
 #define STRING 3
 
-typedef int EdgeId;
-typedef int VertexId;
-typedef int GraphId;
+typedef long int EdgeId;
+typedef long int VertexId;
+typedef long int GraphId;
 typedef GHashTable AttributeTable;
 
 typedef GList ListType;
 typedef GString StringType;
 
 typedef struct{
-	int type;
+	long int type;
 	void* value;
 }Attribute;
 
