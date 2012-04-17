@@ -78,4 +78,4 @@ testglib : Derivedtype.o graph_lib_test.c
 clean :
 	rm -f Parser.tab.c Parser.tab.h LexAly.yy.c y.output $(BINDIR)/toy.exe *.o
 	rm -f SymbolTable.o testST.o $(BINDIR)/testsm.exe
-	rm -f Derivedtype.o graph_lib_test.o $(BINDIR)/graph_lib_test.exe $(GLIBLINK)
+	rm -f Derivedtype.o graph_lib_test.o $(BINDIR)/graph_lib_test.exe
