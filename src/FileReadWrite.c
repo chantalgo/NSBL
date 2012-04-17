@@ -3,11 +3,15 @@
 #include "FileReadWrite.h"
 
 
+
 //Function to write graph in xml format
   void saveGraph(GraphType* g, char* fileloc, char* filename)
   {
     FILE *fp; /*File to write*/
 	char *delim="/";
+	char filepath[100];
+	char str[100];
+
 
     mxml_node_t *xml;    
     mxml_node_t *graph;   
@@ -38,32 +42,38 @@
     mxml_node_t *edge_attribute_value_type;
 
     xml = mxmlNewXML("1.0");
-    //graph = mxmlNewElement(xml, "graph"); 
+    graph = mxmlNewElement(xml, "graph"); 
     //graph_id = mxmlNewElement(graph, "graph_id");
     //mxmlNewText(graph_id, 1, g->id); 
     //vertices_list = mxmlNewElement(graph, "vertices_list");
     //mxmlNewText(vertices_list, 1, g->vertexIdList);
     //edges_list = mxmlNewElement(graph, "edges_list");
     //mxmlNewText(edges_list, 1, g->edgeIdList);
+    
     vertices = mxmlNewElement(graph, "vertices");
-    GList* listV=NULL;
-    GList* listE=NULL;
+    GList* listV= g_hash_table_get_values(g->vertices);
+    GList* listE= g_hash_table_get_values(g->edges) ;
     int lv = g_list_length(g->vertexIdList);
     int n = 0;
+    
     for(n; n<lv; n++)
     {	
-     VertexType* v = g_list_nth_data(listV,n);
+     VertexType* v = (VertexType*)(g_list_nth_data(listV,n));
      vertex = mxmlNewElement(vertices, "vertex");
      vertex_id=mxmlNewElement(vertex,"vertex_id");
-     mxmlNewText(vertex_id,1,(const char *)(v->id));
-     outedges = mxmlNewElement(vertex,"outedges");
+     int len = snprintf(str, 100, "%d",v->id );
+     //printf("%s\n",str);
+     //mxmlNewText(vertex_id,1,str);
+		
+        outedges = mxmlNewElement(vertex,"outedges");
 	 int loe= g_list_length(v->outEdges);
 	 int y=0;
 	 for (y;y<loe;y++)
 	 {
 		outedge=mxmlNewElement(outedges,"outedge");
 		EdgeType* e_temp = g_list_nth_data(v->outEdges,y);
-		mxmlNewText(outedge, 1, (const char *)e_temp->id);
+		int len = snprintf(str, 100, "%d",e_temp->id );
+		mxmlNewText(outedge, 1, str);
 	 }
   
      inedges =  mxmlNewElement(vertex,"inedges");
@@ -74,25 +84,54 @@
 	 {
 		inedge=mxmlNewElement(inedges,"inedge");
 		EdgeType* e_temp = g_list_nth_data(v->inEdges,d);
-		mxmlNewText(inedge, 1, (const char *)e_temp->id);
+		int len = snprintf(str, 100, "%d",e_temp->id );
+		mxmlNewText(inedge, 1, str);
 	 }
      vertex_attributes =  mxmlNewElement(vertex,"vertex_attributes");
      vertex_attribute = mxmlNewElement(vertex_attributes,"vertex_attribute");
      GList* v_attr=g_hash_table_get_keys(v->attributes);
+     GList* v_attr_value=g_hash_table_get_values(v->attributes);
      int a=g_list_length(listV);
      int x=0;
      for(x;x<a;x++)
      {
       vertex_attribute_name=mxmlNewElement(vertex_attribute,"vertex_attribute_name");
-      mxmlNewText(vertex_attribute_name, 1,g_list_nth_data(v_attr,x));
-      vertex_attribute_name=mxmlNewElement(vertex_attribute, "vertex_attribute_value");
-      mxmlNewText(vertex_attribute_value, 1, (char*)vertex_get_attribute_value(v, g_list_nth_data(v_attr,x)));//need to check if cast works as returns void*
+      mxmlNewText(vertex_attribute_name, 1,(char *)g_list_nth_data(v_attr,x));
+      vertex_attribute_value=mxmlNewElement(vertex_attribute, "vertex_attribute_value");
+      //printf("%s\n",(char*)(((Attribute*)(g_list_nth_data(v_attr_value,x)))->value));
+
+    /*  
+	Attribute* attr = (Attribute*) malloc(sizeof(Attribute));
+	attr = (Attribute*)g_list_nth_data(v_attr_value,x);
+	long int abc = attr->type;
+	void *t = attr->value;
+	fprintf(stderr,"\n\n%d\n\n%d\n\n", abc,sizeof((char *)t));
+	char* temp=(char*)g_list_nth_data(v_attr,x);
+	void* t=(vertex_get_attribute_value(v, "Name"));
+	*/
+
+	//char *t1 = (char*)(attr->value);
+      //char *temp=(char*)(((Attribute*)(g_list_nth_data(v_attr_value,x)))->value);
+	//char *temp1 = (char *)malloc(sizeof(char *)* sizeof(temp));
+      //printf("%s\n",temp);
+      //int len = snprintf(str, 100, "%s",temp );
+      //printf("%s %d\n",temp, sizeof(temp));
+	//memcpy(temp1, temp,sizeof(temp));
+	mxmlNewText(vertex_attribute_value, 1, 
+	(char*)(((Attribute*)(g_list_nth_data(v_attr_value,x)))->value));
+      //mxmlNewText(vertex_attribute_value, 1, temp1);
+	//mxmlNewText(vertex_attribute_value, 1, (char *)(((Attribute*)(g_list_nth_data(v_attr_value,x)))->value));
+      //mxmlNewText(vertex_attribute_value, 1, (char*)(vertex_get_attribute_value(v, g_list_nth_data(v_attr,x))));//need to check if cast works as returns void*
+#if 0
 	  vertex_attribute_value_type=mxmlNewElement(vertex_attribute, "vertex_attribute_value_type");
-	  mxmlNewText(vertex_attribute_name, 1,
+	mxmlNewText(vertex_attribute_value_type,1,  
+	mxmlNewText(vertex_attribute_name, 1,
 	  	(const char *)(g_hash_table_lookup(v->attributes,(gconstpointer)((Attribute* )g_list_nth_data(v_attr,x))->type)
 	  		));
-     } 		
+#endif
+     }		
     }
+/*
 
     int le = g_list_length(g->edgeIdList);
     int m=0;
@@ -101,11 +140,15 @@
       EdgeType* e= g_list_nth_data(listE,m);
       edge =mxmlNewElement(edges,"edge");
       edge_id=mxmlNewElement(edge, "edge_id");
-      mxmlNewText(edge_id,1,(const char *)e->id);
+      int len = snprintf(str, 100, "%d",(e->id) );
+      mxmlNewText(edge_id,1,str);
       startV = mxmlNewElement(edge, "startV");
-      mxmlNewText(startV,1,(const char *)(e->start->id));
+      int len = snprintf(str, 100, "%d",e->start->id );
+      mxmlNewText(startV,1,str);
       endV = mxmlNewElement(edge,"endV");
-      mxmlNewText(endV,1,(const char *)(e->end->id));
+A
+      int len = snprintf(str, 100, "%d",(e->end->id) );
+      mxmlNewText(endV,1,str);
       edge_attributes = mxmlNewElement(edge, "edge_attributes");
       edge_attribute = mxmlNewElement(edge_attributes, "edge_attribute");
       GList* e_attr= g_hash_table_get_keys(e->attributes);
@@ -122,12 +165,26 @@
 	    	(const char *)(g_hash_table_lookup(e->attributes,(gconstpointer)((Attribute*)g_list_nth_data(e_attr,y))->type)
 	    	));
       }
-    }
-	  strcat(fileloc, delim);
-	  strcat(fileloc, filename);
-      fp = fopen(fileloc, "w");
+    }*/
+#if 1	
+	strcpy(filepath, fileloc);
+		
+    printf("%s\n", filepath );
+
+    
+    if((strcmp(fileloc,delim)!=0)&&(strcmp(fileloc,"./")!=0))
+      {
+      strcat(filepath, delim);
+	  printf("%s\n", filepath );
+      }
+
+	  strcat(filepath, filename);
+      printf("%s\n", filepath );
+
+      fp = fopen(filepath, "w");
       mxmlSaveFile(xml, fp, MXML_NO_CALLBACK);
       fclose(fp);
+#endif 
 
 
   }
