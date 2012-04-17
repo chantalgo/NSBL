@@ -323,12 +323,12 @@ GList* vertex_match(GList* vlist, char* attribute, void* value){
 }
 
 int print_v(VertexType* v){
-	printf("vid: %d ", v->id);
+	printf("vid: %ld ", v->id);
 	return 0;
 }
 
 int print_e(EdgeType* e){
-	printf("eid %d : %d -> %d ", e->id, e->start->id, e->end->id);
+	printf("eid %ld : %ld -> %ld ", e->id, e->start->id, e->end->id);
 	return 0;
 }
 

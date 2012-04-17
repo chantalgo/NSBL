@@ -2,8 +2,8 @@
 #define NSBL_IO_H_NSBL
 
 
-#include "mxml.h"
-#include "config.h"
+#include "../mxmldir/mxml.h"
+#include "../mxmldir/config.h"
 #include "Derivedtype.h"
 #include <stdio.h>
 #include <string.h>

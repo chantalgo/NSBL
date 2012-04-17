@@ -88,7 +88,9 @@
       vertex_attribute_name=mxmlNewElement(vertex_attribute, "vertex_attribute_value");
       mxmlNewText(vertex_attribute_value, 1, (char*)vertex_get_attribute_value(v, g_list_nth_data(v_attr,x)));//need to check if cast works as returns void*
 	  vertex_attribute_value_type=mxmlNewElement(vertex_attribute, "vertex_attribute_value_type");
-	  mxmlNewText(vertex_attribute_name, 1,(const char *)(g_hash_table_lookup(v->attributes,((Attribute* )g_list_nth_data(v_attr,x))->type));
+	  mxmlNewText(vertex_attribute_name, 1,
+	  	(const char *)(g_hash_table_lookup(v->attributes,(gconstpointer)((Attribute* )g_list_nth_data(v_attr,x))->type)
+	  		));
      } 		
     }
 
@@ -99,11 +101,11 @@
       EdgeType* e= g_list_nth_data(listE,m);
       edge =mxmlNewElement(edges,"edge");
       edge_id=mxmlNewElement(edge, "edge_id");
-      mxmlNewText(edge_id,1,e->id);
+      mxmlNewText(edge_id,1,(const char *)e->id);
       startV = mxmlNewElement(edge, "startV");
-      mxmlNewText(startV,1,itoa(e->startV->id));
+      mxmlNewText(startV,1,(const char *)(e->start->id));
       endV = mxmlNewElement(edge,"endV");
-      mxmlNewText(endV,1,itoa(e->endV->id));
+      mxmlNewText(endV,1,(const char *)(e->end->id));
       edge_attributes = mxmlNewElement(edge, "edge_attributes");
       edge_attribute = mxmlNewElement(edge_attributes, "edge_attribute");
       GList* e_attr= g_hash_table_get_keys(e->attributes);
@@ -114,9 +116,11 @@
         edge_attribute_name=mxmlNewElement(edge_attribute,"edge_attribute_name");
         mxmlNewText(edge_attribute_name,1, g_list_nth_data(e_attr,y));
         edge_attribute_name=mxmlNewElement(edge_attribute,"edge_attribute_value");
-        mxmlNewElement(edge_attribute_value,1, vertex_get_attribute_value(e, g_list_nth_data(e_attr,y)));//need to check if cast works as returns void*
+        mxmlNewText(edge_attribute_value,1, (char*)edge_get_attribute_value(e, g_list_nth_data(e_attr,y)));//need to check if cast works as returns void*
 		edge_attribute_value_type=mxmlNewElement(edge_attribute, "edge_attribute_value_type");
-	    mxmlNewText(edge_attribute_name, 1,(const char *)(g_hash_table_lookup(e->attributes,g_list_nth_data(e_attr,x)))->type);
+	    mxmlNewText(edge_attribute_name, 1,
+	    	(const char *)(g_hash_table_lookup(e->attributes,(gconstpointer)((Attribute*)g_list_nth_data(e_attr,y))->type)
+	    	));
       }
     }
 	  strcat(fileloc, delim);
@@ -129,7 +133,7 @@
   }
 
   //Function to read a saved xml graph
-  GraphType* readGraph(char* fileLoc, char* filename)
+  GraphType* readGraph(char* fileloc, char* filename)
   {
 	FILE *fp;
     mxml_node_t *tree;
@@ -166,8 +170,8 @@
                                 MXML_DESCEND))
 		 {
 			 node = mxmlGetFirstChild(node);//vertex id
-			 char *old_vID=mxmlGetText(node,NULL);
-			 char *new_vID=itoa(new_vertexId());
+			 char *old_vID=(char *)mxmlGetText(node,NULL);
+			 char *new_vID=(char *)((long int)new_vertexId());
 			 mxmlSetText(node, 1, new_vID);
 
 			 //updating new vertexID at every startV node
@@ -217,8 +221,8 @@
                                 MXML_DESCEND))
     {
 			 node = mxmlGetFirstChild(node);//edge id
-			 char *old_eID=mxmlGetText(node,NULL);
-			 char *new_eID=itoa(new_edgeId());
+			 char *old_eID=(char *)mxmlGetText(node,NULL);
+			 char *new_eID=(char *)((long int)new_edgeId());
 			 mxmlSetText(node, 1, new_eID);
 
 			 //updating new edgeID at every outedge node
@@ -273,7 +277,7 @@
     {
         v=new_vertex();
 		node = mxmlGetFirstChild(node);//vertex id
-	    v->id=atoi(mxmlGetText(node,NULL));
+	    v->id=(long int)(mxmlGetText(node,NULL));
 		node = mxmlGetNextSibling(node);//skip outedges
 		node = mxmlGetNextSibling(node);//skip inedges
 		node = mxmlGetNextSibling(node);//populate attributes for the vertex
@@ -281,11 +285,11 @@
 		node_temp2 = mxmlGetFirstChild(node);
 		while(node_temp1!=node_temp2)
 		{
-			char* attribute=mxmlGetText(node_temp2,NULL);//attr name
+			char* attribute=(char*)mxmlGetText(node_temp2,NULL);//attr name
 			node_temp2=mxmlGetNextSibling(node_temp2);//go to attr value
 			void* value=(void*)mxmlGetText(node_temp2,NULL);//needs to be checked
 			node_temp2=mxmlGetNextSibling(node_temp2);//go to attr value type
-			int type=mxmlGetText(node_temp2,NULL);
+			int type=(long int)mxmlGetText(node_temp2,NULL);
 			vertex_assign_attribute( v, attribute, value, type);//check if its correct as it returns int
             node_temp2=mxmlGetNextSibling(node_temp2);
 		}
@@ -304,18 +308,19 @@
                                 NULL, NULL,
                                 MXML_DESCEND))
 	{
-	    VertexType* sv,ev;
+	    VertexType* sv;
+	    VertexType* ev;
 		e=new_edge();
 		node = mxmlGetFirstChild(node);//edge id
-	    e->id=atoi(mxmlGetText(node,NULL));
+	    e->id=(int)(long int)(mxmlGetText(node,NULL));
 		node = mxmlGetNextSibling(node);
-		int startVId=atoi(mxmlGetText(node,NULL));
+		int startVId=(int)((long int)(mxmlGetText(node,NULL)));
 		//have to check if the hash table lookup works or not
-		sv=g_hash_table_lookup(g->vertices,startVId);
+		sv=g_hash_table_lookup(g->vertices,(gconstpointer)(long int)startVId);
 		node = mxmlGetNextSibling(node);
-		int endVId=atoi(mxmlGetText(node,NULL));
+		int endVId=(int)((long int)(mxmlGetText(node,NULL)));
 		//have to check if the hash table lookup works or not
-		ev=g_hash_table_lookup(g->vertices,endVId);
+		ev=g_hash_table_lookup(g->vertices,(gconstpointer)(long int)endVId);
 		//the below code populates outedges and inedges as well
 		edge_assign_direction(e, sv, ev);//check if its correct as it returns int
 		//go to edge_attributes
@@ -327,11 +332,11 @@
 		node_temp2 = mxmlGetFirstChild(node);
 		while(node_temp1!=node_temp2)
 		{
-			char* attribute=mxmlGetText(node_temp2,NULL);//attr name
+			char* attribute=(char*)mxmlGetText(node_temp2,NULL);//attr name
 			node_temp2=mxmlGetNextSibling(node_temp2);//go to attr value
 			void* value=(void*)mxmlGetText(node_temp2,NULL);//needs to be checked
 			node_temp2=mxmlGetNextSibling(node_temp2);//go to attr value type
-			int type=mxmlGetText(node_temp2,NULL);
+			int type=(int)(long int)mxmlGetText(node_temp2,NULL);
 			edge_assign_attribute( e, attribute, value, type);//check if its correct as it returns int
             node_temp2=mxmlGetNextSibling(node_temp2);
 		}
