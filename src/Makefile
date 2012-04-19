@@ -66,8 +66,8 @@ FileReadWrite.o: FileReadWrite.h FileReadWrite.c
 	
 test : toy.exe
 #	$(BINDIR)/toy.exe $(TESTDIR)/syntax-test.nsbl 
-#	$(BINDIR)/toy.exe $(TESTDIR)/astFuncLiteral.nsbl 
-	$(BINDIR)/toy.exe $(TESTDIR)/astFunc.nsbl 
+	$(BINDIR)/toy.exe $(TESTDIR)/astFuncLiteral.nsbl 
+#	$(BINDIR)/toy.exe $(TESTDIR)/astFunc.nsbl 
 #	$(BINDIR)/toy.exe $(TESTDIR)/astStat.nsbl 
 #	$(BINDIR)/toy.exe $(TESTDIR)/astVarDecl.nsbl 
 

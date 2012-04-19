@@ -80,6 +80,37 @@ void  strFreeAll(int n, ...) {
     return;
 }
 
+void derivedTypeInitCode(struct Node* node, int type, int isglobal){
+	if(node->token == AST_COMMA){
+		derivedTypeInitCode(node->child[0], type, isglobal);
+		derivedTypeInitCode(node->child[1], type, isglobal);
+    	node->code = strCatAlloc("",2, node->child[0]->code, node->child[1]->code);
+	}else{
+		switch(type){
+			case GRAPH_T:
+				if(isglobal)
+					node->code = strCatAlloc("",3,INDENT[node->scope[0]], node->symbol->bind, " = new_graph();\n"); 
+				else
+					node->code = strCatAlloc("",5,INDENT[node->scope[0]], sTypeName(type), " ", node->symbol->bind, " = new_graph();\n");
+				break;
+			case VERTEX_T:
+				if(isglobal)
+					node->code = strCatAlloc("",3,INDENT[node->scope[0]], node->symbol->bind, " = new_vertex();\n"); 
+				else
+					node->code = strCatAlloc("",5,INDENT[node->scope[0]], sTypeName(type), " ", node->symbol->bind, " = new_vertex();\n");
+				break;
+			case EDGE_T:
+				if(isglobal)
+					node->code = strCatAlloc("",3,INDENT[node->scope[0]], node->symbol->bind, " = new_edge();\n"); 
+				else
+					node->code = strCatAlloc("",5,INDENT[node->scope[0]], sTypeName(type), " ", node->symbol->bind, " = new_edge();\n");
+				break;
+			default:
+				break;
+		}
+	}
+}
+
 /** recursively generate code piece on each node */
 int codeGen (struct Node * node) {
     if( node == NULL ) return;
@@ -125,11 +156,31 @@ int codeGen (struct Node * node) {
         case AST_DECLARATION :
             codeGen( node->child[0] );codeGen( node->child[1] );
             if(node->scope[0]==0) { // we need to treat them as external declaration in c
-                node->code = strCatAlloc("",3,INDENT[node->scope[0]],node->child[1]->code,";\n");
                 node->codetmp = strCatAlloc("",5,INDENT[node->scope[0]],node->child[0]->code," ",node->child[1]->codetmp,";\n");
+				switch(node->child[0]->lexval.ival){
+					case GRAPH_T: 
+					case VERTEX_T:
+					case EDGE_T:
+						derivedTypeInitCode(node->child[1], node->child[0]->lexval.ival, 1);
+						node->code = strCatAlloc("", 1, node->child[1]->code);
+						break;
+					default:
+               			node->code = strCatAlloc("",3,INDENT[node->scope[0]],node->child[1]->code,";\n");
+						break;
+				}
             }
             else {
-                node->code = strCatAlloc("",5,INDENT[node->scope[0]],node->child[0]->code," ",node->child[1]->code,";\n");
+				switch(node->child[0]->lexval.ival){
+					case GRAPH_T:
+					case VERTEX_T:
+					case EDGE_T:
+						derivedTypeInitCode(node->child[1], node->child[0]->lexval.ival, 0);
+						node->code = strCatAlloc("", 1, node->child[1]->code);
+						break;
+					default:
+                		node->code = strCatAlloc("",5,INDENT[node->scope[0]],node->child[0]->code," ",node->child[1]->code,";\n");
+						break;
+				}
             }
             break;
 /************************************************************************************/

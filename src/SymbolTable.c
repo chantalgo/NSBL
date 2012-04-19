@@ -97,9 +97,9 @@ char* s_table_type_name (int type) {
         case FLOAT_T:           return "float";
         case STRING_T:          return "string";
         case LIST_T:            return "list";
-        case VERTEX_T:          return "vertex";
-        case EDGE_T:            return "edge";
-        case GRAPH_T:           return "graph";
+        case VERTEX_T:          return "VertexType*";
+        case EDGE_T:            return "EdgeType*";
+        case GRAPH_T:           return "GraphType*";
         case DYNAMIC_T:         return "dyn";
         case FUNC_T:            return "func";
         case FUNC_LITERAL_T:    return "fl";
