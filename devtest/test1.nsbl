@@ -1,0 +1,8 @@
+int i, j=2, k, l=4;
+i = j+2;
+k=i+l;
+{
+    float x,h=0.0576,y;
+    y = k +h;
+    x = y;
+}

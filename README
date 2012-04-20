@@ -70,3 +70,9 @@ STATUS:
 04/14/2012
 STATUS:
 Me and Chantal working on I/O part. savegraph is complete but not tested. working on read graph as well. (Kunal)
+
+04/20/2012
+ADD error handle for syntax error.
+BASIC Error HANDLE complete. 
+-Jing
+
