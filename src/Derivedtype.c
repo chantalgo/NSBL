@@ -148,7 +148,28 @@ int edge_assign_direction(EdgeType* e, VertexType* v1, VertexType* v2){
 int edge_assign_attribute(EdgeType* e, char* attribute, void* value, int type){
 	Attribute* attr = (Attribute*) malloc(sizeof(Attribute));
 	attr->type = type;
-	attr->value = value;
+	switch(type){
+		case INT:
+			attr->value = malloc(sizeof(int));
+			*(int*)attr->value = *(int*)value;
+			break;
+		case FLOAT:
+			attr->value = malloc(sizeof(float));
+			*(float*)attr->value = *(float*)value;
+			break;
+		case STRING:
+			{
+			int len = strlen((char*)value)+1;
+			char* scopy = (char*)malloc(sizeof(char)*len);
+			char* s = (char*)value;
+			int i = 0;
+			for(i; i<len; i++){
+				scopy[i] = s[i];
+			}
+			attr->value = (void*)scopy;
+			}
+			break;
+	}
 	g_hash_table_insert(e->attributes, attribute, attr);
 	return 0;
 }
@@ -168,7 +189,28 @@ VertexType* get_end_vertex(EdgeType* e){
 int vertex_assign_attribute(VertexType* v, char* attribute, void* value, int type){
 	Attribute* attr = (Attribute*) malloc(sizeof(Attribute));
 	attr->type = type;
-	attr->value = value;
+	switch(type){
+		case INT:
+			attr->value = malloc(sizeof(int));
+			*(int*)attr->value = *(int*)value;
+			break;
+		case FLOAT:
+			attr->value = malloc(sizeof(float));
+			*(float*)attr->value = *(float*)value;
+			break;
+		case STRING:
+			{
+			int len = strlen((char*)value)+1;
+			char* scopy = (char*)malloc(sizeof(char)*len);
+			char* s = (char*)value;
+			int i = 0;
+			for(i; i<len; i++){
+				scopy[i] = s[i];
+			}
+			attr->value = (void*)scopy;
+			}
+			break;
+	}
 	g_hash_table_insert(v->attributes, attribute, attr);
 	return 0;
 }

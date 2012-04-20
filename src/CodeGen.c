@@ -111,6 +111,27 @@ void derivedTypeInitCode(struct Node* node, int type, int isglobal){
 	}
 }
 
+int existbelong(struct Node* node){
+	if(node->token == BELONG)
+		return 1;
+	return (existbelong(node->child[0]) || existbelong(node->child[1]));
+}
+
+void attributeDeclareCode(struct Node* node, int type){
+	switch(type){
+		case INT_T:
+		//	node->code = strCatAlloc("", 16, INDENT[node->child[0]->child[0]->scope[0]], sTypeName(type), " ", node->child[0]->child[0]->symbol->bind, "_v", " = ", node->child[1]->code, ";\n",
+		//			"vertex_assign_attribute(", node->child[0]->child[0]->symbol->bind, ", \"", node->child[0]->child[1], "\", &", node->child[0]->child[0]->symbol->bind, "_v ,", "INT);\n");
+			break;
+		case FLOAT_T:
+		//	node->code = strCatAlloc("", 16, INDENT[node->child[0]->child[0]->scope[0]], sTypeName(type), " ", node->child[0]->child[0]->symbol->bind, "_v", " = ", node->child[1]->code, ";\n",
+		//			"vertex_assign_attribute(", node->child[0]->child[0]->symbol->bind, ", \"", node->child[0]->child[1], "\", &", node->child[0]->child[0]->symbol->bind, "_v ,", "FLOAT);\n");
+			break;
+		default:
+			break;
+	}
+}
+
 /** recursively generate code piece on each node */
 int codeGen (struct Node * node) {
     if( node == NULL ) return;
@@ -165,7 +186,14 @@ int codeGen (struct Node * node) {
 						node->code = strCatAlloc("", 1, node->child[1]->code);
 						break;
 					default:
-               			node->code = strCatAlloc("",3,INDENT[node->scope[0]],node->child[1]->code,";\n");
+						if(node->child[1]->child!=NULL && node->child[1]->child[0]->token == BELONG){
+							attributeDeclareCode(node->child[1], node->child[0]->lexval.ival);
+							node->code = strCatAlloc("", 1, node->child[1]->code);
+						}else if(existbelong(node->child[1])){
+							ERRNO = ErrorAttributeDeclaration;
+							return ERRNO;
+						}else
+               				node->code = strCatAlloc("",3,INDENT[node->scope[0]],node->child[1]->code,";\n");
 						break;
 				}
             }
@@ -190,7 +218,9 @@ int codeGen (struct Node * node) {
         case MUL_ASSIGN :  
         case DIV_ASSIGN : 
             lf =  node->child[0]; rt = node->child[1];
-            codeGen(lf);codeGen(rt);
+           // if(existbelong(lf))
+			//	break;
+			codeGen(lf);codeGen(rt);
             // type check and implicit type conversion
             if(lf->type == rt->type) {
                 // int float support : = += -= *= /=

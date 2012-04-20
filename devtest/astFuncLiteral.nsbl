@@ -14,6 +14,9 @@ edge e1, e2;
 vertex v1, v2;
 //g.allV[@age>23];
 
+//int v1::age = 18;
+int testv = 2;
+
 int i,j;
 float x, z;
 tt(j,z);
