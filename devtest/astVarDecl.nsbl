@@ -32,3 +32,10 @@ k+=2;                   // k in scope 0
     j*=2;               // j in scope 0
 }
 
+
+graph g;
+
+{
+    edge e1,e2;
+    vertex v1,v2;
+}

@@ -15,6 +15,7 @@
 #define ErrorUnrecognizedLexeme                         +1
 
 // syntax 21-50
+#define ErrorSyntax                                     +21
 
 // semantic 51-80
 #define ErrorIdentifierAlreadyDeclared                  +51
