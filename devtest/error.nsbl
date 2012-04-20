@@ -1,0 +1,11 @@
+int i= 2,j,k                // missing ;
+
+float a = 1;
+
+{}
+
+int a() {}
+
+func la():void = {};
+
+

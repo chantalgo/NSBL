@@ -311,6 +311,8 @@ void ast_output_node(struct Node* node, FILE* out, const char * sep) {
             fprintf(out, "Node<ARGUMENT_EXP>");break;
         case AST_EXP_STAT :
             fprintf(out, "Node<EXP_STAT>");break;
+        case AST_ERROR :
+            fprintf(out, "Node<ERROR>");break;
         default :
             fprintf(out, "Node<UNKNOWN> !!!!!!!!!!!!!!!!");
     }

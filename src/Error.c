@@ -9,6 +9,7 @@ void errorInfo(int eno, long long line, char* fmt, ...){
     fprintf(ERRORIO,"ERROR:%lld:%d: ",line,eno);
     vfprintf(ERRORIO, fmt, args);
     va_end(args);
+    ERRNO = eno;
     return;
 }
 
