@@ -18,6 +18,7 @@ vertex v1, v2;
 int v1::age = 18;
 float v1::weight = 55.6;
 int testv = 2;
+int v1::age = 18;
 
 int i,j;
 float x, z;
