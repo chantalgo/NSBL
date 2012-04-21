@@ -112,16 +112,20 @@ void derivedTypeInitCode(struct Node* node, int type, int isglobal){
 }
 
 int existbelong(struct Node* node){
+	if(node == NULL)
+		return 0;
 	if(node->token == BELONG)
 		return 1;
+	if(node->child == NULL)
+		return 0;
 	return (existbelong(node->child[0]) || existbelong(node->child[1]));
 }
 
 void attributeDeclareCode(struct Node* node, int type){
 	switch(type){
 		case INT_T:
-		//	node->code = strCatAlloc("", 16, INDENT[node->child[0]->child[0]->scope[0]], sTypeName(type), " ", node->child[0]->child[0]->symbol->bind, "_v", " = ", node->child[1]->code, ";\n",
-		//			"vertex_assign_attribute(", node->child[0]->child[0]->symbol->bind, ", \"", node->child[0]->child[1], "\", &", node->child[0]->child[0]->symbol->bind, "_v ,", "INT);\n");
+			node->code = strCatAlloc("", 4, INDENT[node->child[0]->child[0]->scope[0]], sTypeName(type), " ", node->child[0]->child[0]->symbol->bind);// "_v", " = ", node->child[1]->code, ";\n",
+	//				"vertex_assign_attribute(", node->child[0]->child[0]->symbol->bind, ", \"", node->child[0]->child[1], "\", &", node->child[0]->child[0]->symbol->bind, "_v ,", "INT);\n");
 			break;
 		case FLOAT_T:
 		//	node->code = strCatAlloc("", 16, INDENT[node->child[0]->child[0]->scope[0]], sTypeName(type), " ", node->child[0]->child[0]->symbol->bind, "_v", " = ", node->child[1]->code, ";\n",
@@ -218,8 +222,8 @@ int codeGen (struct Node * node) {
         case MUL_ASSIGN :  
         case DIV_ASSIGN : 
             lf =  node->child[0]; rt = node->child[1];
-           // if(existbelong(lf))
-			//	break;
+            if(existbelong(lf))
+				break;
 			codeGen(lf);codeGen(rt);
             // type check and implicit type conversion
             if(lf->type == rt->type) {
