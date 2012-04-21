@@ -3,23 +3,24 @@ func tt(int i, float x):boolean = { return i==x; };
 func dd(int @a, string @b):int = { return @a; };
 
 int ff() {
-	graph g3;
-	edge e3,e4;
-	int e3::weight = 3;
+//	graph g3;
+//	edge e3,e4;
+//	int e3::weight = 3;
     int ffvar;
     func xx():void = {};
+//	string s4, s5="test s5";
 }
 
-graph g1, g2;
-edge e1, e2;
+//graph g1, g2;
+//edge e1, e2;
 vertex v1, v2;
 //g.allV[@age>23];
+string s1="test s1", s2="test s2", s3;
 
+string v1::name = "Tom";
 int v1::age = 18;
 float v1::weight = 55.6;
 int testv = 2;
-int v1::age = 18;
-
 int i,j;
 float x, z;
 tt(j,z);

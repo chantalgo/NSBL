@@ -36,6 +36,8 @@ int sTableInsertTree(struct Node* node, int ttype) {
             sTableInsertTree(node->child[1], ttype);break;
         case AST_ASSIGN :
             sTableInsertTree(node->child[0], ttype);break;
+		case BELONG:
+			sTableInsertTree(node->child[1], ttype);break;
         default :
             fprintf(stderr, "sTableInsertTree : unknown token %d\n",node->token);
     }
