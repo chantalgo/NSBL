@@ -20,6 +20,7 @@ string s1="test s1", s2="test s2", s3;
 
 string v1::name = "Tom";
 int v1::age = 18;
+int v2::age = 19;
 float v1::weight = 55;
 int testv = 2;
 int i,j;

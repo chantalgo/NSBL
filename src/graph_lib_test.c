@@ -15,8 +15,11 @@ int main(int argc, char** argv){
 	vertex_assign_attribute(v1, "name", v1_name, STRING);
 	vertex_assign_attribute(v1, "age", &v1_age, INT);
 	vertex_assign_attribute(v1, "weight", &v1_weight, FLOAT);
+	char* tss = "namechanged";
+	vertex_assign_attribute(v1, "name", tss, STRING);
 	print_v(v1);
 	print_v_attr(v1);
+	
 
 	//create node for Tom
 	VertexType* v2 = new_vertex();
