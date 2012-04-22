@@ -289,8 +289,24 @@ B
     
 
     	fp = fopen(fileloc, "r");
-    	tree = mxmlLoadFile(NULL, fp,MXML_TEXT_CALLBACK);
-    	fclose(fp);
+  	/*invalid or empty file name check */
+        if (fp==NULL)
+        {
+                printf("Error in provided file name. Please check file name again.\n");
+                fclose(fp);
+                return 0;
+        }
+        tree = mxmlLoadFile(NULL, fp,MXML_TEXT_CALLBACK);
+        /*xml file check */
+        if (tree==NULL)
+        {
+                printf("The file provided is not an XML file.\n");
+                fclose(fp);
+                return 0;
+        }
+        fclose(fp);
+
+
 
 	//printf("xml loaded\n");
 
