@@ -104,6 +104,11 @@ struct Node** ast_all_children(int n, ...){
 
 struct Node* ast_new_node(int token, int nch, struct Node** child, long long line){
     struct Node* node = (struct Node *) malloc ( sizeof (struct Node) );  // free in ast_free_tree
+	if(token==BELONG){
+		char* temp = strCatAlloc("", 3, child[1]->lexval.sval, "_", child[0]->lexval.sval);
+		child[1]->code = child[1]->lexval.sval;
+		child[1]->lexval.sval = temp;
+	}
     node->token = token;
     node->type = UNKNOWN_T;             // default
     node->typeCon = NULL;

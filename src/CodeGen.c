@@ -144,23 +144,23 @@ int attributeDeclareCode(struct Node* node, int type){
 	switch(type){
 		case INT_T:
 			if(node->child[1]->type == FLOAT_T)
-				node->code = strCatAlloc("", 20, INDENT[node->child[0]->child[0]->scope[0]], sTypeName(type), " ", node->child[0]->child[0]->symbol->bind, "_", node->child[0]->child[1]->symbol->bind, " = ", "(int)", node->child[1]->code, ";\n",INDENT[node->child[0]->child[0]->scope[0]], "vertex_assign_attribute(", node->child[0]->child[0]->symbol->bind, ", \"", node->child[0]->child[1]->lexval.sval, "\", &", node->child[0]->child[0]->symbol->bind, "_", node->child[0]->child[1]->symbol->bind,", INT);\n");
+				node->code = strCatAlloc("", 20, INDENT[node->child[0]->child[0]->scope[0]], sTypeName(type), " ", node->child[0]->child[0]->symbol->bind, "_", node->child[0]->child[1]->symbol->bind, " = ", "(int)", node->child[1]->code, ";\n",INDENT[node->child[0]->child[0]->scope[0]], "vertex_assign_attribute(", node->child[0]->child[0]->symbol->bind, ", \"", node->child[0]->child[1]->code, "\", &", node->child[0]->child[0]->symbol->bind, "_", node->child[0]->child[1]->symbol->bind,", INT);\n");
 			else if(node->child[1]->type == INT_T)
-				node->code = strCatAlloc("", 19, INDENT[node->child[0]->child[0]->scope[0]], sTypeName(type), " ", node->child[0]->child[0]->symbol->bind, "_", node->child[0]->child[1]->symbol->bind, " = ", node->child[1]->code, ";\n",INDENT[node->child[0]->child[0]->scope[0]], "vertex_assign_attribute(", node->child[0]->child[0]->symbol->bind, ", \"", node->child[0]->child[1]->lexval.sval, "\", &", node->child[0]->child[0]->symbol->bind, "_", node->child[0]->child[1]->symbol->bind,", INT);\n");
+				node->code = strCatAlloc("", 19, INDENT[node->child[0]->child[0]->scope[0]], sTypeName(type), " ", node->child[0]->child[0]->symbol->bind, "_", node->child[0]->child[1]->symbol->bind, " = ", node->child[1]->code, ";\n",INDENT[node->child[0]->child[0]->scope[0]], "vertex_assign_attribute(", node->child[0]->child[0]->symbol->bind, ", \"", node->child[0]->child[1]->code, "\", &", node->child[0]->child[0]->symbol->bind, "_", node->child[0]->child[1]->symbol->bind,", INT);\n");
 			else
 				err = ErrorTypeMisMatch;		
 			break;
 		case FLOAT_T:
 			if(node->child[1]->type == INT_T)
-				node->code = strCatAlloc("", 20, INDENT[node->child[0]->child[0]->scope[0]], sTypeName(type), " ", node->child[0]->child[0]->symbol->bind, "_", node->child[0]->child[1]->symbol->bind, " = ", "(float)", node->child[1]->code, ";\n",INDENT[node->child[0]->child[0]->scope[0]], "vertex_assign_attribute(", node->child[0]->child[0]->symbol->bind, ", \"", node->child[0]->child[1]->lexval.sval, "\", &", node->child[0]->child[0]->symbol->bind, "_", node->child[0]->child[1]->symbol->bind ,", FLOAT);\n");
+				node->code = strCatAlloc("", 20, INDENT[node->child[0]->child[0]->scope[0]], sTypeName(type), " ", node->child[0]->child[0]->symbol->bind, "_", node->child[0]->child[1]->symbol->bind, " = ", "(float)", node->child[1]->code, ";\n",INDENT[node->child[0]->child[0]->scope[0]], "vertex_assign_attribute(", node->child[0]->child[0]->symbol->bind, ", \"", node->child[0]->child[1]->code, "\", &", node->child[0]->child[0]->symbol->bind, "_", node->child[0]->child[1]->symbol->bind ,", FLOAT);\n");
 			else if(node->child[1]->type == FLOAT_T)
-				node->code = strCatAlloc("", 19, INDENT[node->child[0]->child[0]->scope[0]], sTypeName(type), " ", node->child[0]->child[0]->symbol->bind, "_", node->child[0]->child[1]->symbol->bind, " = ", node->child[1]->code, ";\n",INDENT[node->child[0]->child[0]->scope[0]], "vertex_assign_attribute(", node->child[0]->child[0]->symbol->bind, ", \"", node->child[0]->child[1]->lexval.sval, "\", &", node->child[0]->child[0]->symbol->bind, "_", node->child[0]->child[1]->symbol->bind ,", FLOAT);\n");
+				node->code = strCatAlloc("", 19, INDENT[node->child[0]->child[0]->scope[0]], sTypeName(type), " ", node->child[0]->child[0]->symbol->bind, "_", node->child[0]->child[1]->symbol->bind, " = ", node->child[1]->code, ";\n",INDENT[node->child[0]->child[0]->scope[0]], "vertex_assign_attribute(", node->child[0]->child[0]->symbol->bind, ", \"", node->child[0]->child[1]->code, "\", &", node->child[0]->child[0]->symbol->bind, "_", node->child[0]->child[1]->symbol->bind ,", FLOAT);\n");
 			else
 				err = ErrorTypeMisMatch;
 			break;
 		case STRING_T:
 			if(node->child[1]->type == STRING_T)
-				node->code = strCatAlloc("", 20, INDENT[node->child[0]->child[0]->scope[0]], sTypeName(type), " ", node->child[0]->child[0]->symbol->bind, "_", node->child[0]->child[1]->symbol->bind," = g_string_new(", node->child[1]->code, ");\n",INDENT[node->child[0]->child[0]->scope[0]], "vertex_assign_attribute(", node->child[0]->child[0]->symbol->bind, ", \"", node->child[0]->child[1]->lexval.sval, "\", ", node->child[0]->child[0]->symbol->bind, "_", node->child[0]->child[1]->symbol->bind, "->str ,", "STRING);\n");
+				node->code = strCatAlloc("", 20, INDENT[node->child[0]->child[0]->scope[0]], sTypeName(type), " ", node->child[0]->child[0]->symbol->bind, "_", node->child[0]->child[1]->symbol->bind," = g_string_new(", node->child[1]->code, ");\n",INDENT[node->child[0]->child[0]->scope[0]], "vertex_assign_attribute(", node->child[0]->child[0]->symbol->bind, ", \"", node->child[0]->child[1]->code, "\", ", node->child[0]->child[0]->symbol->bind, "_", node->child[0]->child[1]->symbol->bind, "->str ,", "STRING);\n");
 			else
 				err = ErrorTypeMisMatch;
 			break;

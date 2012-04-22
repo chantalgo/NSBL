@@ -607,7 +607,7 @@ simple_declarator
     | simple_declarator BELONG IDENTIFIER {
 		sTableLookupId($1);
 		char* temp = strCatAlloc("", 3, $3.s, "_", $1->lexval.sval);
-        $$ = astNewNode( BELONG, 2, astAllChildren(2, $1, astNewLeaf(IDENTIFIER, temp, $3.l)), $2.l );
+        $$ = astNewNode( BELONG, 2, astAllChildren(2, $1, astNewLeaf(IDENTIFIER, $3.s, $3.l)), $2.l );
     }
     ;
 
