@@ -1,4 +1,3 @@
-
 #include "FileReadWrite.h"
 
 
@@ -642,9 +641,9 @@ B
 	}
 
 //test to see if graph getting changed
-	fp = fopen("tryc.xml", "w");
-      	mxmlSaveFile(tree, fp, MXML_NO_CALLBACK);
-      	fclose(fp);
+	//fp = fopen("tryc.xml", "w");
+      	//mxmlSaveFile(tree, fp, MXML_NO_CALLBACK);
+      	//fclose(fp);
 	//printf("test xml written\n");
 	return g;
 
