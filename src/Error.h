@@ -17,6 +17,7 @@
 // syntax 21-50
 #define ErrorSyntax                                     +21
 #define ErrorAttributeDeclaration						+22
+#define ErrorDerivedTypeDeclaration						+23
 
 // semantic 51-80
 #define ErrorIdentifierAlreadyDeclared                  +51

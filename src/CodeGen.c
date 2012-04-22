@@ -80,7 +80,8 @@ void  strFreeAll(int n, ...) {
     return;
 }
 
-void derivedTypeInitCode(struct Node* node, int type, int isglobal){
+int derivedTypeInitCode(struct Node* node, int type, int isglobal){
+	int err = 0;
 	if(node->token == AST_COMMA){
 		derivedTypeInitCode(node->child[0], type, isglobal);
 		derivedTypeInitCode(node->child[1], type, isglobal);
@@ -106,9 +107,11 @@ void derivedTypeInitCode(struct Node* node, int type, int isglobal){
 					node->code = strCatAlloc("",5,INDENT[node->scope[0]], sTypeName(type), " ", node->symbol->bind, " = new_edge();\n");
 				break;
 			default:
+				err = ErrorDerivedTypeDeclaration;
 				break;
 		}
 	}
+	return err;
 }
 
 void stringInitCode(struct Node* node, int type, int isglobal){
@@ -139,7 +142,10 @@ int existbelong(struct Node* node){
 	return (existbelong(node->child[0]) || existbelong(node->child[1]));
 }
 
-void attributeDeclareCode(struct Node* node, int type){
+int attributeDeclareCode(struct Node* node, int type){
+	int err = 0;
+	if(node->child[1]->type != type)
+		err = ErrorTypeMisMatch;
 	switch(type){
 		case INT_T:
 			node->code = strCatAlloc("", 19, INDENT[node->child[0]->child[0]->scope[0]], sTypeName(type), " ", node->child[0]->child[0]->symbol->bind, "_", node->child[0]->child[1]->symbol->bind, " = ", node->child[1]->code, ";\n",
@@ -156,6 +162,7 @@ void attributeDeclareCode(struct Node* node, int type){
 		default:
 			break;
 	}
+	return err;
 }
 
 /** recursively generate code piece on each node */
@@ -208,12 +215,16 @@ int codeGen (struct Node * node) {
 					case GRAPH_T: 
 					case VERTEX_T:
 					case EDGE_T:
-						derivedTypeInitCode(node->child[1], node->child[0]->lexval.ival, 1);
+						ERRNO = derivedTypeInitCode(node->child[1], node->child[0]->lexval.ival, 1);
+						if(ERRNO)
+							return ERRNO;
 						node->code = strCatAlloc("", 1, node->child[1]->code);
 						break;
 					case STRING_T:
 						if(node->child[1]->child!=NULL && node->child[1]->child[0]->token == BELONG){
-							attributeDeclareCode(node->child[1], node->child[0]->lexval.ival);
+							ERRNO = attributeDeclareCode(node->child[1], node->child[0]->lexval.ival);
+							if(ERRNO)
+								return ERRNO;
 							node->code = strCatAlloc("", 1, node->child[1]->code);
 							node->codetmp = NULL;
 						}else if(existbelong(node->child[1])){
@@ -226,7 +237,9 @@ int codeGen (struct Node * node) {
 						break;
 					default:
 						if(node->child[1]->child!=NULL && node->child[1]->child[0]->token == BELONG){
-							attributeDeclareCode(node->child[1], node->child[0]->lexval.ival);
+							ERRNO = attributeDeclareCode(node->child[1], node->child[0]->lexval.ival);
+							if(ERRNO)
+								return ERRNO;
 							node->code = strCatAlloc("", 1, node->child[1]->code);
 							node->codetmp = NULL;
 						}else if(existbelong(node->child[1])){
@@ -242,16 +255,31 @@ int codeGen (struct Node * node) {
 					case GRAPH_T:
 					case VERTEX_T:
 					case EDGE_T:
-						derivedTypeInitCode(node->child[1], node->child[0]->lexval.ival, 0);
+						ERRNO = derivedTypeInitCode(node->child[1], node->child[0]->lexval.ival, 0);
+						if(ERRNO)
+							return ERRNO;
 						node->code = strCatAlloc("", 1, node->child[1]->code);
 						break;
 					case STRING_T:
-						stringInitCode(node->child[1], node->child[0]->lexval.ival, 0);
-						node->code = strCatAlloc("", 1, node->child[1]->code);
+						if(node->child[1]->child!=NULL && node->child[1]->child[0]->token == BELONG){
+							ERRNO = attributeDeclareCode(node->child[1], node->child[0]->lexval.ival);
+							if(ERRNO)
+								return ERRNO;
+							node->code = strCatAlloc("", 1, node->child[1]->code);
+							node->codetmp = NULL;
+						}else if(existbelong(node->child[1])){
+							ERRNO = ErrorAttributeDeclaration;
+							return ERRNO;
+						}else{
+							stringInitCode(node->child[1], node->child[0]->lexval.ival, 0);
+							node->code = strCatAlloc("", 1, node->child[1]->code);
+						}
 						break;
 					default:
 						if(node->child[1]->child!=NULL && node->child[1]->child[0]->token == BELONG){
-							attributeDeclareCode(node->child[1], node->child[0]->lexval.ival);
+							ERRNO = attributeDeclareCode(node->child[1], node->child[0]->lexval.ival);
+							if(ERRNO)
+								return ERRNO;
 							node->code = strCatAlloc("", 1, node->child[1]->code);
 							node->codetmp = NULL;
 						}else if(existbelong(node->child[1])){
