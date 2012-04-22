@@ -21,10 +21,20 @@ void printFromNewLine();
 
 /*print functions for graph, 
 edge and vertex*/
+
+//function to print all the edges and vertices of a graph 
 int print_g(GraphType* g);
+
+//function to print the graph id
 int print_v(VertexType* v);
+
+//function to print the edge id, start vertex and end vertex ids
 int print_e(EdgeType* e);
+
+//function to print the attributes of a vertex
 int print_v_attr(VertexType* v);
+
+//function to print the attributes of an edge
 int print_e_attr(EdgeType* e);
 
 
