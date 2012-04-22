@@ -9,6 +9,7 @@ int ff() {
     int ffvar;
     func xx():void = {};
 	string s4, s5="test s5";
+	int castv = 15.6;
 }
 
 graph g1, g2;
@@ -17,11 +18,9 @@ vertex v1, v2;
 //g.allV[@age>23];
 string s1="test s1", s2="test s2", s3;
 
-string s5 = 6;
-
-string v1::name = "Tom", v1::add = "nyc";
+string v1::name = "Tom";
 int v1::age = 18;
-float v1::weight = 55.6;
+float v1::weight = 55;
 int testv = 2;
 int i,j;
 float x, z;
