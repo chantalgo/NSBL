@@ -28,16 +28,18 @@ int sTableInsertTree(struct Node* node, int ttype) {
     if(node == NULL) return;
     switch (node->token) {
         case IDENTIFIER :
-            sTableInsertId(node, ttype);break;
+            sTableInsertId(node, ttype); break;
         case DYN_ATTRIBUTE :
-            sTableInsertId(node, -ttype);break;
+            sTableInsertId(node, -ttype); break;
         case AST_COMMA :
             sTableInsertTree(node->child[0], ttype);
-            sTableInsertTree(node->child[1], ttype);break;
+            sTableInsertTree(node->child[1], ttype); break;
         case AST_ASSIGN :
-            sTableInsertTree(node->child[0], ttype);break;
+            sTableInsertTree(node->child[0], ttype); break;
 		case BELONG:
-			sTableInsertTree(node->child[1], ttype);break;
+            // Do NOT insert attribute to symbol table
+			//sTableInsertTree(node->child[1], -ttype);
+            break;
         default :
             fprintf(stderr, "sTableInsertTree : unknown token %d\n",node->token);
     }
@@ -46,6 +48,11 @@ int sTableInsertTree(struct Node* node, int ttype) {
 
 /** insert one IDENTIFIER or DYN_ATTRIBUTE */
 int sTableInsertId(struct Node* node, int ttype) {
+    if ( ttype < -4  ) { // take care of declare unsupported type for attribute
+        ERRNO = ErrorAttributeTypeNotSupported;
+        errorInfo(ERRNO, node->line,"Type `%s' is not supported for Attribute\n", sTypeName(-ttype));
+        return ERRNO;
+    } 
     SymbolTableEntry* entry = sNewVarEty ( node->lexval.sval, ttype, node->line );
     if ( sTableInsert( entry ) == ErrorSymbolTableKeyAlreadyExsit ) {
         SymbolTableEntry * te = sTableLookup(entry->key);

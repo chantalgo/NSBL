@@ -218,5 +218,15 @@ int main(int argc, char** argv){
 	
 	
 	print_g(g1);
+    destroy_edge(e1);
+    print_g(g1);
+    destroy_vertex(v1);
+    destroy_vertex(v2);
+    destroy_vertex(v3);
+    destroy_vertex(v4);
+
+    destroy_vertex(v5);
+    destroy_vertex(v6);
+    print_g(g1);
 }
 

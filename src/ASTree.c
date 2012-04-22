@@ -23,6 +23,7 @@ struct Node* ast_new_leaf(int token, void * ptr, long long line) {
     node->codetmp = NULL;
     node->scope[0] = sStackLevel;
     node->scope[1] = sStackTopId;
+    node->tmp[0] = 0;
     switch (token) {
         case INTEGER_CONSTANT :
             node->token = INTEGER_CONSTANT;
@@ -104,9 +105,9 @@ struct Node** ast_all_children(int n, ...){
 
 struct Node* ast_new_node(int token, int nch, struct Node** child, long long line){
     struct Node* node = (struct Node *) malloc ( sizeof (struct Node) );  // free in ast_free_tree
-	if(token==BELONG){
+	if(token==BELONG && 0){   // not used 
 		char* temp = strCatAlloc("", 3, child[1]->lexval.sval, "_", child[0]->lexval.sval);
-		child[1]->code = child[1]->lexval.sval;
+		//child[1]->code = child[1]->lexval.sval;
 		child[1]->lexval.sval = temp;
 	}
     node->token = token;
@@ -120,6 +121,7 @@ struct Node* ast_new_node(int token, int nch, struct Node** child, long long lin
     node->codetmp = NULL;
     node->scope[0] = sStackLevel;
     node->scope[1] = sStackTopId;
+    node->tmp[0] = 0;
 #ifdef _AST_DEBUG_EXTRA
     debugInfo("ast_new_node :: create \n");
     debugInfo("==DEBUG INFO==\n");
@@ -262,7 +264,7 @@ void ast_output_node(struct Node* node, FILE* out, const char * sep) {
             fprintf(out, "Node<PIPE>");break;
         case AST_MATCH :
             fprintf(out, "Node<MATCH>");break;
-        case AST_ATTIBUTE :
+        case AST_ATTRIBUTE :
             fprintf(out, "Node<ATTRIBUTE>");break;
         case AST_GRAPH_PROP :
             fprintf(out, "Node<GRAPH_PROP>");break;
@@ -318,6 +320,8 @@ void ast_output_node(struct Node* node, FILE* out, const char * sep) {
             fprintf(out, "Node<EXP_STAT>");break;
         case AST_ERROR :
             fprintf(out, "Node<ERROR>");break;
+        case DEL :
+            fprintf(out, "Node<DEL>");break;
         default :
             fprintf(out, "Node<UNKNOWN> !!!!!!!!!!!!!!!!");
     }

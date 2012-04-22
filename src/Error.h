@@ -26,16 +26,23 @@
 #define ErrorFunctionCallNOTEqualNumberOfParameters     +54
 #define ErrorFunctionCallIncompatibleParameterType      +55
 #define ErrorFuncLiteralCallIncompatibleParameterType   +56
+#define ErrorAttributeTypeNotSupported                  +57
+#define ErrorDeclareAttrForWrongType                    +58
+#define ErrorDelAttrFromWrongType                       +59
+#define ErrorDelVariableOfWrongType                     +60
+#define ErrorBinaryOperationWithDynamicType             +61
+#define ErrorGetAttrForWrongType                        +62
 
-#define ErrorCallBreakOutsideOfLoop                     +60
-#define ErrorCallContinueOutsideOfLoop                  +61
-#define ErrorCallReturnOutsideOfFunc                    +62
 
-#define ErrorDynamicAttributeUsedInNonDynamicScope      +71
+#define ErrorCallBreakOutsideOfLoop                     +70
+#define ErrorCallContinueOutsideOfLoop                  +71
+#define ErrorCallReturnOutsideOfFunc                    +72
 
-#define ErrorOperatorNotSupportedByType                 +81
-#define ErrorTypeMisMatch                               +82
-#define ErrorCastType                                   +83
+#define ErrorDynamicAttributeUsedInNonDynamicScope      +81
+
+#define ErrorOperatorNotSupportedByType                 +91
+#define ErrorTypeMisMatch                               +92
+#define ErrorCastType                                   +93
 /**********
  * output *
  **********/
