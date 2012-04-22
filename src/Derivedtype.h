@@ -7,9 +7,11 @@
 #include <glib/gstring.h>
 #include <glib/glist.h>
 #include <glib/garray.h>
+#include <glib/gslist.h>
 #include <stdio.h>
 #include <stdbool.h>
 #include <stddef.h>
+#include <stdarg.h>
 
 
 #define FLAG_NO_REVERSE         0
@@ -22,7 +24,6 @@ typedef long int VertexId;
 typedef long int GraphId;
 typedef GHashTable AttributeTable;
 
-typedef GList ListType;
 typedef GString StringType;
 
 typedef union {
@@ -63,6 +64,11 @@ typedef struct{
 	GHashTable* edges;
 	GHashTable* vertices;
 }GraphType;
+
+typedef struct{
+	int type;
+	GSList* list;
+}ListType;
 
 /*Function declaration*/
 /*Init*/
@@ -111,9 +117,15 @@ int                 g_remove_vertex(GraphType* g, VertexType* v);
 int                 g_insert_v(GraphType* g, VertexType* v);
 int                 g_insert_e(GraphType* g, EdgeType* v);
 int                 g_insert_subg(GraphType* g, GraphType* subg);
+int                 g_append_list(GraphType* g, ListType* list);
 
 GList*              edge_match(GList* elist, char* attribute, void* value);
 GList*              vertex_match(GList* vlist, char* attribute, void* value);
+
+ListType* list_declaration(int type, int n, ...);
+void* list_getelement(ListType* list, int index);
+int list_append(ListType* list, int type, void* obj);
+int list_assign(ListType* list, int type, int index, void* obj);
 
 /*print functions*/
 int                 print_g(GraphType* g);
@@ -128,7 +140,6 @@ Attribute*          assign_operator_to_static( Attribute* attr1, int type, void 
 Attribute*          assign_operator( Attribute* attr1, Attribute* attr2, int rm_attr1, int rm_attr2, int lno);
 Attribute*          unary_operator( Attribute* attr1, int op, int rm_attr1, int lno);
 Attribute*          cast_operator( Attribute* attr1, int op, int rm_attr1, int lno);
-
 
 
 //int list_append(ListType* list, void* data);

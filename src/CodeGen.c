@@ -136,6 +136,61 @@ void stringInitCode(struct Node* node, int type, int isglobal){
 	}
 }
 
+int listInitCode(struct Node* node, int type, int isglobal){
+	int etype = -1;
+	char buffer[20];
+	int count = 0;
+	struct Node* tn = node->child[1];
+	if(tn->token != AST_LIST_INIT)
+		return ErrorAssignmentExpression;
+	if(tn->child!=NULL){
+		count++;
+		tn = tn->child[0];
+		if(tn->token == IDENTIFIER)
+			etype = tn->type;
+		else{
+			etype = tn->child[1]->type;
+			while(tn->token == AST_COMMA){
+				count++;
+				if(tn->child[1]->type != etype)
+					return ErrorListMixedType;
+				tn = tn->child[0];
+			}
+		}
+	}
+	sprintf(buffer, "%d", count);
+	if(isglobal){
+		switch(etype){
+			case -1:
+				node->code = strCatAlloc("", 5, INDENT[node->scope[0]], node->child[0]->symbol->bind, " = list_declaration(-1, ", buffer, ");\n"); 
+				break;
+			case VERTEX_T:
+				node->code = strCatAlloc("", 7, INDENT[node->scope[0]], node->child[0]->symbol->bind, " = list_declaration(VERTEX, ", buffer, ", ",node->child[1]->child[0]->code, ");\n");
+				break;
+			case EDGE_T:
+				node->code = strCatAlloc("", 7, INDENT[node->scope[0]], node->child[0]->symbol->bind, " = list_declaration(EDGE, ", buffer, ", ",node->child[1]->child[0]->code, ");\n");
+				break;
+			default:
+				break;
+		}
+	}else{
+		switch(etype){
+			case -1:
+				node->code = strCatAlloc("", 7, INDENT[node->scope[0]], sTypeName(type), " ", node->child[0]->symbol->bind, " = list_declaration(-1, ", buffer, ");\n"); 
+				break;
+			case VERTEX_T:
+				node->code = strCatAlloc("", 9, INDENT[node->scope[0]], sTypeName(type), " ", node->child[0]->symbol->bind, " = list_declaration(VERTEX, ", buffer, ", ",node->child[1]->code, ");\n");
+				break;
+			case EDGE_T:
+				node->code = strCatAlloc("", 9, INDENT[node->scope[0]], sTypeName(type), " ", node->child[0]->symbol->bind, " = list_declaration(EDGE, ", buffer, ", ",node->child[1]->code, ");\n");
+				break;
+			default:
+				break;
+		}
+	}
+	return 0;
+}
+
 int existbelong(struct Node* node){
 	if(node == NULL)
 		return 0;
@@ -459,6 +514,16 @@ int codeGen (struct Node * node) {
             }
             node->type = node->child[1]->type;
             break;
+		case AST_LIST_INIT:
+			node->type = LIST_T;
+			if(node->child==NULL)
+				node->code = strCatAlloc("", 1, " ");
+			else{
+				lf = node->child[0];
+				codeGen(lf);
+				node->code = strCatAlloc("", 1, lf->code);
+			}
+			break;
         case AST_TYPE_SPECIFIER :
             node->code = strCatAlloc(" ",1,sTypeName(node->lexval.ival));
             break;
@@ -490,6 +555,19 @@ int codeGen (struct Node * node) {
 							return ERRNO;
 						}else{
 							stringInitCode(node->child[1], node->child[0]->lexval.ival, 1);
+							node->code = strCatAlloc("", 1, node->child[1]->code);
+						}
+						break;
+					case LIST_T:
+						if(node->child[1]->token!=AST_ASSIGN){
+							ERRNO = ErrorDerivedTypeDeclaration;
+							return ERRNO;
+						}else{
+							int r = listInitCode(node->child[1], node->child[0]->lexval.ival, 1);
+							if(r){
+								ERRNO = r;
+								return ERRNO;
+							}
 							node->code = strCatAlloc("", 1, node->child[1]->code);
 						}
 						break;
@@ -533,6 +611,19 @@ int codeGen (struct Node * node) {
 							return ERRNO;
 						}else{
 							stringInitCode(node->child[1], node->child[0]->lexval.ival, 0);
+							node->code = strCatAlloc("", 1, node->child[1]->code);
+						}
+						break;
+					case LIST_T:
+						if(node->child[1]->token!=AST_ASSIGN){
+							ERRNO = ErrorDerivedTypeDeclaration;
+							return ERRNO;
+						}else{
+							int r = listInitCode(node->child[1], node->child[0]->lexval.ival, 0);
+							if(r){
+								ERRNO = r;
+								return ERRNO;
+							}
 							node->code = strCatAlloc("", 1, node->child[1]->code);
 						}
 						break;

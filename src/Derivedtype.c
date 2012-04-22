@@ -69,13 +69,13 @@ GraphType* new_graph(){
     return graph;
 }
 
-ListType* new_list(){
-    return NULL;
-}
+//ListType* new_list(){
+//	return NULL;
+//}
 
-StringType* new_string(){
-    return (StringType*)g_string_new("");
-}
+//StringType* new_string(){
+//	return (StringType*)g_string_new("");
+//}
 
 int destroy_edge(EdgeType* e){
 #ifdef _DEBUG
@@ -167,15 +167,15 @@ int destroy_graph(GraphType* g){
     return 0;
 }
 
-int destroy_list(ListType* list){
-    g_list_free_1((GList*)list);
-    return 0;
-}
+//int destroy_list(ListType* list){
+//	g_list_free_1((GList*)list);
+//	return 0;
+//}
 
-int destroy_string(StringType* s){
-    g_string_free((GString*)s, 1);
-    return 0;
-}
+//int destroy_string(StringType* s){
+//	g_string_free((GString*)s, 1);
+//	return 0;
+//}
 
 int edge_assign_direction(EdgeType* e, VertexType* v1, VertexType* v2){
     e->start = v1;
@@ -435,6 +435,24 @@ int g_insert_e(GraphType* g, EdgeType* e){
 
 }
 
+int g_append_list(GraphType* g, ListType* list){
+	int length = g_slist_length(list->list);
+	int i;
+	for(i=0; i<length; i++){
+		switch(list->type){
+			case VERTEX_T:
+				g_insert_v(g, (VertexType*)g_slist_nth_data(list->list, i));
+				break;
+			case EDGE_T:
+				g_insert_e(g, (EdgeType*)g_slist_nth_data(list->list, i));
+				break;
+			default:
+				break;
+		}
+	}
+	return 0;
+}
+
 int g_insert_subg(GraphType* g, GraphType* subg){
     int l,n;
     l = g_list_length(subg->vertexIdList);
@@ -487,6 +505,82 @@ GList* vertex_match(GList* vlist, char* attribute, void* value){
         }
     }
     return result;
+}
+
+ListType* list_declaration(int type,int n, ...){
+	ListType* newlist = (ListType*)malloc(sizeof(ListType));
+	newlist->list = NULL;
+	newlist->type = type;
+	int i;
+	va_list args;
+	va_start(args, type);
+	for(i=0; i<n; i++){
+		switch(type){
+			case VERTEX_T:
+				{VertexType* v = va_arg(args, struct VertexType*);
+				newlist->list = g_slist_append(newlist->list, v);
+				}
+				break;
+			case EDGE_T:
+				{EdgeType* e = va_arg(args, struct EdgeType*);
+				newlist->list = g_slist_append(newlist->list, e);
+				}
+				break;
+			default:
+				break;
+		}
+	}
+	va_end(args);
+	return newlist;
+}
+
+void* list_getelement(ListType* list, int index){
+	if(g_slist_length(list->list)<=(index+1))
+		return NULL;
+	return g_slist_nth_data(list->list, index);
+}
+
+int list_append(ListType* list, int type, void* obj){
+	if(list->type == -1)
+		list->type = type;
+	else if(list->type != type){
+		return 1;
+	}
+	list->list = g_slist_append(list->list, obj);
+	return 0;
+}
+
+int list_assign(ListType* list, int type, int index, void* obj){
+	if(g_slist_length(list->list)<=(index+1))
+		return 1;
+	if(list->type == -1)
+		list->type = type;
+	else if(list->type != type){
+		return 1;
+	}
+	void* p = g_slist_nth_data(list->list, index);
+	p = obj;
+	return 0;
+} 
+
+int print_list(ListType* list){	
+    int i;
+	int type = list->type;
+	int length = g_slist_length(list->list);
+	for(i=0; i<length; i++){
+		switch(type){
+			case VERTEX_T:
+				print_v((VertexType*)g_slist_nth_data(list->list, i));
+				break;
+			case EDGE_T:
+				print_e((EdgeType*)g_slist_nth_data(list->list, i));
+				break;
+			default:
+				break;
+		}
+	}
+	printf("\n");
+	return 0;
 }
 
 int print_v(VertexType* v){
