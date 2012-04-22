@@ -293,7 +293,6 @@ B
         if (fp==NULL)
         {
                 printf("Error in provided file name. Please check file name again.\n");
-                fclose(fp);
                 return 0;
         }
         tree = mxmlLoadFile(NULL, fp,MXML_TEXT_CALLBACK);
@@ -301,7 +300,6 @@ B
         if (tree==NULL)
         {
                 printf("The file provided is not an XML file.\n");
-                fclose(fp);
                 return 0;
         }
         fclose(fp);
