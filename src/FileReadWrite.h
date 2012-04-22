@@ -9,10 +9,10 @@
 #include <string.h>
 
 //function to save a graph in XML format on disk
-void saveGraph(GraphType* g, char* fileloc, char* filename);
+void saveGraph(GraphType* g, char* fileloc);
 
 //function to read a graph in XML format and convert it to GraphType
-GraphType* readGraph(char* fileLoc, char* filename);
+GraphType* readGraph(char* fileLoc);
 
 
 #endif
