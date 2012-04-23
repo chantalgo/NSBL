@@ -361,6 +361,24 @@ int g_insert_e(GraphType* g, EdgeType* e){
 
 }
 
+int g_append_list(GraphType* g, ListType* list){
+	int length = g_slist_length(list->list);
+	int i;
+	for(i=0; i<length; i++){
+		switch(list->type){
+			case VERTEX:
+				g_insert_v(g, (VertexType*)g_slist_nth_data(list->list, i));
+				break;
+			case EDGE:
+				g_insert_e(g, (EdgeType*)g_slist_nth_data(list->list, i));
+				break;
+			default:
+				break;
+		}
+	}
+	return 0;
+}
+
 int g_insert_subg(GraphType* g, GraphType* subg){
 	int l,n;
 	l = g_list_length(subg->vertexIdList);

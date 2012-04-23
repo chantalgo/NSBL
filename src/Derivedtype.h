@@ -98,6 +98,7 @@ int g_remove_vertex(GraphType* g, VertexType* v);
 int g_insert_v(GraphType* g, VertexType* v);
 int g_insert_e(GraphType* g, EdgeType* v);
 int g_insert_subg(GraphType* g, GraphType* subg);
+int g_append_list(GraphType* g, ListType* list);
 
 GList* edge_match(GList* elist, char* attribute, void* value);
 GList* vertex_match(GList* vlist, char* attribute, void* value);

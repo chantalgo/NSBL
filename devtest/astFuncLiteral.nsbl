@@ -10,6 +10,7 @@ int ff() {
     func xx():void = {};
 	string s4, s5="test s5";
 	int castv = 15.6;
+	list le = [e3, e4];
 }
 
 graph g1, g2;
@@ -26,6 +27,8 @@ int testv = 2;
 int i,j;
 float x, z;
 tt(j,z);
+list lv = [v1,v2];
+list lv2 = [];
 
 dd();
 //dd(i);

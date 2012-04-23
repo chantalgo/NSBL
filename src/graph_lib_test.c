@@ -226,7 +226,7 @@ int main(int argc, char** argv){
 	print_list(lv);
 	list_assign(lv, VERTEX, 2, v6);
 	print_list(lv);
-	ListType* le = list_declaration(EDGE, 0);
+	ListType* le = list_declaration(-1, 0);
 	print_list(le);
 	list_append(le, EDGE, e1);
 	print_list(le);
