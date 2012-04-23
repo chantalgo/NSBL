@@ -5,21 +5,25 @@
 #include <glib/gstring.h>
 #include <glib/glist.h>
 #include <glib/garray.h>
+#include <glib/gslist.h>
 #include <stdio.h>
 #include <stdbool.h>
 #include <stddef.h>
+#include <stdarg.h>
 
 #define INT 1
 #define FLOAT 2
 #define STRING 3
+#define VERTEX 4
+#define EDGE 5
 
 typedef long int EdgeId;
 typedef long int VertexId;
 typedef long int GraphId;
 typedef GHashTable AttributeTable;
 
-typedef GList ListType;
-typedef GString StringType;
+//typedef GList ListType;
+//typedef GString StringType;
 
 typedef struct{
 	long int type;
@@ -54,19 +58,24 @@ typedef struct{
 	GHashTable* vertices;
 }GraphType;
 
+typedef struct{
+	int type;
+	GSList* list;
+}ListType;
+
 /*Function declaration*/
 /*Init*/
 EdgeType* new_edge();
 VertexType* new_vertex();
 GraphType* new_graph();
-ListType* new_list();
-StringType* new_string();
+//ListType* new_list();
+//StringType* new_string();
 
 int destroy_edge(EdgeType* e);
 int destroy_vertex(VertexType* v);
 int destroy_graph(GraphType* g);
-int destroy_list(ListType* list);
-int destroy_string(StringType* s);
+//int destroy_list(ListType* list);
+//int destroy_string(StringType* s);
 
 int edge_assign_direction(EdgeType* e, VertexType* v1, VertexType* v2);
 int edge_assign_attribute(EdgeType* e, char* attribute, void* value, int type);
@@ -93,14 +102,18 @@ int g_insert_subg(GraphType* g, GraphType* subg);
 GList* edge_match(GList* elist, char* attribute, void* value);
 GList* vertex_match(GList* vlist, char* attribute, void* value);
 
+ListType* list_declaration(int type, int n, ...);
+void* list_getelement(ListType* list, int index);
+int list_append(ListType* list, int type, void* obj);
+int list_assign(ListType* list, int type, int index, void* obj);
+
 /*print functions*/
 int print_g(GraphType* g);
 int print_v(VertexType* v);
 int print_e(EdgeType* e);
 int print_v_attr(VertexType* v);
 int print_e_attr(EdgeType* e);
-
-
+int print_list(ListType* list);
 
 //int list_append(ListType* list, void* data);
 //ListType* list_declare(...);

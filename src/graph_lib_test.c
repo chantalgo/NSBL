@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-
+#include <stdarg.h>
 int main(int argc, char** argv){
 	GraphType* g1 = new_graph();
 	new_vertex();
@@ -218,5 +218,19 @@ int main(int argc, char** argv){
 	
 	
 	print_g(g1);
+	ListType* lv = list_declaration(VERTEX,3, v1, v2, v3);
+	print_list(lv);
+	list_append(lv, VERTEX, v4);
+	print_list(lv);
+	list_append(lv, EDGE, e1);
+	print_list(lv);
+	list_assign(lv, VERTEX, 2, v6);
+	print_list(lv);
+	ListType* le = list_declaration(EDGE, 0);
+	print_list(le);
+	list_append(le, EDGE, e1);
+	print_list(le);
+	list_assign(le, EDGE, 4, e2);
+	print_list(le);
 }
 
