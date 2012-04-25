@@ -3,7 +3,7 @@
 #include <stdlib.h>
 
 extern FILE *yyin; /* Input for yacc parser. */
-extern void yyerror(char *str); /* Our version. */
+extern void yyerror(const char *str); /* Our version. */
 extern int yywrap(void); /* Our version. */
 extern int yylex(void); /* Lexical analyzer function. */
 extern int yyparse(void); /* Parser function. */
@@ -15,7 +15,10 @@ extern int yyparse(void); /* Parser function. */
 #include "CodeGen.h"
 #include "global.h"
 %}
-
+/**************************
+ * General Options        *
+ **************************/
+-%error-verbose 
 
 /**************************
  * Field names            *
@@ -116,6 +119,7 @@ extern int yyparse(void); /* Parser function. */
 %token AST_WHILE AST_FOR AST_FOREACH
 %token AST_JUMP_CONTINUE AST_JUMP_BREAK AST_JUMP_RETURN
 %token AST_FUNC_CALL AST_ARG_EXPS AST_EXP_STAT
+%token AST_ERROR
 %token AST_PRINT AST_PRINT_STAT AST_READ_GRAPH AST_WRITE_GRAPH
 /**************************
  *  PRECEDENCE & ASSOC    *
@@ -177,6 +181,7 @@ translation_unit
         if(leftNode!=NULL) ll = leftNode->line;
         $$ = astNewNode( AST_EXT_STAT_COMMA, 2, astAllChildren( 2, $1, $2 ), ll );
     }
+    | translation_unit error { $$ = $1; }
     ;
 
 /**************************
@@ -210,6 +215,9 @@ expression_statement
         $$ = astNewNode( AST_EXP_STAT, 1, astAllChildren(1, $1), $1->line);
     }
     | ';' { $$ = astNewNode( AST_EXP_STAT, 0, NULL, $1.l); }
+    | expression error {
+        astFreeTree($1); $$ = NULL;
+        }
     ;
 
 statement_list
@@ -219,6 +227,11 @@ statement_list
         long long ll = -1;
         if(leftNode!=NULL) ll = leftNode->line;
         $$ = astNewNode( AST_STAT_LIST, 2, astAllChildren(2, $1, $2), ll );
+    }
+    | '{' error { $$ = NULL; }
+    | '{' scope_in statement_list scope_out error {
+        astFreeTree($3);
+        $$ = NULL;
     }
     ;
 
@@ -237,6 +250,11 @@ compound_statement_no_scope
     }
     | '{' statement_list '}'   {
         $$ = astNewNode( AST_COMP_STAT_NO_SCOPE, 1, astAllChildren(1, $2), $1.l );
+    }
+    | '{' error { $$ = NULL; }
+    | '{' statement_list error {
+        astFreeTree($2);
+        $$ = NULL;
     }
     ;
 
@@ -287,6 +305,10 @@ jump_statement
     | CONTINUE ';'                      {$$ = astNewNode(AST_JUMP_CONTINUE, 0, NULL, $1.l);}
     | RETURN expression ';'             {$$ = astNewNode(AST_JUMP_RETURN, 1, astAllChildren(1, $2), $1.l);}
     | RETURN ';'                        {$$ = astNewNode(AST_JUMP_RETURN, 0, NULL, $1.l);}
+    | BREAK error                       {$$ = NULL;}
+    | CONTINUE error                    {$$ = NULL;}
+    | RETURN expression error           {$$ = NULL; astFreeTree($2);}
+    | RETURN error                      {$$ = NULL;}
     ;
 
 declaration_statement
@@ -501,6 +523,7 @@ primary_expression
     | constant              { $$ = $1; }
     | STRING_LITERAL        { $$ = astNewLeaf(STRING_LITERAL, $1.s, $1.l); }
     | '(' expression ')'    { $$ = $2; }
+    | error                 { $$ = NULL; }
     ;
 
 graph_property
@@ -617,6 +640,11 @@ declaration
     : declaration_specifiers init_declarator_list ';' {
         $$ = astNewNode( AST_DECLARATION, 2, astAllChildren(2, $1, $2), $1->line );    
         sTableDeclare($$);
+    }
+     | declaration_specifiers init_declarator_list error {
+     astFreeTree($1);
+     astFreeTree($2);
+     $$ = NULL;
     }
     ;
 
@@ -804,8 +832,8 @@ no_type_check_on_dynamic_right
     ;
 %%
 
-void yyerror(char *s) {
-    printf("%s\n", s);
+void yyerror(const char *s) {
+errorInfo(ErrorSyntax, yylval.LString.l, "%s\n",s);
 }
 
 void main_init(char * fileName) {
