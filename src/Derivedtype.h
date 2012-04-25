@@ -146,7 +146,15 @@ void		        assign_operator_to_static( Attribute* attr1, int type, void * valu
 Attribute*          assign_operator( Attribute* attr1, Attribute* attr2, int rm_attr1, int rm_attr2, int lno);
 Attribute*          unary_operator( Attribute* attr1, int op, int lno);
 Attribute*          cast_operator( Attribute* attr1, int type, int lno);
+Attribute*          object_get_attribute(void* v, int obj, char* attribute);
+ListType*           list_match( ListType * l, bool (*func) (void *, int ), int rm_l );
 
+// DONE
+StringType*         assign_operator_string(StringType* s1, StringType* s2);
+ListType*           assign_operator_list(ListType* l1, ListType* l2);
+VertexType*         assign_operator_vertex(VertexType* v1, VertexType* v2);
+EdgeType*           assign_operator_edge(EdgeType* e1, EdgeType* e2);
+GraphType*          assign_operator_graph(GraphType* g1, GraphType* g2);
 void 				die(char* fmt, ...);
 
 //int list_append(ListType* list, void* data);

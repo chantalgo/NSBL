@@ -61,7 +61,7 @@ extern int yyparse(void); /* Parser function. */
 %type <node> logical_AND_expression equality_expression relational_expression
 %type <node> additive_expression multiplicative_expression cast_expression
 %type <node> unary_expression postfix_expression primary_expression
-%type <node> graph_property pipe_property graph_pipe_property argument_expression_list argument_expression
+%type <node> graph_property pipe_property argument_expression_list argument_expression
 %type <node> attribute constant
 
 // statments
@@ -450,7 +450,7 @@ postfix_expression
 primary_expression
     : attribute             { 
         $$ = $1; 
-        if(isNoTypeCheck==0){   // Func_Literal
+        if(isNoTypeCheck==0){   // Func_Literal  // not used, JZ
             sTableLookupId($$);                 // Lookup ATTRIBUTE
         }
         else {  // Match operator
@@ -471,11 +471,6 @@ primary_expression
     | STRING_LITERAL        { $$ = astNewLeaf(STRING_LITERAL, $1.s, $1.l); }
     | '(' expression ')'    { $$ = $2; }
     | error                 { $$ = NULL; }
-    ;
-
-graph_pipe_property
-    : graph_property        {$$ = $1;}
-    | pipe_property         {$$ = $1;}
     ;
 
 graph_property
@@ -526,17 +521,17 @@ constant
  **************************/
 
 function_literal_declaration
-    : function_literal_type_specifier dynamic_scope_left func_declarator ':' declaration_specifiers '=' compound_statement_no_scope scope_out dynamic_scope_right ';' {
-        $$ = astNewNode($1.i, 3, astAllChildren(3, $3, $5, $7), $1.l);
-        $$->typeCon = $3->typeCon;
-        $$->scope[0] = $3->scope[0];
-        $$->scope[1] = $3->scope[1];
+    : function_literal_type_specifier func_declarator ':' declaration_specifiers '=' no_type_check_on_dynamic_left dynamic_scope_left compound_statement_no_scope dynamic_scope_right no_type_check_on_dynamic_right scope_out ';' {
+        $$ = astNewNode($1.i, 3, astAllChildren(3, $2, $4, $8), $1.l);
+        $$->typeCon = $2->typeCon;
+        $$->scope[0] = $2->scope[0];
+        $$->scope[1] = $2->scope[1];
         sTableDeclare($$);
     }
-    | function_literal_type_specifier dynamic_scope_left func_declarator ':' declaration_specifiers '=' compound_statement_no_scope scope_out dynamic_scope_right error {
-        astFreeTree($3);
-        astFreeTree($5);
-        astFreeTree($7);
+    | function_literal_type_specifier func_declarator ':' declaration_specifiers '=' no_type_check_on_dynamic_left dynamic_scope_left compound_statement_no_scope dynamic_scope_right no_type_check_on_dynamic_right scope_out error {
+        astFreeTree($2);
+        astFreeTree($4);
+        astFreeTree($8);
         $$ = NULL;
     }
     ;
@@ -779,6 +774,7 @@ void main_init(char * fileName) {
     maxLevel = 0;
     inLoop = 0;
     inFunc = 0;
+    inMATCH = 0;
     OUTFILE = strCatAlloc("",2,fileName,".c");
 }
 

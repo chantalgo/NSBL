@@ -60,7 +60,7 @@ int s_table_check_key_exsit (SymbolTable* table, SymbolTableKey key) {
 // Output an entry
 void s_show_entry  (gpointer key, gpointer entry, gpointer out) {
     SymbolTableEntry * e = (SymbolTableEntry*) entry;
-    fprintf( (FILE*) out, "%10s  %3d  %3d  %3d  %3d  %15s  %15s  %4d  ||",
+    fprintf( (FILE*) out, "%10s  %3d  %3d  %3d  %3d  %15s  %15s  %4lld  ||",
         e->lex, e->type, e->rtype, e->scope[0], e->scope[1], e->key, e->bind, e->line );
     s_show_typeCon(e->typeCon, out);
     fprintf( (FILE*) out, "\n" );
@@ -128,6 +128,8 @@ char* s_table_type_name (int type) {
         case DYN_VERTEX_T:      return "D_vertex";
         case DYN_EDGE_T:        return "D_edge";
         case DYN_GRAPH_T:       return "D_graph";
+        case UNKNOWN_T:         return "UNKOWN";
+        case NOT_AVAIL:         return "NOT_AVAL";
         default:                return NULL;
     }
 }

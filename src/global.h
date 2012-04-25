@@ -28,5 +28,5 @@ extern FILE* ERRORIO;
 extern char * OUTFILE;
 extern FILE * OUTFILESTREAM;
 extern char ** INDENT;
-extern int  inLoop, inFunc;
+extern int  inLoop, inFunc, inMATCH;
 #endif

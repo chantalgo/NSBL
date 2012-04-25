@@ -1,5 +1,5 @@
-#ifndef ERROR_H___NSBL_
-#define ERROR_H___NSBL_
+#ifndef ERROR_H_NSBL_
+#define ERROR_H_NSBL_
 
 /*******************
  * Internal Errors *
@@ -34,6 +34,8 @@
 #define ErrorDelVariableOfWrongType                     +60
 #define ErrorBinaryOperationWithDynamicType             +61
 #define ErrorGetAttrForWrongType                        +62
+#define ErrorMactchWrongType                            +63
+#define ErrorWrongFuncCall                              +64
 
 
 #define ErrorCallBreakOutsideOfLoop                     +70
