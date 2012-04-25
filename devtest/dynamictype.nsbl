@@ -23,3 +23,6 @@ v.a = v.a + 1;
 for (v.a = 0; v.a < 10; v.a = v.a + 1) {}
 
 v.xxx = 19;
+
+if ( ( ii = v.b + v.a ) > v.xxx ) {
+}

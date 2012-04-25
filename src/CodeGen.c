@@ -604,19 +604,20 @@ int codeGen (struct Node * node) {
                             " , ", strLine(node->line), " ) "
                         );
                     }
+                    node->type = DYNAMIC_T;
+                    node->tmp[0] = REMOVE_DYN;
                 }
                 else  { // STATIC = DYNAMIC
                     //debugInfo("%s %d %s\n", rt->code, lf->type, lf->code);
-                    node->code = strCatAlloc("", 10,
-                        "assign_operator_to_static (", rt->code, " , ", typeMacro(lf->type), 
+                    node->code = strCatAlloc("", 12,
+                        "( assign_operator_to_static (", rt->code, " , ", typeMacro(lf->type), 
                         " , (void *) ", lf->code,  
                         (rt->tmp[0]==REMOVE_DYN) ? " , FLAG_DESTROY_ATTR" : " , FLAG_KEEP_ATTR",
-                        " , ", strLine(node->line), " ) "
+                        " , ", strLine(node->line), " ),  ", lf->code, " ) "
                     );
                     //debugInfo("%s\n",node->code);
+                    node->type = lf->type;
                 }
-                node->type = DYNAMIC_T;
-                node->tmp[0] = REMOVE_DYN;
             }
             else { // ERROR
                 node->code = NULL;

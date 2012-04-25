@@ -146,7 +146,7 @@ int                 print_e_attr(EdgeType* e);
 //TODO
 Attribute*          binary_operator( Attribute* attr1, Attribute* attr2, int op, int reverse, int rm_attr1, int rm_attr2, int lno);
 // static = attr1
-Attribute*          assign_operator_to_static( Attribute* attr1, int type, void * value, int rm_attr1, int lno);
+void                assign_operator_to_static( Attribute* attr1, int type, void * value, int rm_attr1, int lno);
 // attr1 = attr2
 Attribute*          assign_operator( Attribute* attr1, Attribute* attr2, int rm_attr1, int rm_attr2, int lno);
 Attribute*          unary_operator( Attribute* attr1, int op, int rm_attr1, int lno);
