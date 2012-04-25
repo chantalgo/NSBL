@@ -83,3 +83,9 @@ Code Gen and grammar update for the same remains
 4/24/2012
 Dynamic type checking
 delete of object, attribute
+
+4/25/2012
+Dynamic type checking for attribute operators
+Graph lib changed for match and pipe
+codegen for append operations
+
