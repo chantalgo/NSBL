@@ -18,6 +18,7 @@ int ff_fc4_s0 (  ) {
   GString* s5_s12_s3 = new_vertex("test s5");
   int castv_i13_s3 = (int) 15.6;
   ListType* le_l14_s3 = list_declaration(EDGE, 2, e3_e6_s3 , e4_e7_s3);
+  list_append(le_l14_s3, EDGE, e4_e7_s3);
 }
 
 bool tt_fl2_s0 ( int i_i0_s1 , float x_f1_s1 ) {
@@ -55,6 +56,10 @@ x_f31_s0 , z_f32_s0;
 tt_fl2_s0 ( ( j_i30_s0 ) , ( z_f32_s0 ) );
 lv_l33_s0 = list_declaration(VERTEX, 2, v1_v19_s0 , v2_v20_s0);
 lv2_l34_s0 = list_declaration(-1, 0);
+g_insert_v(g1_g15_s0, v1_v19_s0);
+g_insert_e(g1_g15_s0, e2_e18_s0);
+g_append_list(g1_g15_s0, lv_l33_s0);
+list_append(lv_l33_s0, VERTEX, v1_v19_s0);
 dd_fl3_s0 ();
 
 } // END_OF_MAIN 

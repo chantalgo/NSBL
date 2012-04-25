@@ -11,6 +11,7 @@ int ff() {
 	string s4, s5="test s5";
 	int castv = 15.6;
 	list le = [e3, e4];
+	le<:e4;
 }
 
 graph g1, g2;
@@ -29,6 +30,12 @@ float x, z;
 tt(j,z);
 list lv = [v1,v2];
 list lv2 = [];
+
+g1<:v1;
+g1<:e2;
+g1<:lv;
+lv<:v1;
+
 
 dd();
 //dd(i);

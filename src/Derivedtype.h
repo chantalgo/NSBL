@@ -17,6 +17,13 @@
 #define VERTEX 4
 #define EDGE 5
 
+#define EQ 30
+#define GE 31
+#define LE 32
+#define GT 33
+#define LT 34
+
+
 typedef long int EdgeId;
 typedef long int VertexId;
 typedef long int GraphId;
@@ -60,7 +67,7 @@ typedef struct{
 
 typedef struct{
 	int type;
-	GSList* list;
+	GList* list;
 }ListType;
 
 /*Function declaration*/
@@ -100,8 +107,11 @@ int g_insert_e(GraphType* g, EdgeType* v);
 int g_insert_subg(GraphType* g, GraphType* subg);
 int g_append_list(GraphType* g, ListType* list);
 
-GList* edge_match(GList* elist, char* attribute, void* value);
-GList* vertex_match(GList* vlist, char* attribute, void* value);
+ListType* match_string(ListType* list, char* attribute, char* s);
+
+ListType* match_num(ListType* list, char* attribute, float a, op);
+
+ListType* pipe(ListType* list, int pipiop);
 
 ListType* list_declaration(int type, int n, ...);
 void* list_getelement(ListType* list, int index);

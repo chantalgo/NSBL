@@ -362,15 +362,15 @@ int g_insert_e(GraphType* g, EdgeType* e){
 }
 
 int g_append_list(GraphType* g, ListType* list){
-	int length = g_slist_length(list->list);
+	int length = g_list_length(list->list);
 	int i;
 	for(i=0; i<length; i++){
 		switch(list->type){
 			case VERTEX:
-				g_insert_v(g, (VertexType*)g_slist_nth_data(list->list, i));
+				g_insert_v(g, (VertexType*)g_list_nth_data(list->list, i));
 				break;
 			case EDGE:
-				g_insert_e(g, (EdgeType*)g_slist_nth_data(list->list, i));
+				g_insert_e(g, (EdgeType*)g_list_nth_data(list->list, i));
 				break;
 			default:
 				break;
@@ -405,42 +405,83 @@ int g_insert_subg(GraphType* g, GraphType* subg){
 	}
 }
 
-GList* edge_match(GList* elist, char* attribute, void* value){
-	int l = g_list_length(elist);
+ListType* match_string(ListType* list, char* attribute, char* s){
+	int l = g_list_length(list->list);
 	int n = 0;
 	GList* result;
-	for(n; n<l; n++){
-		EdgeType* e = g_list_nth_data(elist, n);
-		Attribute* attr_v;
-		if((attr_v = g_hash_table_lookup(e->attributes, attribute))!=NULL){
-				switch(attr_v->type){
-					case INT: if(*(int*)attr_v->value == *(int*)value) result = g_list_append(result, e); break;
-					case FLOAT: if(*(float*)attr_v->value == *(float*)value) result = g_list_append(result, e); break;
-					case STRING: if(strcmp((char*)attr_v->value, (char*)value)==0) result = g_list_append(result, e); break;
-					default: break;
-				}
-		}
+	switch(list->type){
+		case EDGE:
+			for(n; n<l; n++){
+				EdgeType* e = g_list_nth_data(list->list, n);
+				Attribute* attr_v;
+				if((attr_v = g_hash_table_lookup(e->attributes, attribute))!=NULL){
+					if(strcmp((char*)attr_v->value, (char*)value)==0) 
+						result = g_list_append(result, e);
+				}	
+			}
+			break;
+		case VERTEX:
+			for(n; n<l; n++){
+				VertexType* e = g_list_nth_data(list->list, n);
+				Attribute* attr_v;
+				if((attr_v = g_hash_table_lookup(e->attributes, attribute))!=NULL){
+					if(strcmp((char*)attr_v->value, (char*)value)==0) 
+						result = g_list_append(result, e);
+				}	
+			}
+			break;
 	}
-	return result;
+	g_list_free(list->list);
+	list->list = result;
+	return list;
 }
 
-GList* vertex_match(GList* vlist, char* attribute, void* value){
-	int l = g_list_length(vlist);
+ListType* match_num(ListType* list, char* attribute, float cmpv, int op){
+	int l = g_list_length(list->list);
 	int n = 0;
+	void* e;
 	GList* result;
 	for(n; n<l; n++){
-		VertexType* v = g_list_nth_data(vlist, n);
+		if(list->type == DEGE)
+			e = (EdgeType*)g_list_nth_data(list->list, n);
+		else if(list->type == VERTEX)
+			e = (VertexType*)g_list_nth_data(list->list, n);
+		else
+			break;
 		Attribute* attr_v;
-		if((attr_v = g_hash_table_lookup(v->attributes, attribute))!=NULL){
-				switch(attr_v->type){
-					case INT: if(*(int*)attr_v->value == *(int*)value) result = g_list_append(result, v); break;
-					case FLOAT: if(*(float*)attr_v->value == *(float*)value) result = g_list_append(result, v); break;
-					case STRING: if(strcmp((char*)attr_v->value, (char*)value)==0) result = g_list_append(result, v); break;
-					default: break;
-				}
+		if((attr_v = g_hash_table_lookup(e->attributes, attribute))!=NULL){
+			float f=0.0;
+			if(attr_v->type == INT)
+				f = (float)*(int*)attr_v->value;
+			else if(attr_v->type == FLOAT)
+				f =*(float*)attr_v->value;
+			switch(op){
+				case EQ:
+					if(f == cmpv)
+						result = g_list_append(result, e);
+					break;
+				case GT:
+					if(f > cmpv)
+						result = g_list_append(result, e);
+					break;
+				case LT:
+					if(f < cmpv)
+						result = g_list_append(result, e);
+					break;
+				case GE:
+					if(f >= cmpv)
+						result = g_list_append(result, e);
+					break;
+				case LE:
+					if(f <= cmpv)
+						result = g_list_append(result, e);
+					break;
+			}
 		}
 	}
-	return result;
+	g_list_free(list->list);
+	list->list = result;
+	return list;
 }
 
 ListType* list_declaration(int type,int n, ...){
@@ -454,12 +495,12 @@ ListType* list_declaration(int type,int n, ...){
 		switch(type){
 			case VERTEX:
 				{VertexType* v = va_arg(args, struct VertexType*);
-				newlist->list = g_slist_append(newlist->list, v);
+				newlist->list = g_list_append(newlist->list, v);
 				}
 				break;
 			case EDGE:
 				{EdgeType* e = va_arg(args, struct EdgeType*);
-				newlist->list = g_slist_append(newlist->list, e);
+				newlist->list = g_list_append(newlist->list, e);
 				}
 				break;
 			default:
@@ -471,9 +512,9 @@ ListType* list_declaration(int type,int n, ...){
 }
 
 void* list_getelement(ListType* list, int index){
-	if(g_slist_length(list->list)<=(index+1))
+	if(g_list_length(list->list)<=(index+1))
 		return NULL;
-	return g_slist_nth_data(list->list, index);
+	return g_list_nth_data(list->list, index);
 }
 
 int list_append(ListType* list, int type, void* obj){
@@ -482,19 +523,19 @@ int list_append(ListType* list, int type, void* obj){
 	else if(list->type != type){
 		return 1;
 	}
-	list->list = g_slist_append(list->list, obj);
+	list->list = g_list_append(list->list, obj);
 	return 0;
 }
 
 int list_assign(ListType* list, int type, int index, void* obj){
-	if(g_slist_length(list->list)<=(index+1))
+	if(g_list_length(list->list)<=(index+1))
 		return 1;
 	if(list->type == -1)
 		list->type = type;
 	else if(list->type != type){
 		return 1;
 	}
-	void* p = g_slist_nth_data(list->list, index);
+	void* p = g_list_nth_data(list->list, index);
 	p = obj;
 	return 0;
 } 
@@ -502,14 +543,14 @@ int list_assign(ListType* list, int type, int index, void* obj){
 int print_list(ListType* list){	
     int i;
 	int type = list->type;
-	int length = g_slist_length(list->list);
+	int length = g_list_length(list->list);
 	for(i=0; i<length; i++){
 		switch(type){
 			case VERTEX:
-				print_v((VertexType*)g_slist_nth_data(list->list, i));
+				print_v((VertexType*)g_list_nth_data(list->list, i));
 				break;
 			case EDGE:
-				print_e((EdgeType*)g_slist_nth_data(list->list, i));
+				print_e((EdgeType*)g_list_nth_data(list->list, i));
 				break;
 			default:
 				break;
