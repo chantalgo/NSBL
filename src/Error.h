@@ -36,6 +36,8 @@
 #define ErrorGetAttrForWrongType                        +62
 #define ErrorMactchWrongType                            +63
 #define ErrorWrongFuncCall                              +64
+#define ErrorInvalidReturnType                          +65
+#define ErrorNoReturnInFunc                             +66
 
 
 #define ErrorCallBreakOutsideOfLoop                     +70

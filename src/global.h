@@ -29,4 +29,5 @@ extern char * OUTFILE;
 extern FILE * OUTFILESTREAM;
 extern char ** INDENT;
 extern int  inLoop, inFunc, inMATCH;
+extern GList *returnList, *noReturn;
 #endif

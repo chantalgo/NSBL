@@ -705,11 +705,11 @@ parameter_declaration
         sTableDeclare($$);
         $$->type = tn->type;
     }
-    | declaration_specifiers attribute {
-        $$ = astNewNode( AST_PARA_DECLARATION, 2, astAllChildren(2, $1, $2), $1->line);
-        sTableDeclare($$);
-        $$->type = $2->type;
-    }
+    //| declaration_specifiers attribute {
+    //    $$ = astNewNode( AST_PARA_DECLARATION, 2, astAllChildren(2, $1, $2), $1->line);
+    //    sTableDeclare($$);
+    //    $$->type = $2->type;
+    //}
     | function_literal_type_specifier IDENTIFIER {
         $$ = astNewNode( FUNC_LITERAL, 1, astAllChildren(1, astNewLeaf(IDENTIFIER, $2.s, $2.l)), $1.l);
         $$->type = FUNC_LITERAL_T;
@@ -778,8 +778,10 @@ void main_init(char * fileName) {
     isNoTypeCheck = 0;
     maxLevel = 0;
     inLoop = 0;
-    inFunc = 0;
+    inFunc = -1;
     inMATCH = 0;
+    returnList = NULL;
+    noReturn = NULL;
     OUTFILE = strCatAlloc("",2,fileName,".c");
 }
 
