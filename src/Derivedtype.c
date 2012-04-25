@@ -196,12 +196,30 @@ Attribute * new_attr( int type, void * val ) {
             attr->value.iv = (val==NULL) ? 0 : *(int *)val; break;
         case FLOAT_T :
             attr->value.fv = (val==NULL) ? 0.0 : *(float *)val; break;
+		case BOOL_T:
+			attr->value.bv = (val==NULL) ? 0 : ((*(int*)val > 0) ? 1 : 0); break;
         case STRING_T :
             attr->value.sv = (val==NULL) ? NULL : val; break;
         default :
             fprintf(stderr,"Derivedtype:new_attr: unknown type!!!!\n");
     }
     return attr;
+}
+
+Attribute* new_attr_INT_T(int i){
+	return new_attr(INT_T, &i);
+}
+
+Attribute* new_attr_FLOAT_T(float f){
+	return new_attr(FLOAT_T, &f);
+}
+
+Attribute* new_attr_BOOL_T(int b){
+	return new_attr(BOOL_T, &b);
+}
+
+Attribute* new_attr_STRING_T(char* s){
+	return new_attr(STRING_T, s);
 }
 
 int assign_attr( Attribute * attr, int type, void * val ) {
@@ -882,30 +900,41 @@ Attribute* assign_operator(Attribute* attr1, Attribute* attr2, int rm_attr1, int
 	return attr1;
 }
 
-Attribute* unary_operator(Attribute* attr1, int op, int lno){
+Attribute* unary_operator(Attribute* attr1, int op,int rm_attr1, int lno){
 	if(attr1 == NULL)
         die("NULL Attribute error at line: %d \n", lno);
 	int	type1 = attr1->type;
+	Attribute* result;
 	switch(op){
 		case OP_PLUS:
-			if(type1 == INT_T)
-				attr1->value.iv = +(attr1->value.iv);
-			else if(type1 == FLOAT_T)
-				attr1->value.fv = +(attr1->value.fv);
+			if(type1 == INT_T){
+				result = new_attr(INT_T, NULL);
+				result->value.iv = +(attr1->value.iv);
+			}
+			else if(type1 == FLOAT_T){
+				result = new_attr(FLOAT_T, NULL);
+				result->value.fv = +(attr1->value.fv);
+			}
 			else
                 die("incompatible type error at line: %d \n", lno);
 			break;
 		case OP_MINUS:
-			if(type1 == INT_T)
-				attr1->value.iv = -(attr1->value.iv);
-			else if(type1 == FLOAT_T)
-				attr1->value.fv = -(attr1->value.fv);
+			if(type1 == INT_T){
+				result = new_attr(INT_T, NULL);
+				result->value.iv = -(attr1->value.iv);
+			}
+			else if(type1 == FLOAT_T){
+				result = new_attr(FLOAT_T, NULL);
+				result->value.fv = -(attr1->value.fv);
+			}
 			else
                 die("incompatible type error at line: %d \n", lno);
 			break;
 		case OP_NOT:
-			if(type1 == BOOL_T)
+			if(type1 == BOOL_T){
+				result = new_attr(BOOL_T, NULL);
 				attr1->value.bv = !(attr1->value.bv);
+			}
 			else
                 die("incompatible type error at line: %d \n", lno);
 			break;
@@ -913,29 +942,53 @@ Attribute* unary_operator(Attribute* attr1, int op, int lno){
             die("Unknow unary operator error at line: %d \n", lno);
 			break;
 	}
-	return attr1;
+	if(rm_attr1==FLAG_DESTROY_ATTR) destroy_attr(attr1);
+	return result;
 }
 
-Attribute* cast_operator(Attribute* attr1, int type, int lno){
+Attribute* cast_operator(Attribute* attr1, int type, int rm_attr1, int lno){
 	if(attr1 == NULL)
         die("NULL Attribute error at line: %d \n", lno);
 	int	type1 = attr1->type;
-	if(type1 == type)
-		return attr1;
+	Attribute* result;
 	if(type1 == INT_T && type == FLOAT_T){
-		int i = attr1->value.iv;
-		attr1->value.fv = (float)i;
-		attr1->type = type;
+		result = new_attr(FLOAT_T, NULL);
+		result->value.fv = (float)attr1->value.iv;
 	}
 	else if(type1 == FLOAT_T && type == INT_T){
-		float f = attr1->value.fv;
-		attr1->value.iv = (int)f;
-		attr1->type = type;
+		result = new_attr(INT_T, NULL);
+		result->value.iv = (int)attr1->value.fv;
+	}
+	else if(type1 == INT_T && type ==INT_T){
+		result = new_attr(INT_T, NULL);
+		result->value.iv = attr1->value.iv;
+	}
+	else if(type1 == FLOAT_T && type == FLOAT_T){
+		result = new_attr(FLOAT_T, NULL);
+		result->value.fv = attr1->value.fv;
 	}
 	else
         die("Illegal type conversion error at line: %d \n", lno);
 
-	return attr1;
+	if(rm_attr1==FLAG_DESTROY_ATTR) destroy_attr(attr1);
+	return result;
+}
+
+Attribute* object_get_attribute(void* v, int obj, char* attribute){
+	if(v==NULL)
+        die("NULL object error \n");
+	Attribute* attr;
+	switch(obj){
+		case VERTEX_T:
+			attr = vertex_get_attribute((VertexType*)v, attribute);
+			break;
+		case EDGE_T:
+			attr = edge_get_attribute((EdgeType*)v, attribute);
+			break;
+		default:
+        	die("Illegal object type error \n");
+	}
+	return attr;
 }
 
 StringType*         assign_operator_string(StringType* s1, StringType* s2) {

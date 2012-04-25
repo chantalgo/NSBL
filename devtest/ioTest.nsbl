@@ -1,0 +1,33 @@
+int j=10;
+print<<j;
+graph g;
+edge e;
+vertex v;
+float f=12.35;
+
+string x="try.xml";
+int i=10;
+int k=10;
+int u=10;
+print<<i<<k<<u;
+
+print<<g;
+
+print<<v;
+
+print<<e;
+
+print<<v<<g<<e;
+
+print<<f<<x;
+
+g<<x;
+
+g>>x;
+
+print<<x<<g<<i<<v<<k;
+
+
+
+
+

@@ -87,6 +87,11 @@ int                 destroy_list(ListType* list);
 int                 destroy_string(StringType* s);
 
 Attribute*          new_attr( int type, void * val );
+Attribute*			new_attr_INT_T(int i);
+Attribute*			new_attr_FLOAT_T(float f);
+Attribute*			new_attr_BOOL_T(int b);
+Attribute*			new_attr_STRING_T(char* s);
+
 void                destroy_attr ( Attribute * attr );
 int                 assign_attr( Attribute * attr, int type, void * val );
 int                 cmp_attr( Attribute * attr1, void * val );
@@ -144,8 +149,8 @@ Attribute*          binary_operator( Attribute* attr1, Attribute* attr2, int op,
 void		        assign_operator_to_static( Attribute* attr1, int type, void * value, int rm_attr1, int lno);
 // attr1 = attr2
 Attribute*          assign_operator( Attribute* attr1, Attribute* attr2, int rm_attr1, int rm_attr2, int lno);
-Attribute*          unary_operator( Attribute* attr1, int op, int lno);
-Attribute*          cast_operator( Attribute* attr1, int type, int lno);
+Attribute*          unary_operator( Attribute* attr1, int op, int rm_attr1, int lno);
+Attribute*          cast_operator( Attribute* attr1, int type, int rm_attr1, int lno);
 Attribute*          object_get_attribute(void* v, int obj, char* attribute);
 ListType*           list_match( ListType * l, bool (*func) (void *, int ), int rm_l );
 

@@ -111,6 +111,7 @@ struct Node* ast_new_node(int token, int nch, struct Node** child, long long lin
 		child[1]->lexval.sval = temp;
         
 	}*/
+
     node->token = token;
     node->type = UNKNOWN_T;             // default
     node->typeCon = NULL;
@@ -330,6 +331,14 @@ void ast_output_node(struct Node* node, FILE* out, const char * sep) {
             fprintf(out, "Node<ERROR>");break;
         case DEL :
             fprintf(out, "Node<DEL>");break;
+	case AST_PRINT :
+	    fprintf(out, "Node<AST_PRINT>");break;
+	case AST_PRINT_STAT :
+ 	    fprintf(out, "Node<AST_PRINT_STAT>");break;	
+	case AST_READ_GRAPH :
+	    fprintf(out, "Node<AST_READ_GRAPH>");break;
+	case AST_WRITE_GRAPH :
+	    fprintf(out, "Node<AST_WRITE_GRAPH>");break;
         default :
             fprintf(out, "Node<UNKNOWN> !!!!!!!!!!!!!!!!");
     }
