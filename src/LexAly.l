@@ -50,7 +50,6 @@ comment         (\/\*([^\*]|(\*+([^\*\/])))*\*+\/)|(\/\/.*)
 "endV"          { MYECHO; yylval.LString.l = LEXLINECOUNTER; return ENDING_VERTICES; }
 "allV"          { MYECHO; yylval.LString.l = LEXLINECOUNTER; return ALL_VERTICES; }
 "allE"          { MYECHO; yylval.LString.l = LEXLINECOUNTER; return ALL_EDGES; }
-"print"		{ MYECHO; yylval.LString.l = LEXLINECOUNTER; return PRINT;}
 
 "=="            { MYECHO; yylval.LString.l = LEXLINECOUNTER; return EQ; }
 "!="            { MYECHO; yylval.LString.l = LEXLINECOUNTER; return NE; }
@@ -87,12 +86,7 @@ comment         (\/\*([^\*]|(\*+([^\*\/])))*\*+\/)|(\/\/.*)
 "="             { MYECHO; yylval.LString.l = LEXLINECOUNTER; return '='; }
 ">"             { MYECHO; yylval.LString.l = LEXLINECOUNTER; return GT; }
 "<"             { MYECHO; yylval.LString.l = LEXLINECOUNTER; return LT; }
-<<<<<<< HEAD
 "del"           { MYECHO; yylval.LString.l = LEXLINECOUNTER; return DEL; }
-=======
-"<<"		{ MYECHO; yylval.LString.l = LEXLINECOUNTER; return LIN;}
-">>"		{ MYECHO; yylval.LString.l = LEXLINECOUNTER; return ROUT;}
->>>>>>> [I/O] Grammar and CodeGen for IO complete
 
 "true"          { MYECHO; yylval.LString.l = LEXLINECOUNTER; return BOOL_TRUE; }
 "false"         { MYECHO; yylval.LString.l = LEXLINECOUNTER; return BOOL_FALSE; }

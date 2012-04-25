@@ -7,13 +7,8 @@
 #include "Parser.tab.h"
 #include "global.h"
 #include "Error.h"
-<<<<<<< HEAD
 #include "operator.h"
 #include "CodeGenUtil.h"
-=======
-#include "NSBLio.h"
-#include "Derivedtype.h"
->>>>>>> [I/O] Grammar and CodeGen for IO complete
 
 char * OUTFILE; 
 FILE * OUTFILESTREAM;           // Output file
@@ -78,7 +73,6 @@ int listInitCode(struct Node* node, int type, int isglobal){
 	struct Node* tn = node->child[1];
 	if(tn->token != AST_LIST_INIT)
 		return ErrorAssignmentExpression;
-
 	if(tn->child!=NULL){
 		count++;
 		tn = tn->child[0];
@@ -383,13 +377,6 @@ int codeGen (struct Node * node) {
     int token = node->token, errflag = 0;
     char * op = opMacro(token);
     struct Node *lf, *rt, *sg;
-    char* printFunc;
-    char* var;
-    char* endBrace;
-    char* printVattr;
-    char* printCall;    	
-    char* fileloc;
-    char* comma;
     switch (token) {
 /************************************************************************************/
         case INTEGER_CONSTANT :
@@ -427,7 +414,6 @@ int codeGen (struct Node * node) {
             node->type = node->child[1]->type;
             break;
 		case AST_LIST_INIT:
-
 			node->type = LIST_T;
 			if(node->child==NULL)
 				node->code = strCatAlloc("", 1, " ");
@@ -479,13 +465,11 @@ int codeGen (struct Node * node) {
 							int r = listInitCode(node->child[1], node->child[0]->lexval.ival, 1);
 							if(r){
 								ERRNO = r;
-
 								return ERRNO;
 							}
 							node->code = strCatAlloc("", 1, node->child[1]->code);
 						}
 						break;
-
 					default:
 						if(node->child[1]->child!=NULL && node->child[1]->child[0]->token == BELONG){
 							int rv = attributeDeclareCode(node->child[1], node->child[0]->lexval.ival);
@@ -496,7 +480,6 @@ int codeGen (struct Node * node) {
 							node->code = strCatAlloc("", 1, node->child[1]->code);
 							node->codetmp = NULL;
 						}else if(existbelong(node->child[1])){
-
 							ERRNO = ErrorAttributeDeclaration;
 							return ERRNO;
 						}else
@@ -1284,171 +1267,7 @@ int codeGen (struct Node * node) {
                     rt->code);
             break;
 /************************************************************************************/
-	case AST_PRINT_STAT :
-            codeGen(node->child[0]);
-            break;
-	case AST_PRINT :
-	    {switch(node->child[0]->type)
-		{
-	    	case INT_T:
-			{printFunc=" printInteger("; 
-			var=node->child[0]->symbol->bind;
-			endBrace=");\n";
-			printCall = malloc(strlen(printFunc) + strlen(var) + strlen(endBrace) + 3);
-			strcpy(printCall, printFunc);
-			strcat(printCall, var);
-			strcat(printCall, endBrace);
-			if(node->nch == 1){ 
-	    			node->code = strCatAlloc(" ",3,INDENT[node->child[0]->scope[0]], " ",  printCall);
-            		}
-            		else {
-                		node->code = strCatAlloc(" ",3,INDENT[node->child[0]->scope[0]], " ",  printCall);
-				codeGen(node->child[1]);
-		       	}
-            		break;}
-	    	case FLOAT_T:
-                        {printFunc=" printFloat(";
-                        var=node->child[0]->symbol->bind;
-                        endBrace=");\n";
-                        printCall = malloc(strlen(printFunc) + strlen(var) + strlen(endBrace) + 3);
-			strcpy(printCall, printFunc);
-			strcat(printCall, var);
-			strcat(printCall, endBrace);
-	    		if(node->nch == 1){ 
-	    			node->code = strCatAlloc(" ",3,INDENT[node->child[0]->scope[0]], " ",  printCall);
-            		}
-            		else {
-                		node->code = strCatAlloc(" ",3,INDENT[node->child[0]->scope[0]], " ",  printCall);		
-	    			codeGen(node->child[1]);
-            		}
-            		break;}
-	    	case GRAPH_T:
-                        {printFunc=" print_g(";
-                        var=node->child[0]->symbol->bind;
-                        endBrace=");\n";
-                        printCall = malloc(strlen(printFunc) + strlen(var) + strlen(endBrace) + 3);
-                        strcpy(printCall, printFunc);
-                        strcat(printCall, var);
-                        strcat(printCall, endBrace);
-                         if(node->nch == 1){
-                                node->code = strCatAlloc(" ",3,INDENT[node->child[0]->scope[0]], " ",  printCall);
-                        }
-                        else {
-                                node->code = strCatAlloc(" ",3,INDENT[node->child[0]->scope[0]], " ",  printCall);
-                                codeGen(node->child[1]);
-                        }
-                        break;}
-		case VERTEX_T:
-                        {printFunc=" print_v(";
-                        var=node->child[0]->symbol->bind;
-                        endBrace=");\n";
-			printVattr=" print_v_attr(";
-			printCall = malloc(strlen(printFunc) + 2*(strlen(var) + strlen(endBrace)) + strlen(printVattr) + 6);
-                        strcpy(printCall, printFunc);
-                        strcat(printCall, var);
-                        strcat(printCall, endBrace);
-			strcat(printCall, printVattr);
-			strcat(printCall, var);
-			strcat(printCall, endBrace);
-                         if(node->nch == 1){
-                                node->code = strCatAlloc(" ",3,INDENT[node->child[0]->scope[0]], " ",  printCall);
-                        }
-                        else {
-                                node->code = strCatAlloc(" ",3,INDENT[node->child[0]->scope[0]], " ",  printCall);
-                                codeGen(node->child[1]);
-                        }
-                        break;}
 
-		case EDGE_T:
-			{printFunc=" print_e(";
-                        var=node->child[0]->symbol->bind;
-                        endBrace=");\n";
-                        printVattr=" print_e_attr(";
-                        printCall = malloc(strlen(printFunc) + 2*(strlen(var) + strlen(endBrace)) + strlen(printVattr) + 6);
-                        strcpy(printCall, printFunc);
-                        strcat(printCall, var);
-                        strcat(printCall, endBrace);
-                        strcat(printCall, printVattr);
-                        strcat(printCall, var);
-                        strcat(printCall, endBrace);
-                         if(node->nch == 1){
-                                node->code = strCatAlloc(" ",3,INDENT[node->child[0]->scope[0]], " ",  printCall);
-                        }
-                        else {
-                                node->code = strCatAlloc(" ",3,INDENT[node->child[0]->scope[0]], " ",  printCall);
-                                codeGen(node->child[1]);
-                        }
-                        break;}
-		case STRING_T:
-                        {printFunc=" printString(";
-                        var=node->child[0]->symbol->bind;
-                        endBrace=");\n";
-                        printCall = malloc(strlen(printFunc) + strlen(var) + strlen(endBrace) + 3);
-                        strcpy(printCall, printFunc);
-                        strcat(printCall, var);
-                        strcat(printCall, endBrace);
-                        if(node->nch == 1){
-                                node->code = strCatAlloc(" ",3,INDENT[node->child[0]->scope[0]], " ",  printCall);
-                        }
-                        else {
-                                node->code = strCatAlloc(" ",3,INDENT[node->child[0]->scope[0]], " ",  printCall);
-                                codeGen(node->child[1]);
-                        }
-                        break;}
-		//default:
-			//printf("This is default\n");
-				//break;
-
-
-	}
-	break;}
-/************************************************************************************/
-	case AST_READ_GRAPH:
-		lf=node->child[0];
-		rt=node->child[1];
-		if (lf->type==GRAPH_T && rt->type==STRING_T)
-		{
-			printFunc=" = readGraph(";
-                        var=rt->symbol->bind;
-                        endBrace=");\n";
-                        printCall = malloc(strlen(printFunc) + strlen(var) + strlen(endBrace) + 3);
-                        strcpy(printCall, printFunc);
-			strcat(printCall, var);
-			strcat(printCall, endBrace);
-			node->code =  strCatAlloc(" ",2,lf->symbol->bind,printCall);
-		}
-            	else {
-                	ERRNO = ErrorTypeMisMatch;
-                	errorInfo(ERRNO, node->line, "expected `%s' to be fetched from `%s' file location\n", sTypeName(lf->type), sTypeName(rt->type) );
-                	
-            	}
-		break;
-	case AST_WRITE_GRAPH:
-                lf=node->child[0];
-                rt=node->child[1];
-                if (lf->type==GRAPH_T && rt->type==STRING_T)
-                {
-                        printFunc=" = saveGraph(";
-                        var=lf->symbol->bind;
-                        endBrace=");\n";
-			fileloc=rt->symbol->bind;
-			comma=", ";
-                        printCall = malloc(strlen(printFunc) + strlen(var) + strlen(endBrace) + strlen(comma) + strlen(fileloc) + 3);
-                        strcpy(printCall, printFunc);
-                        strcat(printCall, var);
-                        strcat(printCall, comma);
-			strcat(printCall, fileloc);
-			strcat(printCall, endBrace);
-                
-                        node->code =  strCatAlloc(" ",1,printCall);
-                }
-                else {
-                        ERRNO = ErrorTypeMisMatch;
-                        errorInfo(ERRNO, node->line, "expected `%s' to be written into `%s' file location\n", sTypeName(lf->type), sTypeName(rt->type) );
-                        
-                }
-                break;		
-/************************************************************************************/
         default:
             if(node->code == NULL) {
 #ifdef _DEBUG
