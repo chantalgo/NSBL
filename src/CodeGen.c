@@ -630,8 +630,28 @@ int codeGen (struct Node * node) {
             }
             break;
 
-        case APPEND :       codeGen( node->child[0] );codeGen( node->child[2] );
+        case APPEND :      
+			lf = node->child[0]; rt = node->child[1];
+			codeGen( lf );codeGen( rt );
             // TODO
+			if(lf->type==GRAPH_T && rt->type==VERTEX_T){
+				node->code = strCatAlloc("", 5, "g_insert_v(", lf->code, ", ", rt->code, ")");
+			}
+			else if(lf->type==GRAPH_T && rt->type==EDGE_T){
+				node->code = strCatAlloc("", 5, "g_insert_e(", lf->code, ", ", rt->code, ")");	
+			}
+			else if(lf->type==GRAPH_T && rt->type==LIST_T){
+				node->code = strCatAlloc("", 5, "g_append_list(", lf->code, ", ", rt->code, ")");
+			}
+			else if(lf->type==LIST_T && rt->type==VERTEX_T){
+				node->code = strCatAlloc("", 5, "list_append(", lf->code, ", VERTEX_T, ", rt->code, ")");
+			}
+			else if(lf->type==LIST_T && rt->type==EDGE_T){
+				node->code = strCatAlloc("", 5, "list_append(", lf->code, ", EDGE_T, ", rt->code, ")");
+			}else{
+				ERRNO = ErrorAssignmentExpression;
+				return ERRNO;
+			}
             break;
 /************************************************************************************/
         case OR  :          
