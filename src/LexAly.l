@@ -109,7 +109,7 @@ comment         (\/\*([^\*]|(\*+([^\*\/])))*\*+\/)|(\/\/.*)
                   return IDENTIFIER; 
                 }
 {strliteral}    { MYECHO; 
-                  yylval.LString.s = (char *) malloc ( strlen(yytext) ); 
+                  yylval.LString.s = (char *) malloc ( strlen(yytext)+1 ); 
                   yylval.LString.l = LEXLINECOUNTER;
                   strncpy( yylval.LString.s, yytext, strlen(yytext)  ); 
                   yylval.LString.s[strlen(yytext)]='\0';

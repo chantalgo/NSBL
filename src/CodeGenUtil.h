@@ -18,6 +18,8 @@ char * typeMacro(int t);
 char * assignFunc(int t);
 char * tmpAttr();
 char * tmpMatch();
+char * tmpMatchStr();
+char * tmpMatchStrVab();
 void codeIndentInit();
 void codeIndentFree();
 

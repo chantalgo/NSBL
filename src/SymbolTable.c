@@ -281,7 +281,7 @@ void s_destroy_entry ( gpointer dummy1, gpointer entry, gpointer dummy2 ) {
 
 // create new key 
 int s_new_key ( Lexeme lex, ScopeId scope, SymbolTableKey key) {
-    sprintf( key, "%s%d\0", lex, scope );
+    sprintf( key, "%s_%d\0", lex, scope );
     return 0;
 }
 

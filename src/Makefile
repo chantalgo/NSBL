@@ -2,7 +2,7 @@ BINDIR = ../bin
 TESTDIR = ../devtest
 MXMLDIR = ../mxmldir
 
-CFLAGS = -D_NO_LOG
+CFLAGS = -D_DEBUG -D_AST_DEBUG_ALL  
 ##### CFLAGS Options ############
 # -D_AST_DEBUG
 # -D_AST_DEBUG_ALL
@@ -24,7 +24,7 @@ GLIBLINK = `pkg-config --cflags --libs glib-2.0`
 YACCLIB = -ly -lfl
 LIBS = $(MXMLDIR)/libmxml.a -lpthread 
 
-CC = gcc $(CFLAGS) $(GLIBINCLUDE) 
+CC = gcc -g $(CFLAGS) $(GLIBINCLUDE) 
 LEX = flex
 YACC = yacc
 

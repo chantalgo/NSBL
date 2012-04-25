@@ -437,9 +437,10 @@ postfix_expression
         $$ = astNewNode ( AST_MATCH, 2, astAllChildren(2, $1, $6), $2.l );
     }
     | postfix_expression '.' IDENTIFIER {
-        $$ = astNewNode ( AST_ATTRIBUTE, 2, astAllChildren(2, $1, astNewLeaf(IDENTIFIER, $3.s, $3.l)), $2.l );
-        char * ctmp = $$->child[1]->lexval.sval;
-        $$->child[1]->lexval.sval = strCatAlloc("", 3, $$->child[0]->lexval.sval,"::",ctmp );
+        struct Node * tnode = astNewLeaf(IDENTIFIER, $3.s, $3.l);
+        $$ = astNewNode ( AST_ATTRIBUTE, 2, astAllChildren(2, $1, tnode), $2.l );
+        char * ctmp = tnode->lexval.sval;
+        $$->child[1]->lexval.sval = strCatAlloc("", 2, "::",ctmp );
         free(ctmp);
     }
     | postfix_expression '.' graph_property {
@@ -638,7 +639,7 @@ del_declarator
         $$ = astNewNode( BELONG, 2, astAllChildren(2, tnode, astNewLeaf(IDENTIFIER, $3.s, $3.l)), $2.l );
         // set lexval for ID2
         char * ctmp = $$->child[1]->lexval.sval;
-        $$->child[1]->lexval.sval = strCatAlloc("", 3, $$->child[0]->lexval.sval, "::", ctmp);
+        $$->child[1]->lexval.sval = strCatAlloc("", 2, "::", ctmp);
         free(ctmp);
         // DO NOT look up symbol table
         //sTableLookupId($$->child[1]);
@@ -659,7 +660,7 @@ simple_declarator
         $$ = astNewNode( BELONG, 2, astAllChildren(2, tnode, astNewLeaf(IDENTIFIER, $3.s, $3.l)), $2.l );
         // set lexval for ID2
         char * ctmp = $$->child[1]->lexval.sval;
-        $$->child[1]->lexval.sval = strCatAlloc("", 3, $$->child[0]->lexval.sval, "::", ctmp);
+        $$->child[1]->lexval.sval = strCatAlloc("", 2, "::", ctmp);
         free(ctmp);
     }
     ;
@@ -775,6 +776,9 @@ void main_init(char * fileName) {
     inLoop = 0;
     inFunc = -1;
     inMATCH = 0;
+    exsitMATCH = 0;
+    matchStaticVab = NULL;
+    matchStrDecl = NULL;
     returnList = NULL;
     noReturn = NULL;
     OUTFILE = strCatAlloc("",2,fileName,".c");

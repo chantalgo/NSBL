@@ -53,7 +53,7 @@ struct Node* ast_new_leaf(int token, void * ptr, long long line) {
             node->token = STRING_LITERAL;
             node->type = STRING_T;
             node->lexval.sval = (char *) ptr;
-            node->code = strCatAlloc("", 1, (const char *)ptr);
+            node->code = strCatAlloc("", 1, (char *)ptr);
             break;
         case IDENTIFIER :
             node->token = IDENTIFIER;
@@ -105,11 +105,12 @@ struct Node** ast_all_children(int n, ...){
 
 struct Node* ast_new_node(int token, int nch, struct Node** child, long long line){
     struct Node* node = (struct Node *) malloc ( sizeof (struct Node) );  // free in ast_free_tree
-	if(token==BELONG && 0){   // not used 
+/*	if(token==BELONG && 0){   // not used 
 		char* temp = strCatAlloc("", 3, child[1]->lexval.sval, "_", child[0]->lexval.sval);
 		//child[1]->code = child[1]->lexval.sval;
 		child[1]->lexval.sval = temp;
-	}
+        
+	}*/
     node->token = token;
     node->type = UNKNOWN_T;             // default
     node->typeCon = NULL;
@@ -142,39 +143,46 @@ void ast_free_tree(struct Node* node) {
         debugInfo("FREE sval: %s\n",node->lexval.sval); 
 #endif
         free(node->lexval.sval);        // malloc by LexAly.l
+        node->lexval.sval = NULL;
     }
     /* free code */
     if ( node->code != NULL ) {
 #ifdef _AST_DEBUG_MEMORY
         debugInfo("FREE code: %s\n", node->code);
 #endif
-        free(node->code);
+        free(node->code); node->code = NULL;
     }
     if ( node->codetmp != NULL ) {
 #ifdef _AST_DEBUG_MEMORY
         debugInfo("FREE codetmp: %s\n", node->codetmp);
 #endif
-        free(node->codetmp);
+        free(node->codetmp); node->codetmp = NULL;
     }
     /* if child exsits, free child first */
     if ( node->nch > 0 && node->child != NULL ) {
         // free children
-        int i;for(i=0; i<node->nch; ++i) ast_free_tree( node->child[i] );
+        int i;for(i=0; i<node->nch; ++i) { 
+            debugInfo("Node<%d> : %d\n", node->token, i);
+            ast_free_tree( node->child[i] ); 
+            node->child[i] = NULL;
+        }
         // free child ptr array
 #ifdef _AST_DEBUG_MEMORY
         debugInfo("FREE child ptrs in ");
         ast_output_node(node, DEBUGIO, "\n");
 #endif
-        free(node->child);
+        free(node->child); node->child = NULL;
     }
     else if (node->nch > 0 || node->child != NULL) {
         fprintf(stderr, "ERROR:: ast_free_tree :: nch does NOT match child! code bug detected!!\n ");
     }
     /* free myself */
 #ifdef _AST_DEBUG_MEMORY
-    debugInfo("FREE this node\n");
+    debugInfo("FREE this node : %d", node->token);
+    ast_output_node(node, DEBUGIO, "\n");
+    fflush(DEBUGIO);
 #endif
-    free(node);
+    free(node); node = NULL;
     return;
 }
 
