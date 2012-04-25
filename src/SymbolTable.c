@@ -112,11 +112,11 @@ char* s_table_type_name (int type) {
         case BOOL_T:            return "bool";
         case INT_T:             return "int";
         case FLOAT_T:           return "float";
-        case STRING_T:          return "GString*";
-        case LIST_T:            return "ListType*";
-        case VERTEX_T:          return "VertexType*";
-        case EDGE_T:            return "EdgeType*";
-        case GRAPH_T:           return "GraphType*";
+        case STRING_T:          return "GString";
+        case LIST_T:            return "ListType";
+        case VERTEX_T:          return "VertexType";
+        case EDGE_T:            return "EdgeType";
+        case GRAPH_T:           return "GraphType";
         case DYNAMIC_T:         return "dyn";
         case FUNC_T:            return "func";
         case FUNC_LITERAL_T:    return "fl";

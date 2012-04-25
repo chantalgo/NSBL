@@ -17,8 +17,8 @@
 #
 
 # Directories...
-$prefix=/home/cg2486/plt
-$exec_prefix=/home/cg2486/plt
+$prefix=/usr/local
+$exec_prefix=/usr/local
 $bindir=${exec_prefix}/bin
 $datarootdir=${prefix}/share
 $docdir=${datarootdir}/doc/mxml

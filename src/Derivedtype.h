@@ -31,7 +31,7 @@ typedef union {
 	bool		bv;
     int         iv;
     float       fv;
-    char *      sv;
+    GString*    sv;
 }AttrValue;
 
 typedef struct{
@@ -90,7 +90,7 @@ Attribute*          new_attr( int type, void * val);
 Attribute*			new_attr_INT_T(int i);
 Attribute*			new_attr_FLOAT_T(float f);
 Attribute*			new_attr_BOOL_T(bool b);
-Attribute*			new_attr_STRING_T(char* s);
+Attribute*			new_attr_STRING_T(GString* s);
 
 void                destroy_attr ( Attribute * attr );
 int                 assign_attr( Attribute * attr, int type, void * val );
@@ -142,6 +142,7 @@ int                 print_v(VertexType* v);
 int                 print_e(EdgeType* e);
 int                 print_v_attr(VertexType* v);
 int                 print_e_attr(EdgeType* e);
+int                 print_LIST_T(ListType* l);
 
 int					print_VERTEX_T(VertexType* v);
 int 				print_EDGE_T(EdgeType* e);
@@ -160,11 +161,11 @@ Attribute*          object_get_attribute(void* v, int obj, char* attribute);
 ListType*           list_match( ListType * l, bool (*func) (void *, int ), int rm_l );
 
 // DONE
-StringType*         assign_operator_string(StringType* s1, StringType* s2);
-ListType*           assign_operator_list(ListType* l1, ListType* l2);
-VertexType*         assign_operator_vertex(VertexType* v1, VertexType* v2);
-EdgeType*           assign_operator_edge(EdgeType* e1, EdgeType* e2);
-GraphType*          assign_operator_graph(GraphType* g1, GraphType* g2);
+StringType*         assign_operator_string(StringType** s1, StringType** s2);
+ListType*           assign_operator_list(ListType** l1, ListType** l2);
+VertexType*         assign_operator_vertex(VertexType** v1, VertexType** v2);
+EdgeType*           assign_operator_edge(EdgeType** e1, EdgeType** e2);
+GraphType*          assign_operator_graph(GraphType** g1, GraphType** g2);
 void 				die(char* fmt, ...);
 
 //int list_append(ListType* list, void* data);

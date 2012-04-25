@@ -2,7 +2,7 @@ BINDIR = ../bin
 TESTDIR = ../devtest
 MXMLDIR = ../mxmldir
 
-CFLAGS =  
+CFLAGS = -D_NO_LOG 
 ##### CFLAGS Options ############
 # -D_AST_DEBUG
 # -D_AST_DEBUG_ALL
@@ -28,9 +28,9 @@ CC = gcc -g $(CFLAGS) $(GLIBINCLUDE)
 LEX = flex
 YACC = yacc
 
-OBJ = Parser.tab.o LexAly.yy.o ASTree.o SymbolTable.o SymbolTableUtil.o util.o Error.o CodeGen.o Derivedtype.o CodeGenUtil.o
+OBJ = Parser.tab.o LexAly.yy.o ASTree.o SymbolTable.o SymbolTableUtil.o util.o Error.o CodeGen.o CodeGenUtil.o  
 
-toy.exe : $(OBJ)
+toy.exe : $(OBJ) runtimelib
 	$(CC) -o toy.exe $(OBJ) $(GLIBLINK) $(YACCLIB) 
 	mkdir -p $(BINDIR)
 	mv toy.exe $(BINDIR)
@@ -64,8 +64,12 @@ CodeGenUtil.o:	CodeGenUtil.c CodeGenUtil.h
 	$(CC) -c CodeGenUtil.c 
 Derivedtype.o : Derivedtype.h Derivedtype.c
 	$(CC) -c Derivedtype.c
+NSBLio.o: NSBLio.c
+	$(CC) -c NSBLio.c
 FileReadWrite.o: FileReadWrite.h FileReadWrite.c 
-	$(CC) -c  FileReadWrite.c
+	$(CC) -c  FileReadWrite.c $(LIBS)
+
+runtimelib:	NSBLio.o Derivedtype.o FileReadWrite.o
 	
 test : toy.exe
 #	$(BINDIR)/toy.exe $(TESTDIR)/syntax-test.nsbl 

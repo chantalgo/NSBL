@@ -144,17 +144,13 @@ start_nonterminal
         if(!ERRNO) {// no syntax error, or declaration error
             char *mainBodyCode=NULL, *funCode=NULL,*mainCode;
             char *globalDecl=NULL;
-	    printf("\nCHECK PARSER 0\n");
+            codeInclude(&globalDecl);
             codeIndentInit();
-	    printf("\nCHECK PARSER 1\n");
             codeAllGen($$, &mainBodyCode, &funCode);
-	    printf("\nCHECK PARSER 2\n");
             codeAllFuncLiteral($$, &funCode);
-	    printf("\nCHECK PARSER 3\n");
             codeAllGlobal($$,&globalDecl);
             mainCode = wapperMainCode(mainBodyCode);        
             codeIndentFree();
-	    printf("\nCHECK PARSER 4\n");
             showASTandST($$,"Semantic P2 + Code Gen");
             if(!ERRNO){
                 OUTFILESTREAM = fopen(OUTFILE,"w");

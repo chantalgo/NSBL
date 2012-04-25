@@ -100,21 +100,21 @@
       vertex_attribute_value=mxmlNewElement(vertex_attribute, "vertex_attribute_value");
         Attribute* a=(Attribute*)(g_list_nth_data(v_attr_value,x));
         int type=(int )a->type;
-	if (type==1)
+	if (type==INT_T)
 	{
 
-		len = snprintf(str, 100, "%d",*(int*)((Attribute*)(g_list_nth_data(v_attr_value,x)))->value);
+		len = snprintf(str, 100, "%d",((Attribute*)(g_list_nth_data(v_attr_value,x)))->value.iv);
                 mxmlNewText(vertex_attribute_value,0,str);
         }
-        if (type==2)
+        if (type==FLOAT_T)
         {
-                len = snprintf(str, 100, "%f",*(float*)((Attribute*)(g_list_nth_data(v_attr_value,x)))->value);
+                len = snprintf(str, 100, "%f",((Attribute*)(g_list_nth_data(v_attr_value,x)))->value.fv);
                 mxmlNewText(vertex_attribute_value,0,str);
         }
-        if (type==3)
+        if (type==STRING_T)
         {
 		 mxmlNewText(vertex_attribute_value, 0,
-        (char*)(((Attribute*)(g_list_nth_data(v_attr_value,x)))->value));
+         ((Attribute*)(g_list_nth_data(v_attr_value,x)))->value.sv->str);
 
                 //mxmlNewText(edge_attribute_value,1, (char*)(((Attribute*)(g_list_nth_data(e_attr_value,y)))->value));
         }
@@ -192,19 +192,19 @@
 	//mxmlNewText(edge_attribute_value, 1,(char*)(((Attribute*)(g_list_nth_data(e_attr_value,y)))->value));
 	Attribute* a=(Attribute*)(g_list_nth_data(e_attr_value,y)); 
 	int type=(int )a->type;
-	if (type==1)
+	if (type==INT_T)
 	{
-		len = snprintf(str, 100, "%d",*(int*)((Attribute*)(g_list_nth_data(e_attr_value,y)))->value);
+		len = snprintf(str, 100, "%d",((Attribute*)(g_list_nth_data(e_attr_value,y)))->value.iv);
 		mxmlNewText(edge_attribute_value,0,str);
 	}
-	if (type==2)
+	if (type==FLOAT_T)
         {
-                len = snprintf(str, 100, "%f",*(float*)((Attribute*)(g_list_nth_data(e_attr_value,y)))->value);
+        len = snprintf(str, 100, "%f",((Attribute*)(g_list_nth_data(e_attr_value,y)))->value.fv);
                 mxmlNewText(edge_attribute_value,0,str);
         }
-        if (type==3)
+        if (type==STRING_T)
         {
-                mxmlNewText(edge_attribute_value,0, (char*)(((Attribute*)(g_list_nth_data(e_attr_value,y)))->value));
+                mxmlNewText(edge_attribute_value,0, ((Attribute*)(g_list_nth_data(e_attr_value,y)))->value.sv->str);
         }
 
 

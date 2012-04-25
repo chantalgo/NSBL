@@ -8,7 +8,7 @@
 //print
 void print_INT_T(int val);
 void print_FLOAT_T(float val);
-void print_STRING_T(char* s);
+void print_STRING_T(GString *s);
 void print_BOOL_T(bool b);
 void print();
 void print_NEWLINE();

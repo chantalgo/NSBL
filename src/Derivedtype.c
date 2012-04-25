@@ -72,6 +72,7 @@ GraphType* new_graph(){
 ListType* new_list(){
 	ListType* l = (ListType*)malloc(sizeof(ListType));
 	l->type = UNKNOWN_T;
+    l->list = NULL;
 	return l;
 }
 
@@ -203,6 +204,9 @@ Attribute * new_attr( int type, void * val ) {
 			attr->value.bv = (val==NULL) ? 0 : ((*(bool*)val > 0) ? true : false); break;
         case STRING_T :
             attr->value.sv = (val==NULL) ? NULL : val; break;
+        case UNKNOWN_T :
+            attr->value.sv = NULL;
+            break;
         default :
             fprintf(stderr,"Derivedtype:new_attr: unknown type!!!!\n");
     }
@@ -221,7 +225,7 @@ Attribute* new_attr_BOOL_T(bool b){
 	return new_attr(BOOL_T, &b);
 }
 
-Attribute* new_attr_STRING_T(char* s){
+Attribute* new_attr_STRING_T(GString* s){
 	return new_attr(STRING_T, s);
 }
 
@@ -234,11 +238,8 @@ int assign_attr( Attribute * attr, int type, void * val ) {
 		case BOOL_T:
 			attr->value.bv = * (bool *) val; break;
         case STRING_T :
-            if (attr->value.sv != NULL) free(attr->value.sv);
-            char *str = (char *) val;
-            int slen = strlen(str);
-            attr->value.sv = (char *) malloc ( slen );
-            strcpy( attr->value.sv, str );
+            if (attr->value.sv != NULL) g_string_free(attr->value.sv,1);
+            attr->value.sv = (GString *) val;
             break;
         default :
             fprintf(stderr,"Derivedtype:assign_attr: unknown type!!!!\n");
@@ -258,7 +259,7 @@ int cmp_attr( Attribute * attr1, void * val ) {
 		case BOOL_T:
 			return (attr1->value.bv == *(bool*)val) ? 0 : 1;
         case STRING_T :
-            return strcmp( attr1->value.sv, (char *) val );
+            return strcmp( attr1->value.sv->str, ((GString*) val)->str );
         default :
             fprintf(stderr,"Derivedtype:cmp_attr: unknown type!!!!\n");
     }
@@ -273,9 +274,12 @@ void output_attr( char * key, Attribute * attr, FILE * out ){
 		case BOOL_T:
 			fprintf(out, (attr->value.bv ? "%s -> TRUE" : "%s -> FALSE"), key); break;
         case STRING_T :
-            fprintf(out, "%s -> \"%s\"", key, attr->value.sv); break;
+            if(attr->value.sv == NULL) {
+                fprintf(stderr,"output_attr: NULL String.\n");
+            }
+            fprintf(out, "%s -> \"%s\"", key, (attr->value.sv)->str); break;
         default :
-            fprintf(stderr,"Derivedtype:output_attr: unknown type!!!!\n");
+            fprintf(stderr,"Derivedtype:output_attr: unknown type %d!!!!\n", attr->type);
     }
         printf("\n");
 }
@@ -291,10 +295,10 @@ void destroy_attr ( Attribute * attr ) {
 		case BOOL_T:
 			fprintf(stderr, (attr->value.bv ? "BOOL_T --> TRUE" : "FLOAT --> FALSE")); break;
         case STRING_T :
-            fprintf(stderr," STRING_T --> %s\n", attr->value.sv); break;
+            fprintf(stderr," STRING_T --> %s\n", attr->value.sv->str); break;
     }
 #endif
-    if ( attr->type == STRING_T ) free( attr->value.sv );
+    if ( attr->type == STRING_T ) g_string_free( attr->value.sv, 1 );
     free( attr );
 }
 
@@ -311,7 +315,7 @@ void* get_attr_value(Attribute* attr, int type){
 	if(attr == NULL)
     	die("NULL Attribute error \n");
 	if(type != attr->type && type != RESERVED)
-    	die("Attribute type dismatch error \n");
+    	die("Attribute type dismatch error: %d != %d \n", type, attr->type);
 	switch(attr->type){
 		case INT_T:
 			return &(attr->value.iv);
@@ -359,7 +363,12 @@ int edge_remove_attribute(EdgeType* e, char* attr_name){
 }
 
 Attribute* edge_get_attribute(EdgeType* e, char* attribute){	
-    return g_hash_table_lookup(e->attributes, attribute);
+    Attribute* attr = g_hash_table_lookup(e->attributes, attribute);
+    if (attr == NULL) {
+        attr = new_attr(UNKNOWN_T, NULL);
+        g_hash_table_insert( e->attributes, attribute, attr );
+    }
+    return attr;
 }
 
 void* edge_get_attribute_value(EdgeType* e, char* attribute){
@@ -407,7 +416,12 @@ int vertex_remove_attribute(VertexType* v, char* attr_name) {
 }
 
 Attribute* vertex_get_attribute(VertexType* v, char* attribute){
-     return g_hash_table_lookup(v->attributes, attribute);
+    Attribute* attr = g_hash_table_lookup(v->attributes, attribute);
+    if (attr == NULL) {
+        attr = new_attr(UNKNOWN_T, NULL);
+        g_hash_table_insert( v->attributes, attribute, attr );
+    }
+    return attr;
 }
 
 void* vertex_get_attribute_value(VertexType* v, char* attribute){
@@ -552,7 +566,7 @@ ListType* match_string(ListType* list, char* attribute, char* s){
 				EdgeType* e = g_list_nth_data(list->list, n);
 				Attribute* attr_v;
 				if((attr_v = g_hash_table_lookup(e->attributes, attribute))!=NULL){
-					if(strcmp(attr_v->value.sv, (char*)s)==0) 
+					if(strcmp(attr_v->value.sv->str, (char*)s)==0) 
 						result = g_list_append(result, e);
 				}	
 			}
@@ -562,7 +576,7 @@ ListType* match_string(ListType* list, char* attribute, char* s){
 				VertexType* e = g_list_nth_data(list->list, n);
 				Attribute* attr_v;
 				if((attr_v = g_hash_table_lookup(e->attributes, attribute))!=NULL){
-					if(strcmp(attr_v->value.sv, (char*)s)==0) 
+					if(strcmp(attr_v->value.sv->str, (char*)s)==0) 
 						result = g_list_append(result, e);
 				}	
 			}
@@ -721,6 +735,7 @@ int print_v_attr(VertexType* v){
     for(n; n<l; n++){
         void* key = g_list_nth_data(klist, n);
         Attribute* value = g_hash_table_lookup(v->attributes, key);
+        fprintf(stderr, "key = %s, value = %p\n", key, value);
         output_attr( (char *) key, value, stdout);
     }
     printf("========================================\n");
@@ -771,6 +786,22 @@ int print_g(GraphType* g){
     return 0;
 }
 
+int print_LIST_T(ListType* l){
+    int length = g_list_length(l->list);
+    int i = 0;
+    for(i; i<length; i++){
+        void* obj = g_list_nth_data(l->list, i);
+        switch(l->type){
+            case VERTEX_T:
+                print_VERTEX_T((VertexType*)obj);break;
+            case EDGE_T:
+                print_EDGE_T((EdgeType*)obj);break;
+            default: die("List print wrong type\n");
+        }
+    }
+    return 0;
+}
+
 int print_VERTEX_T(VertexType* v){
 	print_v_attr(v);
 	return 0;
@@ -818,12 +849,38 @@ void die(char* fmt, ...){
     return;
 }
 
-Attribute* binary_operator( Attribute* attr1, Attribute* attr2, int op, int reverse, int rm1, int rm2, int lno) {
-    if(reverse) {
-        Attribute* tmp = attr1;
-        attr1 = attr2;
-        attr2 = tmp;
+
+static Attribute* relational_operator( Attribute* attr1, Attribute* attr2, int op, int lno) {
+    int type1 = attr1->type, type2 = attr2->type, resultype;
+    Attribute* result;
+    float f1, f2;
+    if(type1 == INT_T)
+        f1 = attr1->value.iv;
+    else if(type1 == FLOAT_T)
+        f1 = attr1->value.fv;
+    if(type2 == INT_T)
+        f2 = attr2->value.iv;
+    else if(type2 == FLOAT_T)
+        f2 = attr2->value.fv;
+    if(type1 == INT_T && type2 == FLOAT_T ||
+                type1 == FLOAT_T && type2 == FLOAT_T ||
+                    type1 == FLOAT_T && type2 == INT_T ||
+        type1 == INT_T && type2 == INT_T){ 
+    switch(op){
+        case OP_GT:
+            return result = new_attr_BOOL_T(f1>f2);
+        case OP_LT:
+            return result = new_attr_BOOL_T(f1<f2);
+        case OP_GE:
+            return result = new_attr_BOOL_T(f1>=f2);
+        case OP_LE:
+            return result = new_attr_BOOL_T(f1<=f2);
     }
+    }else
+        die("binary_operator: unsupported op %d at line: %d \n",op, lno);
+}
+
+static Attribute* math_operator( Attribute* attr1, Attribute* attr2, int op, int lno) {
     int type1 = attr1->type, type2 = attr2->type, resultype;
     Attribute* result;
     if(type1 == INT_T && type2 == INT_T) {
@@ -874,6 +931,75 @@ Attribute* binary_operator( Attribute* attr1, Attribute* attr2, int op, int reve
                 die("binary_operator: unsupported op %d at line: %d \n",op, lno);
         }
     }
+    else
+        die("binary_operator: unsupported op %d at line: %d \n",op, lno);
+    return result;
+}
+
+static Attribute* logic_operator( Attribute* attr1, Attribute* attr2, int op, int lno) {
+    int type1 = attr1->type, type2 = attr2->type, resultype;
+    Attribute* result;
+    if(attr1->type == BOOL_T && attr2->type == BOOL_T){
+        switch(op){
+            case OP_AND:
+                return new_attr_BOOL_T(attr1->value.bv && attr2->value.bv);
+            case OP_OR:
+                return new_attr_BOOL_T(attr1->value.bv || attr2->value.bv);
+            default: 
+                die("binary_operator: unsupported op %d at line: %d \n",op, lno);
+        }
+    }
+    else
+        die("binary_operator: unsupported op %d at line: %d \n",op, lno);
+}
+
+static Attribute* equal_operator( Attribute* attr1, Attribute* attr2, int op, int lno) {
+    int type1 = attr1->type, type2 = attr2->type, resultype;
+    Attribute* result;
+    if(type1 == type2){
+        switch(type1){
+            case INT_T:
+                return result = new_attr_BOOL_T( (op==OP_EQ) ? (attr1->value.iv==attr2->value.iv) : (attr1->value.iv != attr2->value.iv) );
+            case FLOAT_T:
+                return result = new_attr_BOOL_T( (op==OP_EQ) ? (attr1->value.fv==attr2->value.fv) : (attr1->value.fv != attr2->value.fv) );
+            case BOOL_T:
+                return result = new_attr_BOOL_T( (op==OP_EQ) ? (attr1->value.bv==attr2->value.bv) : (attr1->value.bv != attr2->value.bv) );
+            case STRING_T:
+                return result = new_attr_BOOL_T( (op==OP_EQ) ? strcmp(attr1->value.sv->str, attr2->value.sv->str)==0 : strcmp(attr1->value.sv->str, attr2->value.sv->str)!=0 );
+        }
+    }
+    else {
+        return new_attr_BOOL_T( false );
+    }
+}
+
+Attribute* binary_operator( Attribute* attr1, Attribute* attr2, int op, int reverse, int rm1, int rm2, int lno) {
+    if(reverse) {
+        Attribute* tmp = attr1;
+        attr1 = attr2;
+        attr2 = tmp;
+    }
+    Attribute* result;
+    switch (op) {
+        case OP_ADD:
+        case OP_SUB:
+        case OP_MUL:
+        case OP_DIV:
+            result = math_operator(attr1, attr2, op, lno);break;
+        case OP_GT:
+        case OP_LT:
+        case OP_GE:
+        case OP_LE:
+            result = relational_operator(attr1, attr2, op, lno);break;
+        case OP_AND:
+        case OP_OR:
+            result = logic_operator(attr1, attr2, op, lno); break;
+        case OP_EQ:
+        case OP_NE:
+            result = equal_operator(attr1, attr2, op, lno); break;
+        default:
+            die("binary_opertor: unsupported OP %d.\n", op);
+    }
     if(rm1==FLAG_DESTROY_ATTR) destroy_attr(attr1);
     if(rm2==FLAG_DESTROY_ATTR) destroy_attr(attr2);
 
@@ -919,6 +1045,7 @@ void assign_operator_to_static(Attribute* attr1, int type, void* value, int rm_a
 Attribute* assign_operator(Attribute* attr1, Attribute* attr2, int rm_attr1, int rm_attr2, int lno){
 	if(attr1 == NULL || attr2 == NULL)
         die("NULL Attribute error at line: %d \n", lno);
+    if(attr1->type == UNKNOWN_T) attr1->type = attr2->type;
 	int type1 = attr1->type, type2 = attr2->type;
 	if(type1 == type2){
 		switch(type1){
@@ -932,10 +1059,12 @@ Attribute* assign_operator(Attribute* attr1, Attribute* attr2, int rm_attr1, int
 				attr1->value.bv = attr2->value.bv;
 				break;
 			case STRING_T:
-				attr1->value.sv = attr2->value.sv;
+                if(attr1->value.sv != NULL) g_string_free(attr1->value.sv,1);
+				attr1->value.sv = g_string_new( (attr2->value.sv)->str );
 				break;
 			default:
-                die("incompatible type error at line: %d \n", lno);
+                die("incompatible type error 1 of type %d at line: %d \n", type1, lno);
+
 		}
 	}
 	else if(type1==FLOAT_T && type2==INT_T){
@@ -944,8 +1073,9 @@ Attribute* assign_operator(Attribute* attr1, Attribute* attr2, int rm_attr1, int
 	else if(type1==INT_T && type2==FLOAT_T){
 		attr1->value.iv = (int)(attr2->value.fv);
 	}
+
 	else
-        die("incompatible type error at line: %d \n", lno);
+        die("incompatible type error 2 at line: %d \n", lno);
 	
 	if(rm_attr2==FLAG_DESTROY_ATTR) destroy_attr(attr2);
 
@@ -1043,9 +1173,9 @@ Attribute* object_get_attribute(void* v, int obj, char* attribute){
 	return attr;
 }
 
-StringType*	assign_operator_string(StringType* s1, StringType* s2) {
-    if (s1 != NULL) destroy_string(s1);
-    return s1 = s2;
+StringType*	assign_operator_string(StringType** s1, StringType** s2) {
+    if (s1 != NULL) destroy_string(*s1);
+    return (*s1 = *s2);
 }
 
 ListType* list_match(ListType* l, bool (*func) (void*, int), int rm_l){
@@ -1076,22 +1206,22 @@ ListType* list_match(ListType* l, bool (*func) (void*, int), int rm_l){
 	return newl;
 }
 
-ListType*           assign_operator_list(ListType* l1, ListType* l2) {
-    if (l1 != NULL) destroy_list(l1);
-    return l1 = l2;
+ListType*           assign_operator_list(ListType** l1, ListType** l2) {
+    if (l1 != NULL) destroy_list(*l1);
+    return (*l1 = *l2);
 }
 
-VertexType*         assign_operator_vertex(VertexType* v1, VertexType* v2) {
-    if (v1 != NULL) destroy_vertex(v1);
-    return v1 = v2;
+VertexType*         assign_operator_vertex(VertexType** v1, VertexType** v2) {
+    if (v1 != NULL) destroy_vertex(*v1);
+    return (*v1 = *v2);
 }
 
-EdgeType*           assign_operator_edge(EdgeType* e1, EdgeType* e2) {
-    if (e1 != NULL) destroy_edge(e1);
-    return e1 = e2;
+EdgeType*           assign_operator_edge(EdgeType** e1, EdgeType** e2) {
+    if (e1 != NULL) destroy_edge(*e1);
+    return (*e1 = *e2);
 }
 
-GraphType*          assign_operator_graph(GraphType* g1, GraphType* g2) {
-    if (g1 != NULL) destroy_graph(g1);
-    return g1 = g2;
+GraphType*          assign_operator_graph(GraphType** g1, GraphType** g2) {
+    if (g1 != NULL) destroy_graph(*g1);
+    return (*g1 = *g2);
 }

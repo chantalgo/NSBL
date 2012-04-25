@@ -221,6 +221,13 @@ char * tmpGraphVab() {
     return tmp;
 }
 
+char * tmpVab() {
+    static char tmp[128];
+    static int i = 0;
+    sprintf(tmp,"_tmp_vab_%d\0", i++);
+    return tmp;
+}
+
 void codeIndentInit(){
     int mlvl = maxLevel, i;
     //printf("Max LEVEL: %d\n", mlvl);

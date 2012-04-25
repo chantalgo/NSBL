@@ -3,9 +3,9 @@
 #include "NSBLio.h"
 
 //function to print string
-void print_STRING_T(char* s)
+void print_STRING_T(GString* s)
 {
-	printf("%s",s);
+	printf("%s",s->str);
 }
 
 //function to print float

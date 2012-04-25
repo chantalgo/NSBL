@@ -21,6 +21,7 @@ char * tmpMatch();
 char * tmpMatchStr();
 char * tmpMatchStrVab();
 char * tmpGraphVab();
+char * tmpVab();
 void codeIndentInit();
 void codeIndentFree();
 
