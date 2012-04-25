@@ -35,6 +35,7 @@
 #define ErrorBinaryOperationWithDynamicType             +61
 #define ErrorGetAttrForWrongType                        +62
 #define ErrorMactchWrongType                            +63
+#define ErrorWrongFuncCall                              +64
 
 
 #define ErrorCallBreakOutsideOfLoop                     +70

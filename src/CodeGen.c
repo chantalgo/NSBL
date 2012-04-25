@@ -14,6 +14,7 @@ char * OUTFILE;
 FILE * OUTFILESTREAM;           // Output file
 
 int  inLoop, inFunc;            // flags to indicate inside of loop or func
+int  inMATCH;
 
 void derivedTypeInitCode(struct Node* node, int type, int isglobal){
 	if(node->token == AST_COMMA){
@@ -911,14 +912,27 @@ int codeGen (struct Node * node) {
             astFreeTypeCon(node->typeCon);
             // 4> code Gen
             if(!errflag) {
-                if(node->nch == 1) node->code = strCatAlloc(" ",2,node->symbol->bind,"()");
-                else node->code = strCatAlloc(" ",4,node->symbol->bind,"(", node->child[1]->code, ")");
+                if(node->symbol->type == FUNC_LITERAL_T && inMATCH > 0) {
+                    if(node->nch == 1)
+                        node->code = strCatAlloc("",2,node->symbol->bind, " ( _obj, _objtype )" );
+                    else
+                        node->code = strCatAlloc("",4,node->symbol->bind, " ( _obj, _objtype, ",
+                            node->child[1]->code, " )");
+                }
+                else if (node->symbol->type == FUNC_T) {
+                    if(node->nch == 1) node->code = strCatAlloc(" ",2,node->symbol->bind,"()");
+                    else node->code = strCatAlloc(" ",4,node->symbol->bind,"(", node->child[1]->code, " )");
+                }
+                else {
+                    ERRNO = ErrorWrongFuncCall;
+                    errorInfo(ERRNO,node->line,"invalid func call.\n");
+                }
             }
             break;
         case AST_ARG_EXPS :
             codeGen(node->child[0]);
             node->type = node->child[0]->type;
-            node->code = strCatAlloc(" ", 3, "(", node->child[0]->code,")");
+            node->code = strCatAlloc(" ", 1, node->child[0]->code );
             break;
 /************************************************************************************/
         case PIPE :
@@ -927,13 +941,15 @@ int codeGen (struct Node * node) {
         case AST_MATCH :
             lf = node->child[0];        // list
             rt = node->child[1];        // condition
-            codeGen(lf); codeGen(rt);
+            codeGen(lf); 
+            inMATCH++; codeGen(rt); inMATCH--;
             if(lf->type != LIST_T) {
                 ERRNO = ErrorMactchWrongType;
                 errorInfo(ERRNO,node->line," match can NOT be operated on type `%s'.\n",sTypeName(lf->type) );
                 return ERRNO;
             }
             char * tmpfunc = tmpMatch();
+            // TODO :: check return type == bool
             // first generate this match func 
             node->codetmp = strCatAlloc("", 9,
                 INDENT[0], "bool ", tmpfunc, 

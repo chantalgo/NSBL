@@ -779,6 +779,7 @@ void main_init(char * fileName) {
     maxLevel = 0;
     inLoop = 0;
     inFunc = 0;
+    inMATCH = 0;
     OUTFILE = strCatAlloc("",2,fileName,".c");
 }
 
