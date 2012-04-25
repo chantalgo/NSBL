@@ -83,14 +83,13 @@ Code Gen and grammar update for the same remains
 4/24/2012
 Dynamic type checking
 delete of object, attribute
-<<<<<<< HEAD
+Match op
+Func_literal support dynamic type
+return type checking
 
 4/25/2012
 Dynamic type checking for attribute operators
 Graph lib changed for match and pipe
 codegen for append operations
 
-=======
-Match op
-Func_literal support dynamic type
->>>>>>> c7ece3bc6e0d372223d121cff806f37dd316597d
+
