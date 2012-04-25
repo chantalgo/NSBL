@@ -47,7 +47,7 @@ extern int yyparse(void); /* Parser function. */
 %type <LString> VOID BOOLEAN INTEGER FLOAT STRING LIST VERTEX EDGE GRAPH
 %type <LString> FUNC_LITERAL
 %type <LString> IF ELSE FOR FOREACH WHILE BREAK CONTINUE RETURN MARK
-%type <LString> '{' '}' '(' ')' '[' ']' ';' ',' ':' '.' DEL 
+%type <LString> '{' '}' '(' ')' '[' ']' ';' ',' ':' '.' '?' DEL 
 // declaration
 %type <node> declaration
 %type <node> basic_type_specifier declaration_specifiers 
@@ -70,7 +70,7 @@ extern int yyparse(void); /* Parser function. */
 %type <node> expression_statement compound_statement selection_statement compound_statement_no_scope deletion_statement 
 %type <node> iteration_statement jump_statement declaration_statement
 %type <node> statement_list 
-%type <node> io_statement io_ext
+%type <node> io_statement io_ext io_ext_list
 
 // function
 %type <node> function_definition
@@ -119,8 +119,8 @@ extern int yyparse(void); /* Parser function. */
 %token AST_WHILE AST_FOR AST_FOREACH
 %token AST_JUMP_CONTINUE AST_JUMP_BREAK AST_JUMP_RETURN
 %token AST_FUNC_CALL AST_ARG_EXPS AST_EXP_STAT
-%token AST_ERROR
-%token AST_PRINT AST_PRINT_STAT AST_READ_GRAPH AST_WRITE_GRAPH
+%token AST_ERROR AST_LIST_MEMBER
+%token AST_PRINT AST_PRINT_COMMA AST_PRINT_STAT AST_READ_GRAPH AST_WRITE_GRAPH
 /**************************
  *  PRECEDENCE & ASSOC    *
  **************************/
@@ -150,7 +150,7 @@ start_nonterminal
             codeAllGen($$, &mainBodyCode, &funCode);
 	    printf("\nCHECK PARSER 2\n");
             codeAllFuncLiteral($$, &funCode);
-	    printf("\CHECK PARSER 3\n");
+	    printf("\nCHECK PARSER 3\n");
             codeAllGlobal($$,&globalDecl);
             mainCode = wapperMainCode(mainBodyCode);        
             codeIndentFree();
@@ -318,35 +318,36 @@ deletion_statement
     ;
 
 io_statement
-    : PRINT io_ext ';'			{printf("\n\nPRINT STATEMENT logic is WORKING\n\n");
-                                 $$ =  astNewNode(AST_PRINT_STAT, 1, astAllChildren(1, $2), $1.l); }
-    | IDENTIFIER LIN IDENTIFIER ';'	{printf("\n\nREAD GRAPH WORKING\n\n"); 
-                                    struct Node* tn = astNewLeaf(IDENTIFIER, $1.s, $1.l);
-                                    sTableLookupId(tn);
-					               struct Node* tm = astNewLeaf(IDENTIFIER, $3.s, $3.l);
-                                   sTableLookupId(tm);
-					                $$ = astNewNode(AST_READ_GRAPH, 2, astAllChildren(2, tn, tm), $2.l);
-					               } 
-    | IDENTIFIER ROUT IDENTIFIER 	{printf("\n\nSAVE GRAPH working in grammar\n\n");  
-                                    struct Node* tn = astNewLeaf(IDENTIFIER, $1.s, $1.l);
-                                    sTableLookupId(tn);
-					               struct Node* tm = astNewLeaf(IDENTIFIER, $3.s, $3.l);
-                                   sTableLookupId(tm);
-					               $$ = astNewNode(AST_WRITE_GRAPH, 2, astAllChildren(2, tn, tm), $2.l);  
-					} 
+    : PRINT io_ext_list ';' {
+        $$ =  astNewNode(AST_PRINT_STAT, 1, astAllChildren(1, $2), $1.l); 
+    }
+    | IDENTIFIER LIN IDENTIFIER ';'	
+    {
+        // FILE << Graph
+        struct Node* tn1 = astNewLeaf(IDENTIFIER, $1.s, $1.l);
+        struct Node* tn3 = astNewLeaf(IDENTIFIER, $3.s, $3.l);
+        sTableLookupId(tn1);
+        sTableLookupId(tn3);
+        $$ = astNewNode(AST_WRITE_GRAPH, 2, astAllChildren(2, tn1, tn3), $2.l);
+    } 
+    | IDENTIFIER ROUT IDENTIFIER ';' {
+        // FILE << Graph
+        struct Node* tn1 = astNewLeaf(IDENTIFIER, $1.s, $1.l);
+        struct Node* tn3 = astNewLeaf(IDENTIFIER, $3.s, $3.l);
+        sTableLookupId(tn1);
+        sTableLookupId(tn3);
+        $$ = astNewNode(AST_READ_GRAPH, 2, astAllChildren(2, tn1, tn3), $2.l);
+    } 
     ;	
 
+io_ext_list
+    : io_ext                        { $$ = $1; }
+    | io_ext_list io_ext            { $$ = astNewNode(AST_PRINT_COMMA, 2, astAllChildren(2, $1, $2), $1->line); }
+
 io_ext
-    : LIN IDENTIFIER 			{printf("\n\nPRINTING only one statement\n\n");  
-                                struct Node* tn = astNewLeaf(IDENTIFIER, $2.s, $2.l);
-					           sTableLookupId(tn);
-                                $$ = astNewNode(AST_PRINT, 1, astAllChildren(1,tn),$1.l);
-					           } 
-    | LIN IDENTIFIER io_ext 		{printf("\n\nPRINTING multiple statements\n\n"); 
-                                    struct Node* tn = astNewLeaf(IDENTIFIER, $2.s, $2.l);
-                                    sTableLookupId(tn);
-					               $$ = astNewNode(AST_PRINT, 2, astAllChildren(2, tn, $3),$1.l);
-					               }
+    : LIN assignment_expression {
+        $$ = astNewNode(AST_PRINT, 1, astAllChildren(1, $2),$1.l);
+    } 
     ;
 
 /**************************
@@ -479,8 +480,11 @@ postfix_expression
     | postfix_expression PIPE pipe_property {
         $$ = astNewNode ( PIPE, 2, astAllChildren(2, $1, $3), $2.l );
     }
-    | postfix_expression '[' no_type_check_on_dynamic_left dynamic_scope_left scope_in logical_OR_expression scope_out dynamic_scope_right no_type_check_on_dynamic_right ']' {
-        $$ = astNewNode ( AST_MATCH, 2, astAllChildren(2, $1, $6), $2.l );
+    | postfix_expression '?' '[' no_type_check_on_dynamic_left dynamic_scope_left scope_in logical_OR_expression scope_out dynamic_scope_right no_type_check_on_dynamic_right ']' {
+        $$ = astNewNode ( AST_MATCH, 2, astAllChildren(2, $1, $7), $2.l );
+    }
+    | postfix_expression '[' expression ']' {
+        $$ = astNewNode ( AST_LIST_MEMBER, 2, astAllChildren(2, $1, $3), $2.l );
     }
     | postfix_expression '.' IDENTIFIER {
         struct Node * tnode = astNewLeaf(IDENTIFIER, $3.s, $3.l);

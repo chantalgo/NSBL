@@ -179,7 +179,7 @@ char * assignFunc(int t) {
     switch(t) {
         case STRING_T :         return "assign_operator_string";
         case LIST_T :           return "assign_operator_list";
-        case VERTEX_T :         return "assign_operator_list";
+        case VERTEX_T :         return "assign_operator_vertex";
         case EDGE_T :           return "assign_operator_edge";
         case GRAPH_T :          return "assign_operator_graph";
         default :               return "XXXXXXXXXXXXXX";
@@ -211,6 +211,13 @@ char * tmpMatchStrVab() {
     static char tmp[128];
     static int i = 0;
     sprintf(tmp,"_STRV_%d\0", i++);
+    return tmp;
+}
+
+char * tmpGraphVab() {
+    static char tmp[128];
+    static int i = 0;
+    sprintf(tmp,"_tmp_g_%d\0", i++);
     return tmp;
 }
 

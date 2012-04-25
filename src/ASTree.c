@@ -53,7 +53,7 @@ struct Node* ast_new_leaf(int token, void * ptr, long long line) {
             node->token = STRING_LITERAL;
             node->type = STRING_T;
             node->lexval.sval = (char *) ptr;
-            node->code = strCatAlloc("", 1, (char *)ptr);
+            node->code = strCatAlloc("", 3, "g_string_new ( ", (char *)ptr, " )" );
             break;
         case IDENTIFIER :
             node->token = IDENTIFIER;
@@ -331,14 +331,18 @@ void ast_output_node(struct Node* node, FILE* out, const char * sep) {
             fprintf(out, "Node<ERROR>");break;
         case DEL :
             fprintf(out, "Node<DEL>");break;
-	case AST_PRINT :
-	    fprintf(out, "Node<AST_PRINT>");break;
-	case AST_PRINT_STAT :
- 	    fprintf(out, "Node<AST_PRINT_STAT>");break;	
-	case AST_READ_GRAPH :
-	    fprintf(out, "Node<AST_READ_GRAPH>");break;
-	case AST_WRITE_GRAPH :
-	    fprintf(out, "Node<AST_WRITE_GRAPH>");break;
+	    case AST_PRINT :
+	        fprintf(out, "Node<AST_PRINT>");break;
+        case AST_PRINT_COMMA :
+            fprintf(out, "Node<AST_PRINT_COMMA>");break;
+	    case AST_PRINT_STAT :
+ 	        fprintf(out, "Node<AST_PRINT_STAT>");break;	
+	    case AST_READ_GRAPH :
+	        fprintf(out, "Node<AST_READ_GRAPH>");break;
+	    case AST_WRITE_GRAPH :
+	        fprintf(out, "Node<AST_WRITE_GRAPH>");break;
+        case AST_LIST_MEMBER :
+            fprintf(out, "Node<AST_LIST_MEMBER>");break;
         default :
             fprintf(out, "Node<UNKNOWN> !!!!!!!!!!!!!!!!");
     }

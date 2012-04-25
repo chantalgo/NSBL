@@ -75,6 +75,7 @@ comment         (\/\*([^\*]|(\*+([^\*\/])))*\*+\/)|(\/\/.*)
 ")"             { MYECHO; yylval.LString.l = LEXLINECOUNTER; return ')'; }
 "["             { MYECHO; yylval.LString.l = LEXLINECOUNTER; return '['; }
 "]"             { MYECHO; yylval.LString.l = LEXLINECOUNTER; return ']'; }
+"?"             { MYECHO; yylval.LString.l = LEXLINECOUNTER; return '?'; }
 ";"             { MYECHO; yylval.LString.l = LEXLINECOUNTER; return ';'; }
 ","             { MYECHO; yylval.LString.l = LEXLINECOUNTER; return ','; }
 ":"             { MYECHO; yylval.LString.l = LEXLINECOUNTER; return ':'; }

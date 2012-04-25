@@ -20,6 +20,7 @@ char * tmpAttr();
 char * tmpMatch();
 char * tmpMatchStr();
 char * tmpMatchStrVab();
+char * tmpGraphVab();
 void codeIndentInit();
 void codeIndentFree();
 

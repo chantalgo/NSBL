@@ -39,6 +39,7 @@
 #define ErrorInvalidReturnType                          +65
 #define ErrorNoReturnInFunc                             +66
 #define ErrorIfConditionNotBOOL                         +67
+#define ErrorGetMemberForNotListType                    +68
 
 
 #define ErrorCallBreakOutsideOfLoop                     +70

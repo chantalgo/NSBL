@@ -21,9 +21,10 @@ print<<v<<g<<e;
 
 print<<f<<x;
 
-g<<x;
+x>>g;
 
-g>>x;
+int kkk;
+x<<g;
 
 print<<x<<g<<i<<v<<k;
 

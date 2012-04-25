@@ -58,9 +58,11 @@ void stringInitCode(struct Node* node, int type, int isglobal){
 		node->code = strCatAlloc("", 2, node->child[0]->code, node->child[1]->code);
 	}else if(node->token == AST_ASSIGN){
 		if(isglobal)
-			node->code = strCatAlloc("",5,INDENT[node->scope[0]], node->child[0]->symbol->bind, " = g_string_new(", node->child[1]->code, ");\n"); 
+			node->code = strCatAlloc("",5,INDENT[node->scope[0]], 
+                node->child[0]->symbol->bind, " = ", node->child[1]->code, ";\n"); 
 		else
-			node->code = strCatAlloc("",7,INDENT[node->scope[0]], sTypeName(type), " ", node->child[0]->symbol->bind, " = new_vertex(", node->child[1]->code, ");\n");	
+			node->code = strCatAlloc("",7,INDENT[node->scope[0]], 
+                sTypeName(type), " ", node->child[0]->symbol->bind, " = ", node->child[1]->code, ";\n");	
 	}else{
 		if(isglobal)
 			node->code = strCatAlloc("",3,INDENT[node->scope[0]], node->symbol->bind, " = g_string_new(\"\");\n"); 
@@ -601,7 +603,6 @@ int codeGen (struct Node * node) {
 			codeGen(lf);codeGen(rt);
             // type check and implicit type conversion
             if(lf->type == rt->type && lf->type>=0 ) {
-                // int float support : = += -= *= /=,  not supported, JZ
                 if ( lf->type == INT_T || lf->type == FLOAT_T || lf->type == BOOL_T ) {
                     node->code = strCatAlloc(" ",3,lf->code,op,rt->code);
                     node->type = lf->type;
@@ -1033,6 +1034,26 @@ int codeGen (struct Node * node) {
             node->tmp[0] = REMOVE_DYN; 
             break;
 /************************************************************************************/
+        case AST_LIST_MEMBER:
+            lf = node->child[0];
+            rt = node->child[1];
+            codeGen(lf); codeGen(rt);
+            if(lf->type != LIST_T) {
+                ERRNO = ErrorGetMemberForNotListType;
+                errorInfo( ERRNO, node->line, "get member for not list type.\n");
+                return ERRNO;
+            }
+            if(rt->type == INT_T){
+                node->code = strCatAlloc( "",8 ,
+                    lf->code, "->type",
+                    "list_getelement ( ", lf->code, " , " ,rt->code, " )" );
+            }
+            else if (rt->type < 0) {
+                node->code = strCatAlloc( "" , 1, 
+                    "get_attr_value ( ");
+            }
+            break;
+/************************************************************************************/
         case AST_ATTRIBUTE :
             if(inMATCH==0){
                 node->child[0]->code = strCatAlloc("", 1, node->child[0]->symbol->bind);
@@ -1350,170 +1371,62 @@ int codeGen (struct Node * node) {
                     rt->code);
             break;
 /************************************************************************************/
-	case AST_PRINT_STAT :
+	    case AST_PRINT_STAT :
             codeGen(node->child[0]);
+            node->code = strCatAlloc("", 1, node->child[0]->code);
             break;
-	case AST_PRINT :
-	    {switch(node->child[0]->type)
-		{
-	    	case INT_T:
-			{printFunc=" printInteger("; 
-			var=node->child[0]->symbol->bind;
-			endBrace=");\n";
-			printCall = malloc(strlen(printFunc) + strlen(var) + strlen(endBrace) + 3);
-			strcpy(printCall, printFunc);
-			strcat(printCall, var);
-			strcat(printCall, endBrace);
-			if(node->nch == 1){ 
-	    			node->code = strCatAlloc(" ",3,INDENT[node->child[0]->scope[0]], " ",  printCall);
-            		}
-            		else {
-                		node->code = strCatAlloc(" ",3,INDENT[node->child[0]->scope[0]], " ",  printCall);
-				codeGen(node->child[1]);
-		       	}
-            		break;}
-	    	case FLOAT_T:
-                        {printFunc=" printFloat(";
-                        var=node->child[0]->symbol->bind;
-                        endBrace=");\n";
-                        printCall = malloc(strlen(printFunc) + strlen(var) + strlen(endBrace) + 3);
-			strcpy(printCall, printFunc);
-			strcat(printCall, var);
-			strcat(printCall, endBrace);
-	    		if(node->nch == 1){ 
-	    			node->code = strCatAlloc(" ",3,INDENT[node->child[0]->scope[0]], " ",  printCall);
-            		}
-            		else {
-                		node->code = strCatAlloc(" ",3,INDENT[node->child[0]->scope[0]], " ",  printCall);		
-	    			codeGen(node->child[1]);
-            		}
-            		break;}
-	    	case GRAPH_T:
-                        {printFunc=" print_g(";
-                        var=node->child[0]->symbol->bind;
-                        endBrace=");\n";
-                        printCall = malloc(strlen(printFunc) + strlen(var) + strlen(endBrace) + 3);
-                        strcpy(printCall, printFunc);
-                        strcat(printCall, var);
-                        strcat(printCall, endBrace);
-                         if(node->nch == 1){
-                                node->code = strCatAlloc(" ",3,INDENT[node->child[0]->scope[0]], " ",  printCall);
-                        }
-                        else {
-                                node->code = strCatAlloc(" ",3,INDENT[node->child[0]->scope[0]], " ",  printCall);
-                                codeGen(node->child[1]);
-                        }
-                        break;}
-		case VERTEX_T:
-                        {printFunc=" print_v(";
-                        var=node->child[0]->symbol->bind;
-                        endBrace=");\n";
-			printVattr=" print_v_attr(";
-			printCall = malloc(strlen(printFunc) + 2*(strlen(var) + strlen(endBrace)) + strlen(printVattr) + 6);
-                        strcpy(printCall, printFunc);
-                        strcat(printCall, var);
-                        strcat(printCall, endBrace);
-			strcat(printCall, printVattr);
-			strcat(printCall, var);
-			strcat(printCall, endBrace);
-                         if(node->nch == 1){
-                                node->code = strCatAlloc(" ",3,INDENT[node->child[0]->scope[0]], " ",  printCall);
-                        }
-                        else {
-                                node->code = strCatAlloc(" ",3,INDENT[node->child[0]->scope[0]], " ",  printCall);
-                                codeGen(node->child[1]);
-                        }
-                        break;}
-
-		case EDGE_T:
-			{printFunc=" print_e(";
-                        var=node->child[0]->symbol->bind;
-                        endBrace=");\n";
-                        printVattr=" print_e_attr(";
-                        printCall = malloc(strlen(printFunc) + 2*(strlen(var) + strlen(endBrace)) + strlen(printVattr) + 6);
-                        strcpy(printCall, printFunc);
-                        strcat(printCall, var);
-                        strcat(printCall, endBrace);
-                        strcat(printCall, printVattr);
-                        strcat(printCall, var);
-                        strcat(printCall, endBrace);
-                         if(node->nch == 1){
-                                node->code = strCatAlloc(" ",3,INDENT[node->child[0]->scope[0]], " ",  printCall);
-                        }
-                        else {
-                                node->code = strCatAlloc(" ",3,INDENT[node->child[0]->scope[0]], " ",  printCall);
-                                codeGen(node->child[1]);
-                        }
-                        break;}
-		case STRING_T:
-                        {printFunc=" printString(";
-                        var=node->child[0]->symbol->bind;
-                        endBrace=");\n";
-                        printCall = malloc(strlen(printFunc) + strlen(var) + strlen(endBrace) + 3);
-                        strcpy(printCall, printFunc);
-                        strcat(printCall, var);
-                        strcat(printCall, endBrace);
-                        if(node->nch == 1){
-                                node->code = strCatAlloc(" ",3,INDENT[node->child[0]->scope[0]], " ",  printCall);
-                        }
-                        else {
-                                node->code = strCatAlloc(" ",3,INDENT[node->child[0]->scope[0]], " ",  printCall);
-                                codeGen(node->child[1]);
-                        }
-                        break;}
-		//default:
-			//printf("This is default\n");
-				//break;
-
-
-	}
-	break;}
+        case AST_PRINT_COMMA :
+            codeGen(node->child[0]);
+            codeGen(node->child[1]);
+            node->code = strCatAlloc("", 2, node->child[0]->code, node->child[1]->code);
+            break;
+	    case AST_PRINT : {
+            codeGen(node->child[0]);
+            int tt = node->child[0]->type;
+            if ( tt >= 0 ) {
+                node->code = strCatAlloc("", 6,
+                    INDENT[node->scope[0]], "print_", typeMacro(tt), " ( ",
+                        node->child[0]->code, " );\n");
+            }
+            else if ( tt < 0 ) {
+                node->code = strCatAlloc("", 4,
+                    INDENT[node->scope[0]], "print_attr ( ", 
+                        node->child[0]->code, " );\n");
+            }
+            break;
+	    }
 /************************************************************************************/
-	case AST_READ_GRAPH:
-		lf=node->child[0];
-		rt=node->child[1];
-		if (lf->type==GRAPH_T && rt->type==STRING_T)
-		{
-			printFunc=" = readGraph(";
-                        var=rt->symbol->bind;
-                        endBrace=");\n";
-                        printCall = malloc(strlen(printFunc) + strlen(var) + strlen(endBrace) + 3);
-                        strcpy(printCall, printFunc);
-			strcat(printCall, var);
-			strcat(printCall, endBrace);
-			node->code =  strCatAlloc(" ",2,lf->symbol->bind,printCall);
-		}
-            	else {
-                	ERRNO = ErrorTypeMisMatch;
-                	errorInfo(ERRNO, node->line, "expected `%s' to be fetched from `%s' file location\n", sTypeName(lf->type), sTypeName(rt->type) );
-                	
-            	}
-		break;
-	case AST_WRITE_GRAPH:
-                lf=node->child[0];
-                rt=node->child[1];
-                if (lf->type==GRAPH_T && rt->type==STRING_T)
-                {
-                        printFunc=" = saveGraph(";
-                        var=lf->symbol->bind;
-                        endBrace=");\n";
-			fileloc=rt->symbol->bind;
-			comma=", ";
-                        printCall = malloc(strlen(printFunc) + strlen(var) + strlen(endBrace) + strlen(comma) + strlen(fileloc) + 3);
-                        strcpy(printCall, printFunc);
-                        strcat(printCall, var);
-                        strcat(printCall, comma);
-			strcat(printCall, fileloc);
-			strcat(printCall, endBrace);
-                
-                        node->code =  strCatAlloc(" ",1,printCall);
-                }
-                else {
-                        ERRNO = ErrorTypeMisMatch;
-                        errorInfo(ERRNO, node->line, "expected `%s' to be written into `%s' file location\n", sTypeName(lf->type), sTypeName(rt->type) );
+	    case AST_READ_GRAPH:        // FILE >> Graph
+		    lf=node->child[0];
+		    rt=node->child[1];
+            codeGen(lf); codeGen(rt);
+            if ( lf->type == STRING_T && rt->type == GRAPH_T ) {
+                char * tg = tmpGraphVab();
+                node->code = strCatAlloc("", 10,
+                    INDENT[node->scope[0]], codeFreeFuncName(GRAPH_T), "( ", rt->code, " );\n",
+                    INDENT[node->scope[0]], rt->code, " = readGraph( ", lf->code, "->str );\n"
+                ); 
+            }
+            else {
+                ERRNO = ErrorTypeMisMatch;
+                errorInfo(ERRNO, node->line, "expected `FILE:STRING' to be fetched from `GRAPH' file location.\n" );	
+            }
+		    break;
+	    case AST_WRITE_GRAPH:       // FILE << Graph
+            lf=node->child[0];
+            rt=node->child[1];
+            codeGen(lf); codeGen(rt);
+            if ( lf->type == STRING_T && rt->type == GRAPH_T ) {
+                node->code = strCatAlloc("", 6,
+                    INDENT[node->scope[0]], "saveGraph( ", rt->code, " , (", lf->code,")->str );\n"
+                );
+            }
+            else {
+                ERRNO = ErrorTypeMisMatch;
+                errorInfo(ERRNO, node->line, "expected `FILE:STRING' to be written into `GRAPH' file location.\n");
                         
-                }
-                break;		
+            }
+            break;		
 /************************************************************************************/
         default:
             if(node->code == NULL) {

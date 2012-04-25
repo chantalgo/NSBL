@@ -24,7 +24,7 @@ void init_util() {
 #ifndef _NO_LOG
     LOGIO   = stdout;
 #endif
-    ERRORIO = stdout;
+    ERRORIO = stderr;
     LEXLINECOUNTER = 1;
 }
 

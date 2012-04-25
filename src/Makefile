@@ -2,7 +2,7 @@ BINDIR = ../bin
 TESTDIR = ../devtest
 MXMLDIR = ../mxmldir
 
-CFLAGS = -D_NO_LOG 
+CFLAGS =  
 ##### CFLAGS Options ############
 # -D_AST_DEBUG
 # -D_AST_DEBUG_ALL
