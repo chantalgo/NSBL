@@ -72,7 +72,7 @@ void stringInitCode(struct Node* node, int type, int isglobal){
 }
 
 int listInitCode(struct Node* node, int type, int isglobal){
-	int etype = -1;
+	int etype = UNKNOWN_T;
 	char buffer[20];
 	int count = 0;
 	struct Node* tn = node->child[1];
@@ -98,7 +98,7 @@ int listInitCode(struct Node* node, int type, int isglobal){
 	if(isglobal){
 		switch(etype){
 			case -1:
-				node->code = strCatAlloc("", 5, INDENT[node->scope[0]], node->child[0]->symbol->bind, " = list_declaration(-1, ", buffer, ");\n"); 
+				node->code = strCatAlloc("", 5, INDENT[node->scope[0]], node->child[0]->symbol->bind, " = list_declaration(UNKNOWN_T, ", buffer, ");\n"); 
 				break;
 			case VERTEX_T:
 				node->code = strCatAlloc("", 7, INDENT[node->scope[0]], node->child[0]->symbol->bind, " = list_declaration(VERTEX, ", buffer, ", ",node->child[1]->child[0]->code, ");\n");

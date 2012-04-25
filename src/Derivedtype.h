@@ -28,7 +28,7 @@ typedef GHashTable AttributeTable;
 typedef GString StringType;
 
 typedef union {
-	int			bv;
+	bool		bv;
     int         iv;
     float       fv;
     char *      sv;
@@ -86,10 +86,10 @@ int                 destroy_graph(GraphType* g);
 int                 destroy_list(ListType* list);
 int                 destroy_string(StringType* s);
 
-Attribute*          new_attr( int type, void * val );
+Attribute*          new_attr( int type, void * val);
 Attribute*			new_attr_INT_T(int i);
 Attribute*			new_attr_FLOAT_T(float f);
-Attribute*			new_attr_BOOL_T(int b);
+Attribute*			new_attr_BOOL_T(bool b);
 Attribute*			new_attr_STRING_T(char* s);
 
 void                destroy_attr ( Attribute * attr );
@@ -134,7 +134,7 @@ ListType* 			pipe(ListType* list, int pipiop);
 ListType* 			list_declaration(int type, int n, ...);
 void* 				list_getelement(ListType* list, int index);
 int 				list_append(ListType* list, int type, void* obj);
-int 				list_assign(ListType* list, int type, int index, void* obj);
+int 				list_assign_element(ListType* list, int type, int index, void* obj);
 
 /*print functions*/
 int                 print_g(GraphType* g);
@@ -142,6 +142,11 @@ int                 print_v(VertexType* v);
 int                 print_e(EdgeType* e);
 int                 print_v_attr(VertexType* v);
 int                 print_e_attr(EdgeType* e);
+
+int					print_VERTEX_T(VertexType* v);
+int 				print_EDGE_T(EdgeType* e);
+int 				print_GRAPH_T(GraphType* g);
+int					print_attr(Attribute* attr);
 
 //TODO
 Attribute*          binary_operator( Attribute* attr1, Attribute* attr2, int op, int reverse, int rm_attr1, int rm_attr2, int lno);

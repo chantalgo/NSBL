@@ -69,13 +69,15 @@ GraphType* new_graph(){
     return graph;
 }
 
-//ListType* new_list(){
-//	return NULL;
-//}
+ListType* new_list(){
+	ListType* l = (ListType*)malloc(sizeof(ListType));
+	l->type = UNKNOWN_T;
+	return l;
+}
 
-//StringType* new_string(){
-//	return (StringType*)g_string_new("");
-//}
+StringType* new_string(){
+	return (StringType*)g_string_new("");
+}
 
 int destroy_edge(EdgeType* e){
 #ifdef _DEBUG
@@ -168,13 +170,14 @@ int destroy_graph(GraphType* g){
 }
 
 int destroy_list(ListType* list){
-//	g_list_free_1((GList*)list);
-//	return 0;
+	g_list_free(list->list);
+	free(list);
+	return 0;
 }
 
 int destroy_string(StringType* s){
-//	g_string_free((GString*)s, 1);
-//	return 0;
+	g_string_free((GString*)s, 1);
+	return 0;
 }
 
 int edge_assign_direction(EdgeType* e, VertexType* v1, VertexType* v2){
@@ -197,7 +200,7 @@ Attribute * new_attr( int type, void * val ) {
         case FLOAT_T :
             attr->value.fv = (val==NULL) ? 0.0 : *(float *)val; break;
 		case BOOL_T:
-			attr->value.bv = (val==NULL) ? 0 : ((*(int*)val > 0) ? 1 : 0); break;
+			attr->value.bv = (val==NULL) ? 0 : ((*(bool*)val > 0) ? true : false); break;
         case STRING_T :
             attr->value.sv = (val==NULL) ? NULL : val; break;
         default :
@@ -214,7 +217,7 @@ Attribute* new_attr_FLOAT_T(float f){
 	return new_attr(FLOAT_T, &f);
 }
 
-Attribute* new_attr_BOOL_T(int b){
+Attribute* new_attr_BOOL_T(bool b){
 	return new_attr(BOOL_T, &b);
 }
 
@@ -228,6 +231,8 @@ int assign_attr( Attribute * attr, int type, void * val ) {
             attr->value.iv = * (int *) val; break;
         case FLOAT_T :
             attr->value.fv = * (float *) val; break;
+		case BOOL_T:
+			attr->value.bv = * (bool *) val; break;
         case STRING_T :
             if (attr->value.sv != NULL) free(attr->value.sv);
             char *str = (char *) val;
@@ -250,6 +255,8 @@ int cmp_attr( Attribute * attr1, void * val ) {
             else if ( tt < 0.0 ) return -1;
             else return 1;
         }
+		case BOOL_T:
+			return (attr1->value.bv == *(bool*)val) ? 0 : 1;
         case STRING_T :
             return strcmp( attr1->value.sv, (char *) val );
         default :
@@ -263,6 +270,8 @@ void output_attr( char * key, Attribute * attr, FILE * out ){
             fprintf(out, "%s -> %d", key, attr->value.iv); break;
         case FLOAT_T :
             fprintf(out, "%s -> %f", key, attr->value.fv); break;
+		case BOOL_T:
+			fprintf(out, (attr->value.bv ? "%s -> TRUE" : "%s -> FALSE"), key); break;
         case STRING_T :
             fprintf(out, "%s -> \"%s\"", key, attr->value.sv); break;
         default :
@@ -279,6 +288,8 @@ void destroy_attr ( Attribute * attr ) {
             fprintf(stderr, " INT_T --> %d\n", attr->value.iv); break;
         case FLOAT_T :
             fprintf(stderr, " FLOAT_T --> %f\n", attr->value.fv); break;
+		case BOOL_T:
+			fprintf(stderr, (attr->value.bv ? "BOOL_T --> TRUE" : "FLOAT --> FALSE")); break;
         case STRING_T :
             fprintf(stderr," STRING_T --> %s\n", attr->value.sv); break;
     }
@@ -650,7 +661,7 @@ void* list_getelement(ListType* list, int index){
 }
 
 int list_append(ListType* list, int type, void* obj){
-	if(list->type == -1)
+	if(list->type == UNKNOWN_T)
 		list->type = type;
 	else if(list->type != type){
 		return 1;
@@ -659,10 +670,10 @@ int list_append(ListType* list, int type, void* obj){
 	return 0;
 }
 
-int list_assign(ListType* list, int type, int index, void* obj){
+int list_assign_element(ListType* list, int type, int index, void* obj){
 	if(g_list_length(list->list)<=(index+1))
 		return 1;
-	if(list->type == -1)
+	if(list->type == UNKNOWN_T)
 		list->type = type;
 	else if(list->type != type){
 		return 1;
@@ -760,6 +771,43 @@ int print_g(GraphType* g){
     return 0;
 }
 
+int print_VERTEX_T(VertexType* v){
+	print_v_attr(v);
+	return 0;
+}
+
+int print_EDGE_T(EdgeType* e){
+	print_e_attr(e);
+	return 0;
+}
+
+int print_GRAPH_T(GraphType* g){
+	print_g(g);
+	return 0;
+}
+
+int print_attr(Attribute* attr){
+	if(attr==NULL)	
+    	die("NULL attribute \n");
+	switch(attr->type){
+		case BOOL_T: 
+			printf((attr->value.bv)? "TRUE" : "FALSE" );
+			break;
+		case INT_T:
+			printf("%d", attr->value.iv);
+			break;
+		case FLOAT_T:
+			printf("%f", attr->value.fv);
+			break;
+		case STRING_T:
+			printf("%s", attr->value.sv);
+			break;
+		default:
+			break;
+	}
+	return 0;
+}
+
 void die(char* fmt, ...){
     va_list args;
     va_start(args, fmt);
@@ -797,6 +845,7 @@ Attribute* binary_operator( Attribute* attr1, Attribute* attr2, int op, int reve
                     result->value.fv = attr1->value.fv + attr2->value.fv;
                 else
                     die("binary_operator: coding error at line: %d \n", lno);
+				break;
             case OP_SUB :
                 if(resultype == INT_T)
                     result->value.iv = attr1->value.iv - attr2->value.iv;
@@ -804,6 +853,7 @@ Attribute* binary_operator( Attribute* attr1, Attribute* attr2, int op, int reve
                     result->value.fv = attr1->value.fv - attr2->value.fv;
                 else
                     die("binary_operator: coding error at line: %d \n", lno);
+				break;
             case OP_MUL :
                 if(resultype == INT_T)
                     result->value.iv = attr1->value.iv * attr2->value.iv;
@@ -811,6 +861,7 @@ Attribute* binary_operator( Attribute* attr1, Attribute* attr2, int op, int reve
                     result->value.fv = attr1->value.fv * attr2->value.fv;
                 else
                     die("binary_operator: coding error at line: %d \n", lno);
+				break;
             case OP_DIV :
                 if(resultype == INT_T)
                     result->value.iv = attr1->value.iv / attr2->value.iv;
@@ -818,6 +869,7 @@ Attribute* binary_operator( Attribute* attr1, Attribute* attr2, int op, int reve
                     result->value.fv = attr1->value.fv / attr2->value.fv;
                 else
                     die("binary_operator: coding erro at line: %d r\n", lno);
+				break;
             default:
                 die("binary_operator: unsupported op %d at line: %d \n",op, lno);
         }
@@ -842,7 +894,7 @@ void assign_operator_to_static(Attribute* attr1, int type, void* value, int rm_a
 				*(float*)value = attr1->value.fv;
 				break;
 			case BOOL_T:
-				*(int*)value = attr1->value.bv;
+				*(bool*)value = attr1->value.bv;
 				break;
 			case STRING_T:
 				value = attr1->value.sv;
@@ -991,9 +1043,37 @@ Attribute* object_get_attribute(void* v, int obj, char* attribute){
 	return attr;
 }
 
-StringType*         assign_operator_string(StringType* s1, StringType* s2) {
+StringType*	assign_operator_string(StringType* s1, StringType* s2) {
     if (s1 != NULL) destroy_string(s1);
     return s1 = s2;
+}
+
+ListType* list_match(ListType* l, bool (*func) (void*, int), int rm_l){
+	if(l==NULL)
+   		die("NULL parameter error \n");
+	ListType* newl = (ListType*)malloc(sizeof(ListType));
+	newl->type = l->type;
+	int length = g_list_length(l->list);
+	int i, b;
+	void* obj;
+	for(i=0; i<length; i++){
+		obj = g_list_nth_data(l->list, i);
+		switch(l->type){
+			case VERTEX_T:
+				b = func(obj, VERTEX_T);
+				break;
+			case EDGE_T:
+				b = func(obj, EDGE_T);
+				break;
+			default:
+        		die("Illegal type error \n");
+		}
+		if(b){
+			newl->list = g_list_append(newl->list, obj);
+		}
+	}
+	if(rm_l == FLAG_DESTROY_ATTR)destroy_list(l);
+	return newl;
 }
 
 ListType*           assign_operator_list(ListType* l1, ListType* l2) {
