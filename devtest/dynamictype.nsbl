@@ -10,7 +10,7 @@ int ii;
 
 int jj = ii = v.a + v.b*j  + k;
 
-bool f=true, ff;
+bool f = true, ff;
 
 if (v.a > 10 && ! ((bool) v.f) )  {
 
@@ -21,3 +21,5 @@ while (v.a < 10) {
 v.a = v.a + 1;
 }
 for (v.a = 0; v.a < 10; v.a = v.a + 1) {}
+
+v.xxx = 19;

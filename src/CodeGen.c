@@ -562,7 +562,7 @@ int codeGen (struct Node * node) {
             // type check and implicit type conversion
             if(lf->type == rt->type && lf->type>=0 ) {
                 // int float support : = += -= *= /=,  not supported, JZ
-                if ( lf->type == INT_T || lf->type == FLOAT_T ) {
+                if ( lf->type == INT_T || lf->type == FLOAT_T || lf->type == BOOL_T ) {
                     node->code = strCatAlloc(" ",3,lf->code,op,rt->code);
                     node->type = lf->type;
                 }
