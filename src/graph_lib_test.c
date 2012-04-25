@@ -218,6 +218,17 @@ int main(int argc, char** argv){
 	
 	
 	print_g(g1);
+    destroy_edge(e1);
+    print_g(g1);
+    destroy_vertex(v1);
+    destroy_vertex(v2);
+    destroy_vertex(v3);
+    destroy_vertex(v4);
+
+    destroy_vertex(v5);
+    destroy_vertex(v6);
+    print_g(g1);
+
 	ListType* lv = list_declaration(VERTEX,3, v1, v2, v3);
 	print_list(lv);
 	list_append(lv, VERTEX, v4);

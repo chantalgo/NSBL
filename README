@@ -79,3 +79,7 @@ BASIC Error HANDLE complete.
 4/21/2012
 XML Read Write and print statements DONE (Kunal)
 Code Gen and grammar update for the same remains
+
+4/24/2012
+Dynamic type checking
+delete of object, attribute

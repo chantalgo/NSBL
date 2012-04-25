@@ -2,7 +2,7 @@ BINDIR = ../bin
 TESTDIR = ../devtest
 MXMLDIR = ../mxmldir
 
-CFLAGS = -D_DEBUG  
+CFLAGS = -D_DEBUG 
 ##### CFLAGS Options ############
 # -D_AST_DEBUG
 # -D_AST_DEBUG_ALL
@@ -21,16 +21,17 @@ YFLAGS =
 
 GLIBINCLUDE = -I/usr/include/glib-2.0/ -I/usr/lib64/glib-2.0/include -I/usr/lib/glib-2.0/include
 GLIBLINK = `pkg-config --cflags --libs glib-2.0`
-LIBS = $(MXMLDIR)/libmxml.a -lpthread -lfl -ly
+YACCLIB = -ly -lfl
+LIBS = $(MXMLDIR)/libmxml.a -lpthread 
 
 CC = gcc $(CFLAGS) $(GLIBINCLUDE) 
 LEX = flex
 YACC = yacc
 
-OBJ = Parser.tab.o LexAly.yy.o ASTree.o SymbolTable.o SymbolTableUtil.o util.o Error.o CodeGen.o Derivedtype.o  FileReadWrite.o
+OBJ = Parser.tab.o LexAly.yy.o ASTree.o SymbolTable.o SymbolTableUtil.o util.o Error.o CodeGen.o Derivedtype.o
 
 toy.exe : $(OBJ)
-	$(CC) -o toy.exe $(OBJ) $(LIBS) $(GLIBLINK) 
+	$(CC) -o toy.exe $(OBJ) $(GLIBLINK) $(YACCLIB) 
 	mkdir -p $(BINDIR)
 	mv toy.exe $(BINDIR)
 

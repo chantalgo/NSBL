@@ -88,6 +88,23 @@ void s_table_max_level (SymbolTable* table, int* mlevel) {
     g_hash_table_foreach(table, &s_entry_compare_levle, (gpointer) mlevel);
 }
 
+GList* s_table_all_variables_in_scope (SymbolTable* table, ScopeId sid, int type) {
+    GList* gl = NULL;
+    GList* vals = g_hash_table_get_values( table );
+    int i, l = g_list_length( vals );
+    for ( i=0; i<l; ++i ) {
+        SymbolTableEntry * e = (SymbolTableEntry *) g_list_nth_data( vals, i );
+        if ( e->scope[1] == sid && e->type == type ) { 
+#ifdef _DEBUG
+            debugInfo("s_table_all_variables_in_scope: sid = %d, type = %d, %s\n", sid, type, e->bind);
+#endif
+            gl = g_list_append( gl, (gpointer) e );
+        }
+    }
+    g_list_free(vals);
+    return gl;
+}
+
 // convert type MACRO to char *
 char* s_table_type_name (int type) {
     switch (type) {

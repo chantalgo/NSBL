@@ -15,30 +15,7 @@
 #define S_STACK_INIT_LENGTH     128
 
 /** ALL TYPES */
-#define VOID_T          0
-#define BOOL_T          1
-#define INT_T           2
-#define FLOAT_T         3
-#define STRING_T        4
-#define LIST_T          5
-#define VERTEX_T        6
-#define EDGE_T          7
-#define GRAPH_T         8
-#define FUNC_T          10
-#define FUNC_LITERAL_T  11
-
-#define DYN_BOOL_T      -1
-#define DYN_INT_T       -2
-#define DYN_FLOAT_T     -3
-#define DYN_STRING_T    -4
-#define DYN_LIST_T      -5
-#define DYN_VERTEX_T    -6
-#define DYN_EDGE_T      -7
-#define DYN_GRAPH_T     -8
-#define DYNAMIC_T       -9
-
-#define UNKNOWN_T       -99
-#define NOT_AVAIL       -55
+#include "type.h"
 
 typedef int ScopeId;
 typedef GHashTable SymbolTable;
@@ -80,6 +57,8 @@ int                     s_table_check_key_exsit (SymbolTable* table, SymbolTable
 void                    s_table_show        (SymbolTable* table, FILE* out);
 void                    s_table_max_level   (SymbolTable* table, int* mlevel);
 
+GList*                  s_table_all_variables_in_scope (SymbolTable* table, ScopeId sid, int type);
+
 char*                   s_table_type_name   (int type);
 char*                   s_table_short_type_name   (int type);
 ScopeId                 s_table_new_scopeid ();
@@ -112,6 +91,7 @@ int                     s_new_bind          (SymbolTableEntry* entry, Binding bi
 #define sTableLookup(k)     s_table_lookup( s_table, k )
 #define sTableShow(o)       s_table_show( s_table, o )
 #define sTableMaxLevel(l)   s_table_max_level( s_table, l)
+#define sTableAllVarScope(s,t)   s_table_all_variables_in_scope( s_table, s, t )
 
 #define sTypeName(t)        s_table_type_name(t)
 #define sShortTypeName(t)   s_table_short_type_name(t)

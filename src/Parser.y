@@ -47,13 +47,14 @@ extern int yyparse(void); /* Parser function. */
 %type <LString> VOID BOOLEAN INTEGER FLOAT STRING LIST VERTEX EDGE GRAPH
 %type <LString> FUNC_LITERAL
 %type <LString> IF ELSE FOR FOREACH WHILE BREAK CONTINUE RETURN MARK
-%type <LString> '{' '}' '(' ')' '[' ']' ';' ',' ':' '.' 
+%type <LString> '{' '}' '(' ')' '[' ']' ';' ',' ':' '.' DEL 
 // declaration
 %type <node> declaration
 %type <node> basic_type_specifier declaration_specifiers 
 %type <node> init_declarator_list init_declarator simple_declarator
 %type <node> parameter_list parameter_declaration
 %type <node> initializer initializer_list
+%type <node> del_declarator del_declarator_list deletion
 
 // expression
 %type <node> expression assignment_expression logical_OR_expression 
@@ -66,7 +67,7 @@ extern int yyparse(void); /* Parser function. */
 // statments
 %type <node> start_nonterminal translation_unit
 %type <node> external_statement statement 
-%type <node> expression_statement compound_statement selection_statement compound_statement_no_scope 
+%type <node> expression_statement compound_statement selection_statement compound_statement_no_scope deletion_statement 
 %type <node> iteration_statement jump_statement declaration_statement
 %type <node> statement_list 
 
@@ -100,13 +101,15 @@ extern int yyparse(void); /* Parser function. */
 %token FOR FOREACH WHILE
 %token BREAK CONTINUE
 %token RETURN
+/* del */
+%token DEL
 /* used in AST */
 %token AST_TYPE_SPECIFIER AST_DECLARATION AST_COMMA
 %token AST_ASSIGN AST_CAST
 %token AST_UNARY_PLUS AST_UNARY_MINUS AST_UNARY_NOT
 %token AST_FUNC_DECLARATOR AST_PARA_DECLARATION AST_FUNC 
 %token AST_INIT_ASSGN AST_LIST_INIT
-%token AST_MATCH AST_ATTIBUTE AST_GRAPH_PROP
+%token AST_MATCH AST_ATTRIBUTE AST_GRAPH_PROP
 %token AST_STAT_LIST AST_COMP_STAT AST_COMP_STAT_NO_SCOPE AST_EXT_STAT_COMMA
 
 %token AST_IF_STAT AST_IFELSE_STAT
@@ -187,6 +190,7 @@ statement
     | iteration_statement           { $$ = $1; }
     | jump_statement                { $$ = $1; }
     | declaration_statement         { $$ = $1; }
+    | deletion_statement            { $$ = $1; }
     ;
 
 expression_statement
@@ -295,6 +299,10 @@ declaration_statement
     | function_literal_declaration      { $$ = $1; }
     ;
 
+deletion_statement
+    : deletion                          { $$ = $1; }
+    ;
+
 /**************************
  *   EXPRESSIONS          *
  **************************/
@@ -315,10 +323,10 @@ assignment_expression
 
 assignment_operator
     : '='               { $$.i = AST_ASSIGN; $$.l = $1.l; }
-    | ADD_ASSIGN        { $$.i = ADD_ASSIGN; $$.l = $1.l; }
-    | SUB_ASSIGN        { $$.i = SUB_ASSIGN; $$.l = $1.l; }
-    | MUL_ASSIGN        { $$.i = MUL_ASSIGN; $$.l = $1.l; }
-    | DIV_ASSIGN        { $$.i = DIV_ASSIGN; $$.l = $1.l; }
+    //| ADD_ASSIGN        { $$.i = ADD_ASSIGN; $$.l = $1.l; }
+    //| SUB_ASSIGN        { $$.i = SUB_ASSIGN; $$.l = $1.l; }
+    //| MUL_ASSIGN        { $$.i = MUL_ASSIGN; $$.l = $1.l; }
+    //| DIV_ASSIGN        { $$.i = DIV_ASSIGN; $$.l = $1.l; }
     | APPEND            { $$.i = APPEND;     $$.l = $1.l; }
     ;
 
@@ -429,7 +437,10 @@ postfix_expression
         $$ = astNewNode ( AST_MATCH, 2, astAllChildren(2, $1, $6), $2.l );
     }
     | postfix_expression '.' IDENTIFIER {
-        $$ = astNewNode ( AST_ATTIBUTE, 2, astAllChildren(2, $1, astNewLeaf(IDENTIFIER, $3.s, $3.l)), $2.l );
+        $$ = astNewNode ( AST_ATTRIBUTE, 2, astAllChildren(2, $1, astNewLeaf(IDENTIFIER, $3.s, $3.l)), $2.l );
+        char * ctmp = $$->child[1]->lexval.sval;
+        $$->child[1]->lexval.sval = strCatAlloc("", 3, $$->child[0]->lexval.sval,"::",ctmp );
+        free(ctmp);
     }
     | postfix_expression '.' graph_property {
         $$ = astNewNode ( AST_GRAPH_PROP, 2, astAllChildren(2, $1, $3), $2.l );
@@ -576,6 +587,16 @@ declaration
     }
     ;
 
+deletion
+    : DEL del_declarator_list ';' {
+        $$ = astNewNode( DEL, 1, astAllChildren(1, $2), $1.l);
+    }
+    | DEL del_declarator_list error {
+        astFreeTree($2);
+        $$ = NULL;
+    }
+    ;
+
 declaration_specifiers
     : basic_type_specifier {
         $$= $1;
@@ -600,14 +621,51 @@ init_declarator
     }
     ;
 
+del_declarator_list
+    : del_declarator    { $$ = $1; }
+    | del_declarator_list ',' del_declarator {
+        $$ = astNewNode( AST_COMMA, 2, astAllChildren(2, $1, $3), $2.l );
+    }
+    ;
+
+del_declarator
+    : IDENTIFIER { 
+        $$ = astNewLeaf(IDENTIFIER, $1.s, $1.l);
+        sTableLookupId($$); 
+    }
+    | IDENTIFIER BELONG IDENTIFIER {
+        struct Node* tnode = astNewLeaf(IDENTIFIER, $1.s, $1.l); 
+        sTableLookupId(tnode);    // check the exsitence of object
+        if(tnode->type<=FLOAT_T || tnode->type>=FUNC_T) {
+            ERRNO = ErrorDelAttrFromWrongType; 
+            errorInfo(ERRNO,tnode->line,"del an attribute from an object of type `%s'.\n",sTypeName(tnode->type) );
+        }
+        $$ = astNewNode( BELONG, 2, astAllChildren(2, tnode, astNewLeaf(IDENTIFIER, $3.s, $3.l)), $2.l );
+        // set lexval for ID2
+        char * ctmp = $$->child[1]->lexval.sval;
+        $$->child[1]->lexval.sval = strCatAlloc("", 3, $$->child[0]->lexval.sval, "::", ctmp);
+        free(ctmp);
+        // DO NOT look up symbol table
+        //sTableLookupId($$->child[1]);
+    }
+    ;
+
 simple_declarator
     : IDENTIFIER {
         $$ = astNewLeaf(IDENTIFIER, $1.s, $1.l);
     }
-    | simple_declarator BELONG IDENTIFIER {
-		sTableLookupId($1);
-		char* temp = strCatAlloc("", 3, $3.s, "_", $1->lexval.sval);
-        $$ = astNewNode( BELONG, 2, astAllChildren(2, $1, astNewLeaf(IDENTIFIER, $3.s, $3.l)), $2.l );
+    | IDENTIFIER BELONG IDENTIFIER {
+        struct Node* tnode = astNewLeaf(IDENTIFIER, $1.s, $1.l);
+		sTableLookupId(tnode);      // check whether ID1 is declared
+        if(tnode->type<=FLOAT_T || tnode->type>=FUNC_T) {
+            ERRNO = ErrorDeclareAttrForWrongType;
+            errorInfo(ERRNO,tnode->line,"declare an attribute for an object of type `%s'.\n",sTypeName(tnode->type) );
+        }
+        $$ = astNewNode( BELONG, 2, astAllChildren(2, tnode, astNewLeaf(IDENTIFIER, $3.s, $3.l)), $2.l );
+        // set lexval for ID2
+        char * ctmp = $$->child[1]->lexval.sval;
+        $$->child[1]->lexval.sval = strCatAlloc("", 3, $$->child[0]->lexval.sval, "::", ctmp);
+        free(ctmp);
     }
     ;
 
@@ -741,5 +799,8 @@ int main(int argc, char * const * argv) {
     yyparse();
     fclose(yyin);
     main_clean();
+    if(ERRNO!=0) {
+        fprintf(stderr, "error code = %d\n", ERRNO);
+    }
     return ERRNO;
 }

@@ -1,11 +1,12 @@
 int i,                                                  // scope 0
         j,
-
 k=2;                    // OK
+
 
 int p=i;                // OK
 //float   i=1.2;          // ERROR :: redeclaration
 //float   j=0.9;          // ERROR :: redeclaration
+
 
 string 
 s = "abcd";             // OK
@@ -32,10 +33,17 @@ k+=2;                   // k in scope 0
     j*=2;               // j in scope 0
 }
 
+graph g1, g2;
+edge e1, e2;
+vertex v1, v2;
 
-graph g;
+string s1="test s1", s2="test s2", s3;
 
-{
-    edge e1,e2;
-    vertex v1,v2;
-}
+string v1::name = "Tom";
+int v1::age = 18;
+int v2::age = 19;
+float v1::weight = 55;
+int testv = 2;
+float x, z;
+
+i+j = k;

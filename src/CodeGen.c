@@ -7,6 +7,7 @@
 #include "Parser.tab.h"
 #include "global.h"
 #include "Error.h"
+#include "operator.h"
 
 char ** INDENT;                 // space indent
 char * OUTFILE; 
@@ -78,6 +79,12 @@ void  strFreeAll(int n, ...) {
             free(tptr);
     }
     return;
+}
+
+char * strLine(int l) {
+    static char LineNO[64];
+    sprintf(LineNO, "%d\0", l);
+    return LineNO;
 }
 
 void derivedTypeInitCode(struct Node* node, int type, int isglobal){
@@ -196,33 +203,272 @@ int existbelong(struct Node* node){
 
 int attributeDeclareCode(struct Node* node, int type){
 	int err = 0;
+    // First generate code for BELONG
+    codeGen(node->child[0]);
+    // Then generate declaration
 	switch(type){
 		case INT_T:
 			if(node->child[1]->type == FLOAT_T)
-				node->code = strCatAlloc("", 20, INDENT[node->child[0]->child[0]->scope[0]], sTypeName(type), " ", node->child[0]->child[0]->symbol->bind, "_", node->child[0]->child[1]->symbol->bind, " = ", "(int)", node->child[1]->code, ";\n",INDENT[node->child[0]->child[0]->scope[0]], "vertex_assign_attribute(", node->child[0]->child[0]->symbol->bind, ", \"", node->child[0]->child[1]->code, "\", &", node->child[0]->child[0]->symbol->bind, "_", node->child[0]->child[1]->symbol->bind,", INT);\n");
+				node->code = strCatAlloc("", 16 , 
+                    INDENT[node->child[0]->child[0]->scope[0]], 
+                    "{ ",
+                    sTypeName(type), 
+                    " ", 
+                    node->child[0]->child[1]->code, 
+                    " = ", 
+                    "(int)",            // type conversion : FLOAT ==> INT 
+                    node->child[1]->code, 
+                    "; ",
+                    "vertex_assign_attribute(", 
+                    node->child[0]->child[0]->symbol->bind, 
+                    ", \"", 
+                    node->child[0]->child[1]->code, 
+                    "\", &", 
+                    node->child[0]->child[1]->code, 
+                    ", INT); }\n"
+                );
 			else if(node->child[1]->type == INT_T)
-				node->code = strCatAlloc("", 19, INDENT[node->child[0]->child[0]->scope[0]], sTypeName(type), " ", node->child[0]->child[0]->symbol->bind, "_", node->child[0]->child[1]->symbol->bind, " = ", node->child[1]->code, ";\n",INDENT[node->child[0]->child[0]->scope[0]], "vertex_assign_attribute(", node->child[0]->child[0]->symbol->bind, ", \"", node->child[0]->child[1]->code, "\", &", node->child[0]->child[0]->symbol->bind, "_", node->child[0]->child[1]->symbol->bind,", INT);\n");
+                node->code = strCatAlloc("",15 ,
+                    INDENT[node->child[0]->child[0]->scope[0]], 
+                    "{ ",
+                    sTypeName(type), 
+                    " ", 
+                    node->child[0]->child[1]->code, 
+                    " = ", 
+                    node->child[1]->code, 
+                    "; ",
+                    "vertex_assign_attribute(", 
+                    node->child[0]->child[0]->symbol->bind, 
+                    ", \"", 
+                    node->child[0]->child[1]->code, 
+                    "\", &", 
+                    node->child[0]->child[1]->code, 
+                    ", INT); }\n"
+                );
+
 			else
 				err = ErrorTypeMisMatch;		
 			break;
 		case FLOAT_T:
 			if(node->child[1]->type == INT_T)
-				node->code = strCatAlloc("", 20, INDENT[node->child[0]->child[0]->scope[0]], sTypeName(type), " ", node->child[0]->child[0]->symbol->bind, "_", node->child[0]->child[1]->symbol->bind, " = ", "(float)", node->child[1]->code, ";\n",INDENT[node->child[0]->child[0]->scope[0]], "vertex_assign_attribute(", node->child[0]->child[0]->symbol->bind, ", \"", node->child[0]->child[1]->code, "\", &", node->child[0]->child[0]->symbol->bind, "_", node->child[0]->child[1]->symbol->bind ,", FLOAT);\n");
+                node->code = strCatAlloc("", 16 ,
+                    INDENT[node->child[0]->child[0]->scope[0]],
+                    "{ ",
+                    sTypeName(type),
+                    " ",
+                    node->child[0]->child[1]->code,
+                    " = ",
+                    "(float)",            // type conversion : INT ==> FLOAT
+                    node->child[1]->code,
+                    "; ",
+                    "vertex_assign_attribute(",
+                    node->child[0]->child[0]->symbol->bind,
+                    ", \"",
+                    node->child[0]->child[1]->code,
+                    "\", &",
+                    node->child[0]->child[1]->code, 
+                    ", FLOAT); }\n"
+                );
 			else if(node->child[1]->type == FLOAT_T)
-				node->code = strCatAlloc("", 19, INDENT[node->child[0]->child[0]->scope[0]], sTypeName(type), " ", node->child[0]->child[0]->symbol->bind, "_", node->child[0]->child[1]->symbol->bind, " = ", node->child[1]->code, ";\n",INDENT[node->child[0]->child[0]->scope[0]], "vertex_assign_attribute(", node->child[0]->child[0]->symbol->bind, ", \"", node->child[0]->child[1]->code, "\", &", node->child[0]->child[0]->symbol->bind, "_", node->child[0]->child[1]->symbol->bind ,", FLOAT);\n");
+                node->code = strCatAlloc("", 15 ,
+                    INDENT[node->child[0]->child[0]->scope[0]],
+                    "{ ",
+                    sTypeName(type),
+                    " ",
+                    node->child[0]->child[1]->code,
+                    " = ", 
+                    node->child[1]->code,
+                    "; ",
+                    "vertex_assign_attribute(",
+                    node->child[0]->child[0]->symbol->bind,
+                    ", \"",
+                    node->child[0]->child[1]->code,
+                    "\", &",
+                    node->child[0]->child[1]->code,
+                    ", FLOAT); }\n"
+                );
 			else
 				err = ErrorTypeMisMatch;
 			break;
 		case STRING_T:
 			if(node->child[1]->type == STRING_T)
-				node->code = strCatAlloc("", 20, INDENT[node->child[0]->child[0]->scope[0]], sTypeName(type), " ", node->child[0]->child[0]->symbol->bind, "_", node->child[0]->child[1]->symbol->bind," = g_string_new(", node->child[1]->code, ");\n",INDENT[node->child[0]->child[0]->scope[0]], "vertex_assign_attribute(", node->child[0]->child[0]->symbol->bind, ", \"", node->child[0]->child[1]->code, "\", ", node->child[0]->child[0]->symbol->bind, "_", node->child[0]->child[1]->symbol->bind, "->str ,", "STRING);\n");
+                node->code = strCatAlloc("", 15 ,
+                    INDENT[node->child[0]->child[0]->scope[0]],
+                    "{ ",
+                    sTypeName(type),
+                    " ",
+                    node->child[0]->child[1]->code,
+                    " = g_string_new(", 
+                    node->child[1]->code,
+                    "); ",
+                    "vertex_assign_attribute(",
+                    node->child[0]->child[0]->symbol->bind,
+                    ", \"",
+                    node->child[0]->child[1]->code,
+                    "\", ",
+                    node->child[0]->child[1]->code,
+                    "->str, STRING); }\n"
+                );
 			else
 				err = ErrorTypeMisMatch;
 			break;
 		default:
 			break;
 	}
+    if(err) {
+        errorInfo(err, node->line, "Type Mismatch for the assignment\n");
+    }
 	return err;
+}
+
+char * codeFreeFuncName( int type ) {
+    switch (type) {
+        case LIST_T :
+            return "destroy_list" ;
+        case VERTEX_T :
+            return "destroy_vertex" ;
+        case EDGE_T :
+            return "destroy_edge" ;
+        case GRAPH_T :
+            return "destroy_graph" ;
+        case STRING_T :
+            return "destroy_string" ;
+        default :
+            return NULL;
+    }
+}
+
+char * codeRemoveAttrFuncName( int type ) {
+    switch ( type ) {
+        case VERTEX_T :
+            return "vertex_remove_attribute";
+        case EDGE_T :
+            return "edge_remove_attribute";
+        case GRAPH_T :
+            return "graph_remove_attribute";
+        default :
+            return NULL;
+    }
+}
+
+// not used, JZ 
+char * codeForFreeDerivedVabInScope(ScopeId sid, int type, GList * gl, ScopeId lvl){
+    GList * vals = sTableAllVarScope( sid, type );
+    char * code = NULL, * freefunc = codeFreeFuncName(type);
+    int i, l = g_list_length( vals );
+    SymbolTableEntry * e;
+#ifdef _DEBUG
+    int ll = g_list_length( gl );
+    debugInfo("codeForFreeDerivedVabInScope: sid=%d, type=%d, l=%d, ll=%d\n", sid,type,l,ll);
+    if(ll>0) {
+        int i;
+        for (i=0; i<ll; ++i) {
+            e = (SymbolTableEntry *) g_list_nth_data( gl, i );
+            debugInfoExt("      gl[%d] ==> %s\n", i, e->bind);
+        }
+    }
+#endif
+    for ( i=0; i<l; ++i ){
+        e = (SymbolTableEntry *) g_list_nth_data( vals, i );
+        if( g_list_find( gl, (gpointer) e ) == NULL )
+            code = strRightCatAlloc( code, "", 5, INDENT[lvl], freefunc, "( ", e->bind, " );\n" );
+    }
+    g_list_free( vals );
+    return code;
+}
+
+// not used, JZ
+char * allFreeCodeInScope(ScopeId sid, GList * gl, ScopeId lvl) {
+    char * sc = codeForFreeDerivedVabInScope( sid, STRING_T, gl, lvl );
+    char * vc = codeForFreeDerivedVabInScope( sid, VERTEX_T, gl, lvl );
+    char * ec = codeForFreeDerivedVabInScope( sid, EDGE_T, gl, lvl );
+    char * gc = codeForFreeDerivedVabInScope( sid, GRAPH_T, gl, lvl );
+    char * lc = codeForFreeDerivedVabInScope( sid, LIST_T, gl, lvl );
+
+    return strCatAlloc("", 5, sc, vc, ec, gc, lc );
+}
+
+// not used, JZ
+GList * getAllParaInFunc(struct Node * node, GList * gl) {
+    if (node ==NULL) return gl;
+    else if (node->token == AST_COMMA) {
+        gl = getAllParaInFunc(node->child[0], gl);
+        gl = getAllParaInFunc(node->child[1], gl);
+    }
+    else if (node->token == AST_PARA_DECLARATION) {
+        gl = g_list_append( gl, node->child[1]->symbol );
+    }
+    else {
+        fprintf(stderr, "getAllParaInFunc: unknow node %d !!!!!!!!!!\n", node->token);
+    }
+    return gl;
+}
+
+// not used, JZ
+GList * getReturnVab( struct Node * node, GList * gl) {
+    if (node == NULL) return gl;
+    else if (node->token == AST_JUMP_RETURN) {
+        if (node->nch!=0) {
+            gl = g_list_append( gl, node->child[0]->symbol );
+        }
+        return gl;
+    }
+    
+    int i;
+    for (i=0; i<node->nch; ++i) {
+        gl = getReturnVab( node->child[i], gl );
+    }
+    return gl;
+}
+
+char * codeDel( struct Node * node ) {
+    if (node == NULL) return NULL;
+#ifdef _DEBUG
+    debugInfo("codeDel: NODE = %d\n",node->token);
+#endif
+    if (node->token == AST_COMMA) {
+        char * lfc = codeDel( node->child[0] );
+        char * rtc = codeDel( node->child[1] );
+        return strCatAlloc("", 2, lfc, rtc);
+    }
+    else if (node->token == BELONG) {
+        codeGen(node);
+        char * freeFunc = codeRemoveAttrFuncName(node->child[0]->type);
+        return strCatAlloc("", 7, INDENT[node->scope[0]],freeFunc," ( ", node->child[0]->code, " , \"", node->child[1]->code, "\" );\n");
+        return NULL;
+    }
+    else if (node->token == IDENTIFIER) {
+        int type = node->symbol->type;
+        if (type<=FLOAT_T || type>=FUNC_T) {
+            ERRNO = ErrorDelVariableOfWrongType;
+            errorInfo(ERRNO,node->line,"delete variable of type `%s'.\n",sTypeName(type));
+            return NULL;
+        } 
+        char * freeFunc = codeFreeFuncName(type);
+        return strCatAlloc("",5,INDENT[node->scope[0]],freeFunc," ( ", node->symbol->bind, " );\n");
+    }
+    else {
+        fprintf(stderr, "codeDel: unknown node %d !!!!!!\n", node->token);
+        return NULL;
+    }
+}
+
+int codeAttr ( struct Node * node ) {
+    // codeGen should already be called on this node, before codeAttr
+    char * code = node->code;
+    if(node->type<=0 || node->type>STRING_T) {
+        ERRNO = ErrorBinaryOperationWithDynamicType;
+        errorInfo(ERRNO, node->line, "Binary Operation with Dynamic Type.\n");
+        return 1;
+    }
+    node->code = strCatAlloc("", 5, " new_attr( ", typeMacro(node->type), " , (void *) ( ", node->code, " ) ) ");
+    node->tmp[0] = REMOVE_DYN;  // set remove flag
+    return 0;
+}
+
+char * codeGetAttrVal( char * operand, int type ) {
+    return strCatAlloc("",7 , " *(", sTypeName(type),
+        " *) get_attr_value( ", operand, " , ", typeMacro(type), " ) " );
 }
 
 /** recursively generate code piece on each node */
@@ -255,6 +501,10 @@ int codeGen (struct Node * node) {
             else
                 ERRNO = ErrorNoBinderForAttribute;
             break;
+        case BELONG :
+            node->child[0]->code = strCatAlloc("", 1, node->child[0]->symbol->bind);
+            node->child[1]->code = strCatAlloc("", 1,  node->child[1]->lexval.sval);
+            break;
         case AST_COMMA :
             lf = node->child[0]; rt = node->child[1];
             codeGen( lf );codeGen( rt );
@@ -279,7 +529,10 @@ int codeGen (struct Node * node) {
             break;
         case AST_DECLARATION :
             codeGen( node->child[0] );codeGen( node->child[1] );
-            if(node->scope[0]==0) { // we need to treat them as external declaration in c
+            // when the declaration is in scope 0, we need to generate two places of code for c
+            // 1. external global declaration 
+            // 2. assignment in main func, if possible
+            if(node->scope[0]==0) {
                 node->codetmp = strCatAlloc("",5,INDENT[node->scope[0]],node->child[0]->code," ",node->child[1]->codetmp,";\n");
 				switch(node->child[0]->lexval.ival){
 					case GRAPH_T: 
@@ -335,6 +588,7 @@ int codeGen (struct Node * node) {
 						break;
 				}
             }
+            // If scope > 0, no bother, just declaration everything in one c declaration
             else {
 				switch(node->child[0]->lexval.ival){
 					case GRAPH_T:
@@ -392,17 +646,24 @@ int codeGen (struct Node * node) {
             }
             break;
 /************************************************************************************/
+        case DEL : {
+            node->code = codeDel(node->child[0]);
+            break;
+        }
+/************************************************************************************/
         case AST_ASSIGN :               // assignment_operator 
-        case ADD_ASSIGN :   
-        case SUB_ASSIGN :   
-        case MUL_ASSIGN :  
-        case DIV_ASSIGN : 
+        //case ADD_ASSIGN :                 // not supported, JZ
+        //case SUB_ASSIGN :   
+        //case MUL_ASSIGN :  
+        //case DIV_ASSIGN : 
             lf =  node->child[0]; rt = node->child[1];
-            if(existbelong(lf))
+            if(existbelong(lf)) {
+                codeGen(rt);
 				break;
+            }
 			codeGen(lf);codeGen(rt);
             // type check and implicit type conversion
-            if(lf->type == rt->type) {
+            if(lf->type == rt->type && lf->type>=0 ) {
                 // int float support : = += -= *= /=
                 if(lf->type == INT_T || lf->type == FLOAT_T || token == AST_ASSIGN) {
                     node->code = strCatAlloc(" ",3,lf->code,op,rt->code);
@@ -424,12 +685,40 @@ int codeGen (struct Node * node) {
                 node->code = strCatAlloc(" ",4,lf->code,op,"(float)", rt->code);
                 node->type = FLOAT_T;
             }
-            else {
+            // DYNAMIC 
+            else if (lf->type < 0 || rt->type < 0) {
+                if (lf->type < 0 ) { // DYNAMIC = DYNAMIC or STATIC
+                    int flag = 0;
+                    if (rt->type >=0) flag = codeAttr(rt);
+                    if (!flag){
+                        node->code = strCatAlloc("", 9,
+                            "assign_operator (", lf->code, " , ", rt->code, 
+                            (lf->tmp[0]==REMOVE_DYN) ? " , FLAG_DESTROY_ATTR" : " , FLAG_KEEP_ATTR",
+                            (rt->tmp[0]==REMOVE_DYN) ? " , FLAG_DESTROY_ATTR" : " , FLAG_KEEP_ATTR",
+                            " , ", strLine(node->line), " ) "
+                        );
+                    }
+                }
+                else  { // STATIC = DYNAMIC
+                    //debugInfo("%s %d %s\n", rt->code, lf->type, lf->code);
+                    node->code = strCatAlloc("", 10,
+                        "assign_operator_to_static (", rt->code, " , ", typeMacro(lf->type), 
+                        " , (void *) ", lf->code,  
+                        (rt->tmp[0]==REMOVE_DYN) ? " , FLAG_DESTROY_ATTR" : " , FLAG_KEEP_ATTR",
+                        " , ", strLine(node->line), " ) "
+                    );
+                    //debugInfo("%s\n",node->code);
+                }
+                node->type = DYNAMIC_T;
+                node->tmp[0] = REMOVE_DYN;
+            }
+            else { // ERROR
+                node->code = NULL;
                 ERRNO = ErrorTypeMisMatch;
                 errorInfo(ERRNO, node->line, "type mismatch for the operands of operator `%s'\n",op);
                 return ERRNO;
             }
-            //
+            // for global declaration in c
             if(node->scope[0]==0){
                 node->codetmp = strCatAlloc("",1,lf->codetmp);
             }
@@ -449,10 +738,10 @@ int codeGen (struct Node * node) {
 				node->code = strCatAlloc("", 5, "g_append_list(", lf->code, ", ", rt->code, ")");
 			}
 			else if(lf->type==LIST_T && rt->type==VERTEX_T){
-				node->code = strCatAlloc("", 5, "list_append(", lf->code, ", VERTEX, ", rt->code, ")");
+				node->code = strCatAlloc("", 5, "list_append(", lf->code, ", VERTEX_T, ", rt->code, ")");
 			}
 			else if(lf->type==LIST_T && rt->type==EDGE_T){
-				node->code = strCatAlloc("", 5, "list_append(", lf->code, ", EDGE, ", rt->code, ")");
+				node->code = strCatAlloc("", 5, "list_append(", lf->code, ", EDGE_T, ", rt->code, ")");
 			}else{
 				ERRNO = ErrorAssignmentExpression;
 				return ERRNO;
@@ -464,43 +753,85 @@ int codeGen (struct Node * node) {
             lf =  node->child[0]; rt = node->child[1];
             codeGen(lf);codeGen(rt);
             node->type = BOOL_T;
-            if(lf->type != rt->type){
-                ERRNO = ErrorTypeMisMatch;
-                errorInfo(ERRNO, node->line, "type mismatch for the operands of operator `%s'\n",op);
-                return ERRNO;
+            if(lf->type >= 0 && rt->type >= 0) {
+                if (lf->type != rt->type){
+                    ERRNO = ErrorTypeMisMatch;
+                    errorInfo(ERRNO, node->line, "type mismatch for the operands of operator `%s'\n",op);
+                    return ERRNO;
+                }
+                else if (lf->type == BOOL_T) {
+                    node->code = strCatAlloc(" ",3,lf->code,op,rt->code);
+                }
+                else {
+                    ERRNO = ErrorOperatorNotSupportedByType;
+                    errorInfo(ERRNO, node->line, "operator `%s' is only supported by type `bool'\n",op);
+                    return ERRNO;
+                }
             }
-            else if (lf->type == BOOL_T) {
-                node->code = strCatAlloc(" ",3,lf->code,op,rt->code);
-            }
-            else {
-                ERRNO = ErrorOperatorNotSupportedByType;
-                errorInfo(ERRNO, node->line, "operator `%s' is only supported by type `bool'\n",op);
-                return ERRNO;
-            }
+            else { // DYNAMIC
+                int flag = 0;
+                if (lf->type > 0 && lf->type == BOOL_T) flag = codeAttr(lf);
+                if (rt->type > 0 && rt->type == BOOL_T) flag = codeAttr(rt);
+                if (lf->type > 0 && lf->type != BOOL_T ||
+                        rt->type > 0 && rt->type != BOOL_T) {
+                    ERRNO = ErrorOperatorNotSupportedByType;
+                    errorInfo(ERRNO, node->line, "operator `%s' is only supported by type `bool'\n",op);
+                    return ERRNO;
+                }
+                if(!flag) {
+                    node->code = strCatAlloc("",12 ,
+                    " binary_operator ( ", lf->code, " , ", rt->code, " , ", DynOP(token),
+                    ", FLAG_NO_REVERSE",
+                    ( (lf->tmp[0]==REMOVE_DYN) ? " , FLAG_DESTROY_ATTR" : " , FLAG_KEEP_ATTR" ),
+                    ( (rt->tmp[0]==REMOVE_DYN) ? " , FLAG_DESTROY_ATTR" : " , FLAG_KEEP_ATTR" ),
+                    " , ", strLine(node->line), " )"
+                    );
+                }
+                node->tmp[0] = REMOVE_DYN;
+                node->type = DYN_BOOL_T;
+            }    
             break;
 /************************************************************************************/
         case EQ :           
         case NE :           
             lf =  node->child[0]; rt = node->child[1];
             codeGen(lf);codeGen(rt);
-            if(lf->type != rt->type){
-                if(lf->type == INT_T && rt->type == FLOAT_T) {
-                    node->code = strCatAlloc(" ",4,"(float)",lf->code,op,rt->code);
-                    node->type = BOOL_T;
-                }
-                else if(lf->type == FLOAT_T && rt->type == INT_T) {
-                    node->code = strCatAlloc(" ",4,lf->code,op,"(float)",rt->code);
-                    node->type = BOOL_T;
+            if(lf->type >= 0 && rt->type >= 0){ // STATIC
+                if (lf->type != rt->type) {
+                    if(lf->type == INT_T && rt->type == FLOAT_T) {
+                        node->code = strCatAlloc(" ",4,"(float)",lf->code,op,rt->code);
+                        node->type = BOOL_T;
+                    }
+                    else if(lf->type == FLOAT_T && rt->type == INT_T) {
+                        node->code = strCatAlloc(" ",4,lf->code,op,"(float)",rt->code);
+                        node->type = BOOL_T;
+                    }
+                    else {
+                        ERRNO = ErrorTypeMisMatch;
+                        errorInfo(ERRNO, node->line, "type mismatch for the operands of operator `%s'\n",op);
+                        return ERRNO;
+                    }
                 }
                 else {
-                    ERRNO = ErrorTypeMisMatch;
-                    errorInfo(ERRNO, node->line, "type mismatch for the operands of operator `%s'\n",op);
-                    return ERRNO;
+                    node->code = strCatAlloc(" ",3,lf->code,op,rt->code);
+                    node->type = BOOL_T;
                 }
             }
-            else {
-                node->code = strCatAlloc(" ",3,lf->code,op,rt->code);
-                node->type = BOOL_T;
+            else {  // DYNAMIC
+                int flag = 0;
+                if(lf->type >= 0) flag = codeAttr(lf);
+                if(rt->type >= 0) flag = codeAttr(rt);
+                if(!flag) {
+                    node->code = strCatAlloc("",12 ,
+                    " binary_operator ( ", lf->code, " , ", rt->code, " , ", DynOP(token),
+                    ", FLAG_NO_REVERSE",
+                    ( (lf->tmp[0]==REMOVE_DYN) ? " , FLAG_DESTROY_ATTR" : " , FLAG_KEEP_ATTR" ),
+                    ( (rt->tmp[0]==REMOVE_DYN) ? " , FLAG_DESTROY_ATTR" : " , FLAG_KEEP_ATTR" ),
+                    " , ", strLine(node->line), " )"
+                    );
+                }
+                node->tmp[0] = REMOVE_DYN;
+                node->type = DYN_BOOL_T; 
             }
             break;
 /************************************************************************************/
@@ -517,11 +848,34 @@ int codeGen (struct Node * node) {
                 node->code = strCatAlloc(" ",4, "(float)",lf->code,op,rt->code);
             else if (rt->type == INT_T && lf->type == FLOAT_T) 
                 node->code = strCatAlloc(" ",4, lf->code,op,"(float)",rt->code);
+            else if (lf->type <= 0 || rt->type <= 0) {  // DYNAMIC
+                if(lf->type >=0 && lf->type != INT_T && lf->type != FLOAT_T ||
+                    lf->type >=0 && lf->type != INT_T && lf->type != FLOAT_T ){
+                    ERRNO = ErrorTypeMisMatch;
+                    errorInfo(ERRNO, node->line, "type mismatch for the operands of operator `%s'\n",op);
+                    return ERRNO;
+                }
+                int flag = 0;
+                if(lf->type >= 0) flag = codeAttr(lf);
+                if(rt->type >= 0) flag = codeAttr(rt);
+                if(!flag) {
+                    node->code = strCatAlloc("",12 ,
+                    " binary_operator ( ", lf->code, " , ", rt->code, " , ", DynOP(token),
+                    ", FLAG_NO_REVERSE",
+                    ( (lf->tmp[0]==REMOVE_DYN) ? " , FLAG_DESTROY_ATTR" : " , FLAG_KEEP_ATTR" ),
+                    ( (rt->tmp[0]==REMOVE_DYN) ? " , FLAG_DESTROY_ATTR" : " , FLAG_KEEP_ATTR" ),
+                    " , ", strLine(node->line), " )"
+                    );
+                }
+                node->tmp[0] = REMOVE_DYN;
+                node->type = DYNAMIC_T; 
+            }
             else {
                 ERRNO = ErrorTypeMisMatch;
                 errorInfo(ERRNO, node->line, "type mismatch for the operands of operator `%s'\n",op);
                 return ERRNO;
             }
+            
             break;
 /************************************************************************************/
         case ADD :          
@@ -542,6 +896,26 @@ int codeGen (struct Node * node) {
                 node->code = strCatAlloc(" ",4, lf->code,op,"(float)",rt->code);
                 node->type = FLOAT_T;
             }
+            else if (lf->type < 0 || rt->type < 0) { // DYNAMIC
+#ifdef _DEBUG
+                debugInfo("DYNAMIC : %d : (%d, %d) \n",
+                    node->token, lf->type, rt->type );
+#endif
+                int flag = 0;
+                if(lf->type>=0) flag = codeAttr(lf);    // if STATIC, wapper to Attr
+                if(rt->type>=0) flag = codeAttr(rt);
+                if (!flag) {
+                    node->code = strCatAlloc("", 12,
+                        " binary_operator( ", lf->code, " , ", rt->code, " , ", DynOP(token), 
+                        ", FLAG_NO_REVERSE",
+                        (lf->tmp[0]==REMOVE_DYN) ? " , FLAG_DESTROY_ATTR" : " , FLAG_KEEP_ATTR" ,
+                        (rt->tmp[0]==REMOVE_DYN) ? " , FLAG_DESTROY_ATTR" : " , FLAG_KEEP_ATTR" ,
+                        " , ", strLine(node->line), " )"
+                    );
+                    node->tmp[0] = REMOVE_DYN;
+                    node->type = DYNAMIC_T;
+                }         
+            }
             else {
                 ERRNO = ErrorTypeMisMatch;
                 errorInfo(ERRNO, node->line, "type mismatch for the operands of operator `%s'\n",op);
@@ -553,19 +927,30 @@ int codeGen (struct Node * node) {
             lf =  node->child[0]; rt = node->child[1];
             int castType = lf->lexval.ival;
             codeGen(rt);
-            if(castType == rt->type) {
-                node->code = strCatAlloc(" ",4,"(",lf->code,")" , rt->code);
-                node->type = castType;
-            }
-            else if ( (castType == INT_T && rt->type == FLOAT_T) ||
+            if(rt->type >= 0) {
+                if(castType == rt->type) {
+                    node->code = strCatAlloc(" ",4,"(",lf->code,")" , rt->code);
+                    node->type = castType;
+                }
+                else if ( (castType == INT_T && rt->type == FLOAT_T) ||
                         (castType == FLOAT_T && rt->type == INT_T) ) {
-                node->code = strCatAlloc(" ",4,"(",lf->code,")" , rt->code);
-                node->type = castType;
+                    node->code = strCatAlloc(" ",4,"(",lf->code,")" , rt->code);
+                    node->type = castType;
+                }
+                else {
+                    ERRNO = ErrorCastType;
+                    errorInfo(ERRNO, node->line, "cast from `%s' to `%s' is invalid\n", sTypeName(castType), sTypeName(rt->type) );
+                    return ERRNO;
+                }
             }
-            else {
-                ERRNO = ErrorCastType;
-                errorInfo(ERRNO, node->line, "cast from `%s' to `%s' is invalid\n", sTypeName(castType), sTypeName(rt->type) );
-                return ERRNO;
+            else {  // DYNAMIC
+                node->code = strCatAlloc( "" , 8,
+                    "cast_operator( ", rt->code, " , ", typeMacro(castType),
+                    (rt->tmp[0]==REMOVE_DYN) ? " , FLAG_DESTROY_ATTR" : " , FLAG_KEEP_ATTR",
+                    " , ", strLine(node->line), " )"
+                );
+                node->tmp[0] = REMOVE_DYN;
+                node->type = DYNAMIC_T;
             }
             break; 
 /************************************************************************************/
@@ -574,18 +959,30 @@ int codeGen (struct Node * node) {
         case AST_UNARY_NOT :    
             sg = node->child[0];
             codeGen(sg);
-            if ( (sg->type == INT_T || sg->type == FLOAT_T) &&
+            if ( sg->type >= 0) {
+                if ( (sg->type == INT_T || sg->type == FLOAT_T) &&
                     ( token == AST_UNARY_PLUS || token == AST_UNARY_MINUS) ) {
-                node->code = strCatAlloc(" ",4,op,"(",sg->code,")");
-                node->type = sg->type;
+                    node->code = strCatAlloc(" ",4,op,"(",sg->code,")");
+                    node->type = sg->type;
+                }
+                else if ( sg->type == BOOL_T && token == AST_UNARY_NOT ) {
+                    node->code = strCatAlloc(" ",4,op,"(",sg->code,")");
+                    node->type = sg->type;
+                }
+                else {
+                    ERRNO = ErrorOperatorNotSupportedByType;
+                    errorInfo(ERRNO, node->line, "unary operator `%s' is not supported by type `%s'.\n",op,sTypeName(sg->type));
+                }
             }
-            else if ( sg->type == BOOL_T && token == AST_UNARY_NOT ) {
-                node->code = strCatAlloc(" ",4,op,"(",sg->code,")");
-                node->type = sg->type;
-            }
-            else {
-                ERRNO = ErrorOperatorNotSupportedByType;
-                errorInfo(ERRNO, node->line, "unary operator `%s' is not supported by type `%s'.\n",op,sTypeName(sg->type));
+            else { // DYNAMIC
+                node->code = strCatAlloc("", 8,
+                    "unary_operator (", sg->code, " , ", DynOP(token),
+                    (sg->tmp[0]==REMOVE_DYN) ? " , FLAG_DESTROY_ATTR" : " , FLAG_KEEP_ATTR",
+                    " , ", strLine(node->line), " )"
+                );
+                node->tmp[0] = REMOVE_DYN;
+                if(token==AST_UNARY_NOT) node->type = DYN_BOOL_T;
+                else node->type = DYNAMIC_T;
             }
             break;
 /************************************************************************************/
@@ -623,7 +1020,22 @@ int codeGen (struct Node * node) {
         case AST_MATCH :
             break;
 /************************************************************************************/
-        case AST_ATTIBUTE :
+        case AST_ATTRIBUTE :
+            node->child[0]->code = strCatAlloc("", 1, node->child[0]->symbol->bind);
+            node->child[1]->code = strCatAlloc("", 1, node->child[1]->lexval.sval); 
+            if(node->child[0]->type == VERTEX_T ) 
+                node->code = strCatAlloc("", 5, "vertex_get_attribute( ",
+                    node->child[0]->code, " ,  \"", node->child[1]->code, "\" )");
+            else if(node->child[0]->type == EDGE_T )
+                node->code = strCatAlloc("", 5, "edge_get_attribute( ",
+                    node->child[0]->code, " ,  \"", node->child[1]->code, "\" )");
+            else {
+                ERRNO = ErrorGetAttrForWrongType;
+                errorInfo(ERRNO, node->line, "Access attribute for type `%s'.\n",
+                    sTypeName(node->child[0]->type) );
+                node->code = NULL;
+            }
+            node->type = DYNAMIC_T;
             break;
 /************************************************************************************/
         case AST_GRAPH_PROP :
@@ -636,13 +1048,15 @@ int codeGen (struct Node * node) {
             }
             else {
                 codeGen(node->child[0]);
-                if(token == AST_COMP_STAT_NO_SCOPE)
-                    node->code = strCatAlloc("",3,
-                        "{\n", node->child[0]->code,"}\n");
-                else 
-                    node->code = strCatAlloc("",5,INDENT[node->scope[0]],
-                        "{\n", node->child[0]->code,
+                if(token == AST_COMP_STAT_NO_SCOPE) {
+                    // do nothing
+                }
+                else {
+                    char * freecode = allFreeCodeInScope( node->child[0]->scope[1], NULL, node->child[0]->scope[0]);
+                    node->code = strCatAlloc("",6,INDENT[node->scope[0]],
+                        "{\n", node->child[0]->code,freecode,
                         INDENT[node->scope[0]],"}\n");
+                }
             }
             break;
         case AST_STAT_LIST :
@@ -664,45 +1078,98 @@ int codeGen (struct Node * node) {
         case AST_IF_STAT :              // selection_statement
             lf = node->child[0]; rt = node->child[1];
             codeGen(lf); codeGen(rt);
-            node->code = strCatAlloc("",7, 
+            if(lf->type>=0) {
+                node->code = strCatAlloc("",7, 
                     INDENT[node->scope[0]],"if ( ", lf->code, " ) \n", 
                     rt->code, 
-                    INDENT[node->scope[0]],"\n");
+                    INDENT[node->scope[0]]," // END_IF \n");
+            }
+            else { // DYNAMIC
+                char * ctmp = tmpAttr();
+                node->code = strCatAlloc("", 17,
+                    INDENT[node->scope[0]],"// START_IF\n",
+                    INDENT[node->scope[0]],"Attribute* ", ctmp, " = ", lf->code, " ;\n",
+                    INDENT[node->scope[0]],"if ( ", codeGetAttrVal(ctmp, BOOL_T), " ) \n",
+                    rt->code,
+                    INDENT[node->scope[0]],"destory_attr( ", ctmp, " ); // END_IF\n");
+            }
             break;
         case AST_IFELSE_STAT :
             lf = node->child[0]; sg = node->child[1]; rt = node->child[2];
             codeGen(lf); codeGen(sg); codeGen(rt);
-            node->code = strCatAlloc("",10,
+            if(lf->type>=0) {
+                node->code = strCatAlloc("",10,
                     INDENT[node->scope[0]],"if ( ", lf->code, " ) \n",
                     sg->code, 
                     INDENT[node->scope[0]],"else\n", rt->code, 
-                    INDENT[node->scope[0]],"\n");
+                    INDENT[node->scope[0]]," // END_IF\n");
+            }
+            else { // DYNAMIC
+                char * ctmp = tmpAttr();
+                node->code = strCatAlloc("", 20, 
+                    INDENT[node->scope[0]],"// START_IF\n",
+                    INDENT[node->scope[0]],"Attribute* ", ctmp, " = ", lf->code, " ;\n",
+                    INDENT[node->scope[0]],"if ( ", codeGetAttrVal(ctmp, BOOL_T), " ) \n",
+                    sg->code, 
+                    INDENT[node->scope[0]],"else\n", rt->code,
+                    INDENT[node->scope[0]],"destory_attr( ", ctmp, " ); // END_IF\n");
+            }
             break;
 /************************************************************************************/
         case AST_WHILE :                // iteration_statement
             lf = node->child[0]; rt = node->child[1];
             codeGen(lf); 
             inLoop++; codeGen(rt); inLoop--;
-            node->code = strCatAlloc("", 7, 
+            if(lf->type>=0){
+                node->code = strCatAlloc("", 7, 
                     INDENT[node->scope[0]],"while ( ", lf->code, " ) {\n",
                     rt->code, INDENT[node->scope[0]], 
                     "} //END_OF_WHILE\n");
+            }
+            else { // DYNAMIC
+                char * ctmp = tmpAttr();
+                node->code = strCatAlloc("", 28,
+                    INDENT[node->scope[0]],"// START_OF_WHILE\n",
+                    INDENT[node->scope[0]],"Attribute* ", ctmp, " = ", lf->code, " ;\n",
+                    INDENT[node->scope[0]],"while ( ", codeGetAttrVal(ctmp, BOOL_T),
+                    " ) {\n", rt->code, 
+                    INDENT[node->scope[0]],"destory_attr( ", ctmp, " );\n",
+                    INDENT[node->scope[0]],ctmp, " = ", lf->code, " ;\n",
+                    INDENT[node->scope[0]],"} \n",
+                    INDENT[node->scope[0]],"destory_attr( ", ctmp, " ); //END_OF_WHILE\n");
+            }
             break;
-        case AST_FOR :
-            { 
-                struct Node *f1 = node->child[0],
+        case AST_FOR : {
+            struct Node *f1 = node->child[0],
                         *f2 = node->child[1],
                         *f3 = node->child[2],
                         *fs = node->child[3];
-                codeGen(f1);codeGen(f2);codeGen(f3);
-                inLoop++; codeGen(fs); inLoop--;
+            codeGen(f1);codeGen(f2);codeGen(f3);
+            inLoop++; codeGen(fs); inLoop--;
+            if (f1->type>=0 && f2->type>=0 && f3->type>=0){
                 node->code = strCatAlloc("",10, INDENT[node->scope[0]],
                     "for (", (f1!=NULL)? f1->code : "", ";", 
                              (f2!=NULL)? f2->code : "", ";", 
                              (f3!=NULL)? f3->code : "", ") {\n",
                              fs->code, "} //END_OF_FOR\n");
             }
+            else {  // DYNAMIC :: translate for to while
+                char * ctmp = tmpAttr();
+                node->code = strCatAlloc("", 33,
+                    INDENT[node->scope[0]],"// START_OF_FOR\n",
+                    INDENT[node->scope[0]],f1->code,";\n",
+                    INDENT[node->scope[0]],"Attribute* ", ctmp, " = ", f2->code, " ;\n", 
+                    INDENT[node->scope[0]],"while (", codeGetAttrVal(ctmp, BOOL_T),
+                    " ) {\n", fs->code,
+                    INDENT[node->scope[0]],f3->code,";\n",
+                    INDENT[node->scope[0]],"destory_attr( ", ctmp, " );\n",
+                    INDENT[node->scope[0]],ctmp, " = ", f2->code, " ;\n",
+                    "} \n",
+                    INDENT[node->scope[0]],"destory_attr( ", ctmp, " ); // END_OF_FOR\n"
+                );
+            }
             break;
+        }
         case AST_FOREACH :
             break;
 /************************************************************************************/
@@ -744,19 +1211,27 @@ int codeGen (struct Node * node) {
         // 2> return is in scope of func, and return type is correct
 
 /************************************************************************************/
-        case AST_FUNC :                 // function_definition
+        case AST_FUNC : {                // function_definition
             lf = node->child[0];            // return type
             sg = node->child[1];            // parameter_list
             rt = node->child[2];            // compound_statement
             codeGen(sg); 
             inFunc++; codeGen(rt); inFunc--;
-            node->code = strCatAlloc("",7,
+            // We need to find out all parameters and return type, which should NOT be free
+            //GList* exVab = getAllParaInFunc(sg->child[1], NULL);
+            //exVab = getReturnVab(rt, exVab);
+            // generate freecode
+            //char * freecode = allFreeCodeInScope(rt->scope[1], exVab, rt->scope[0] );
+            //g_list_free(exVab);
+            // generate all
+            node->code = strCatAlloc("",9,
                     sTypeName(lf->lexval.ival)," ",
                     node->symbol->bind,     // func_id
-                    " ( ", sg->code," ) ",
-                    rt->code);
+                    " ( ", sg->code," ) ", "{\n",
+                    rt->child[0]->code, "}\n");
             //showASTandST(node,"Function Definition");
             break;
+        }
         case FUNC_LITERAL :             // function_literal_declaration
             lf = node->child[1];            // return type
             sg = node->child[0];            // parameter_list
@@ -875,10 +1350,60 @@ char * opMacro(int ma) {
     }
 }
 
+char * DynOP(int ma) {
+    switch(ma) {
+        case AST_ASSIGN :       return "OP_ASSIGN";
+        case ADD :              return "OP_ADD";
+        case SUB :              return "OP_SUB";
+        case MUL :              return "OP_MUL";
+        case DIV :              return "OP_DIV";
+        case OR :               return "OP_OR";
+        case AND :              return "OP_AND";
+        case EQ :               return "OP_EQ";
+        case NE :               return "OP_NE";
+        case LT :               return "OP_LT";
+        case GT :               return "OP_GT";
+        case LE :               return "OP_LE";
+        case GE :               return "OP_GE";
+        case AST_UNARY_PLUS :   return "OP_PLUS";
+        case AST_UNARY_MINUS :  return "OP_MINUS";
+        case AST_UNARY_NOT :    return "OP_NOT"; 
+        default :               return "OP_UNKNOWN" ;
+    }
+}
+
+char * typeMacro(int t) {
+    switch(t) {
+        case VOID_T :           return "VOID_T";
+        case BOOL_T :           return "BOOL_T";
+        case INT_T :            return "INT_T";
+        case FLOAT_T :          return "FLOAT_T";
+        case STRING_T :         return "STRING_T";
+        case LIST_T :           return "LIST_T";
+        case VERTEX_T :         return "VERTEX_T";
+        case EDGE_T :           return "EDGE_T";
+        case GRAPH_T :          return "GRAPH_T";
+        default :               return "UNKNOWN_T"; 
+    }
+}
+
+char * tmpAttr() {
+    static char tmp[128];
+    static int i = 0;
+    sprintf(tmp,"tmp_attr_%d\0", i++);
+    return tmp;
+}
+
 char * wapperMainCode(char * mainBodyCode){
     char * head = "int main() {\n\n";
+    //char * freecode = allFreeCodeInScope( 0, NULL, 0 );
+#ifdef _DEBUG
+    //debugInfo("MainFreeCode:\n");
+    //debugInfoExt("%s",freecode);
+#endif
+    //char * freecode = NULL;
     char * end = "\n} // END_OF_MAIN \n";
-    return strCatAlloc("",3,head,mainBodyCode,end);
+    return strCatAlloc("",3,head,mainBodyCode, end);
 }
 
 void exportCode(char * code){
