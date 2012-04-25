@@ -167,15 +167,15 @@ int destroy_graph(GraphType* g){
     return 0;
 }
 
-//int destroy_list(ListType* list){
+int destroy_list(ListType* list){
 //	g_list_free_1((GList*)list);
 //	return 0;
-//}
+}
 
-//int destroy_string(StringType* s){
+int destroy_string(StringType* s){
 //	g_string_free((GString*)s, 1);
 //	return 0;
-//}
+}
 
 int edge_assign_direction(EdgeType* e, VertexType* v1, VertexType* v2){
     e->start = v1;
@@ -717,4 +717,30 @@ Attribute* binary_operator( Attribute* attr1, Attribute* attr2, int op, int reve
     if(rm2==FLAG_DESTROY_ATTR) destroy_attr(attr2);
 
     return result;
+}
+
+
+StringType*         assign_operator_string(StringType* s1, StringType* s2) {
+    if (s1 != NULL) destroy_string(s1);
+    return s1 = s2;
+}
+
+ListType*           assign_operator_list(ListType* l1, ListType* l2) {
+    if (l1 != NULL) destroy_list(l1);
+    return l1 = l2;
+}
+
+VertexType*         assign_operator_vertex(VertexType* v1, VertexType* v2) {
+    if (v1 != NULL) destroy_vertex(v1);
+    return v1 = v2;
+}
+
+EdgeType*           assign_operator_edge(EdgeType* e1, EdgeType* e2) {
+    if (e1 != NULL) destroy_edge(e1);
+    return e1 = e2;
+}
+
+GraphType*          assign_operator_graph(GraphType* g1, GraphType* g2) {
+    if (g1 != NULL) destroy_graph(g1);
+    return g1 = g2;
 }

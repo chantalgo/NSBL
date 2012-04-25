@@ -450,7 +450,7 @@ postfix_expression
 primary_expression
     : attribute             { 
         $$ = $1; 
-        if(isNoTypeCheck==0){   // Func_Literal
+        if(isNoTypeCheck==0){   // Func_Literal  // not used, JZ
             sTableLookupId($$);                 // Lookup ATTRIBUTE
         }
         else {  // Match operator
@@ -526,17 +526,17 @@ constant
  **************************/
 
 function_literal_declaration
-    : function_literal_type_specifier dynamic_scope_left func_declarator ':' declaration_specifiers '=' compound_statement_no_scope scope_out dynamic_scope_right ';' {
-        $$ = astNewNode($1.i, 3, astAllChildren(3, $3, $5, $7), $1.l);
-        $$->typeCon = $3->typeCon;
-        $$->scope[0] = $3->scope[0];
-        $$->scope[1] = $3->scope[1];
+    : function_literal_type_specifier func_declarator ':' declaration_specifiers '=' no_type_check_on_dynamic_left dynamic_scope_left compound_statement_no_scope dynamic_scope_right no_type_check_on_dynamic_right scope_out ';' {
+        $$ = astNewNode($1.i, 3, astAllChildren(3, $2, $4, $8), $1.l);
+        $$->typeCon = $2->typeCon;
+        $$->scope[0] = $2->scope[0];
+        $$->scope[1] = $2->scope[1];
         sTableDeclare($$);
     }
-    | function_literal_type_specifier dynamic_scope_left func_declarator ':' declaration_specifiers '=' compound_statement_no_scope scope_out dynamic_scope_right error {
-        astFreeTree($3);
-        astFreeTree($5);
-        astFreeTree($7);
+    | function_literal_type_specifier func_declarator ':' declaration_specifiers '=' no_type_check_on_dynamic_left dynamic_scope_left compound_statement_no_scope dynamic_scope_right no_type_check_on_dynamic_right scope_out error {
+        astFreeTree($2);
+        astFreeTree($4);
+        astFreeTree($8);
         $$ = NULL;
     }
     ;

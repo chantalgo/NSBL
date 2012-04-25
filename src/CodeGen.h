@@ -17,6 +17,8 @@ char * opMacro(int ma);
 char * DynOP(int ma);
 char * typeMacro(int t);
 char * tmpAttr();
+char * tmpMatch();
+char * assignFunc(int t);
 char * wapperMainCode(char * mainBodyCode);
 void exportCode(char * code);
 #endif

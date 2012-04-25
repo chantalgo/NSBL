@@ -1,5 +1,5 @@
-#ifndef SYMBOLTABLEUTIL_H___NSBL_
-#define SYMBOLTABLEUTIL_H___NSBL_
+#ifndef SYMBOLTABLEUTIL_H_NSBL_
+#define SYMBOLTABLEUTIL_H_NSBL_
 #include "ASTree.h"
 int sTableDeclare(struct Node* node);
 int sTableLookupId(struct Node* node);

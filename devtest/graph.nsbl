@@ -1,0 +1,24 @@
+graph g1, g2;
+edge e1, e2;
+vertex v1, v2;
+
+string s1="test s1", s2="test s2", s3;
+
+string v1::name = "Tom";
+int v1::age = 18;
+int v2::age = 19;
+float v1::weight = 55;
+
+
+{
+    vertex v11,v12;
+    string v11::name = "J";
+
+}
+
+vertex a(vertex v1, edge e2) {
+    vertex a, rem;
+    int i = 1+2.2;
+    int a::age = 100+12;
+    return a;
+}

@@ -1,5 +1,5 @@
-#ifndef UTILS_H___JZ_12345
-#define UTILS_H___JZ_12345
+#ifndef UTILS_H_NSBL_
+#define UTILS_H_NSBL_
 #include "ASTree.h"
 
 void init_util();

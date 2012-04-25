@@ -128,6 +128,8 @@ char* s_table_type_name (int type) {
         case DYN_VERTEX_T:      return "D_vertex";
         case DYN_EDGE_T:        return "D_edge";
         case DYN_GRAPH_T:       return "D_graph";
+        case UNKNOWN_T:         return "UNKOWN";
+        case NOT_AVAIL:         return "NOT_AVAL";
         default:                return NULL;
     }
 }

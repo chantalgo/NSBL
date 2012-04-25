@@ -1,0 +1,11 @@
+vertex v1;
+int i; 
+
+int v1::age = 18;
+//int i::j = 0;                 // error
+float v1::weight = 100;
+string v1::name = "tom";
+
+del v1::age, v1::name;
+
+del v1;
