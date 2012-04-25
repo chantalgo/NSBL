@@ -60,7 +60,7 @@ int s_table_check_key_exsit (SymbolTable* table, SymbolTableKey key) {
 // Output an entry
 void s_show_entry  (gpointer key, gpointer entry, gpointer out) {
     SymbolTableEntry * e = (SymbolTableEntry*) entry;
-    fprintf( (FILE*) out, "%10s  %3d  %3d  %3d  %3d  %15s  %15s  %4d  ||",
+    fprintf( (FILE*) out, "%10s  %3d  %3d  %3d  %3d  %15s  %15s  %4lld  ||",
         e->lex, e->type, e->rtype, e->scope[0], e->scope[1], e->key, e->bind, e->line );
     s_show_typeCon(e->typeCon, out);
     fprintf( (FILE*) out, "\n" );

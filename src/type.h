@@ -26,4 +26,6 @@
 #define UNKNOWN_T       -99
 #define NOT_AVAIL       -55
 
+#define RESERVED 		-100
+
 #endif

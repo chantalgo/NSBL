@@ -61,7 +61,7 @@ extern int yyparse(void); /* Parser function. */
 %type <node> logical_AND_expression equality_expression relational_expression
 %type <node> additive_expression multiplicative_expression cast_expression
 %type <node> unary_expression postfix_expression primary_expression
-%type <node> graph_property pipe_property graph_pipe_property argument_expression_list argument_expression
+%type <node> graph_property pipe_property argument_expression_list argument_expression
 %type <node> attribute constant
 
 // statments
@@ -471,11 +471,6 @@ primary_expression
     | STRING_LITERAL        { $$ = astNewLeaf(STRING_LITERAL, $1.s, $1.l); }
     | '(' expression ')'    { $$ = $2; }
     | error                 { $$ = NULL; }
-    ;
-
-graph_pipe_property
-    : graph_property        {$$ = $1;}
-    | pipe_property         {$$ = $1;}
     ;
 
 graph_property

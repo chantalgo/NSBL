@@ -278,12 +278,33 @@ static void destroy_attr_from_table ( gpointer key, gpointer entry, gpointer dum
     destroy_attr( attr );
 }
 
+void* get_attr_value(Attribute* attr, int type){
+	if(attr == NULL)
+    	die("NULL Attribute error \n");
+	if(type != attr->type && type != RESERVED)
+    	die("Attribute type dismatch error \n");
+	switch(attr->type){
+		case INT_T:
+			return &(attr->value.iv);
+			break;
+		case FLOAT_T:
+			return &(attr->value.fv);
+			break;
+		case STRING_T:
+			return attr->value.sv;
+			break;
+		case BOOL_T:
+			return &(attr->value.bv);
+		default:
+			return NULL;
+	}
+}
+
 int edge_assign_attribute ( EdgeType* e, char * attr_name, void * val, int type ) {
     Attribute* attr = (Attribute*)g_hash_table_lookup(e->attributes, attr_name);
     if (attr != NULL) {
         if ( attr->type != type ) {
-            //dynamic type error handler
-            return 1;
+    		die("Attribute type mismatch error \n");
         }
     }
     else {
@@ -308,8 +329,15 @@ int edge_remove_attribute(EdgeType* e, char* attr_name){
     return 0;
 }
 
-void* edge_get_attribute_value(EdgeType* e, char* attribute){
+Attribute* edge_get_attribute(EdgeType* e, char* attribute){	
     return g_hash_table_lookup(e->attributes, attribute);
+}
+
+void* edge_get_attribute_value(EdgeType* e, char* attribute){
+	Attribute* attr;
+	if( (attr = edge_get_attribute(e, attribute)) != NULL)
+		return get_attr_value(attr, RESERVED);
+	return NULL;
 }
 
 VertexType* get_start_vertex(EdgeType* e){
@@ -324,8 +352,7 @@ int vertex_assign_attribute(VertexType* v, char* attr_name, void * val, int type
     Attribute* attr = (Attribute*)g_hash_table_lookup(v->attributes, attr_name);
     if (attr != NULL) {
         if ( attr->type != type ) {
-            //dynamic type error handler
-            return 1;
+    		die("Attribute type mismatch error \n");
         }
     }
     else {
@@ -350,8 +377,15 @@ int vertex_remove_attribute(VertexType* v, char* attr_name) {
     return 0;
 }
 
+Attribute* vertex_get_attribute(VertexType* v, char* attribute){
+     return g_hash_table_lookup(v->attributes, attribute);
+}
+
 void* vertex_get_attribute_value(VertexType* v, char* attribute){
-    return g_hash_table_lookup(v->attributes, attribute);
+	Attribute* attr;
+	if( (attr = vertex_get_attribute(v, attribute)) != NULL)
+		return get_attr_value(attr, RESERVED);
+	return NULL;
 }
 
 GList* get_v_outedges(VertexType* v){
@@ -536,23 +570,23 @@ ListType* match_num(ListType* list, char* attribute, float cmpv, int op){
 			else if(attr_v->type == FLOAT_T)
 				f =attr_v->value.fv;
 			switch(op){
-				case EQ:
+				case OP_EQ:
 					if(f == cmpv)
 						result = g_list_append(result, e);
 					break;
-				case GT:
+				case OP_GT:
 					if(f > cmpv)
 						result = g_list_append(result, e);
 					break;
-				case LT:
+				case OP_LT:
 					if(f < cmpv)
 						result = g_list_append(result, e);
 					break;
-				case GE:
+				case OP_GE:
 					if(f >= cmpv)
 						result = g_list_append(result, e);
 					break;
-				case LE:
+				case OP_LE:
 					if(f <= cmpv)
 						result = g_list_append(result, e);
 					break;
@@ -570,7 +604,7 @@ ListType* list_declaration(int type,int n, ...){
 	newlist->type = type;
 	int i;
 	va_list args;
-	va_start(args, type);
+	va_start(args, n);
 	for(i=0; i<n; i++){
 		switch(type){
 			case VERTEX_T:
@@ -744,30 +778,30 @@ Attribute* binary_operator( Attribute* attr1, Attribute* attr2, int op, int reve
                 else if (resultype == FLOAT_T)
                     result->value.fv = attr1->value.fv + attr2->value.fv;
                 else
-                    die("binary_operator: coding error\n");
+                    die("binary_operator: coding error at line: %d \n", lno);
             case OP_SUB :
                 if(resultype == INT_T)
                     result->value.iv = attr1->value.iv - attr2->value.iv;
                 else if (resultype == FLOAT_T)
                     result->value.fv = attr1->value.fv - attr2->value.fv;
                 else
-                    die("binary_operator: coding error\n");
+                    die("binary_operator: coding error at line: %d \n", lno);
             case OP_MUL :
                 if(resultype == INT_T)
                     result->value.iv = attr1->value.iv * attr2->value.iv;
                 else if (resultype == FLOAT_T)
                     result->value.fv = attr1->value.fv * attr2->value.fv;
                 else
-                    die("binary_operator: coding error\n");
+                    die("binary_operator: coding error at line: %d \n", lno);
             case OP_DIV :
                 if(resultype == INT_T)
                     result->value.iv = attr1->value.iv / attr2->value.iv;
                 else if (resultype == FLOAT_T)
                     result->value.fv = attr1->value.fv / attr2->value.fv;
                 else
-                    die("binary_operator: coding error\n");
+                    die("binary_operator: coding erro at line: %d r\n", lno);
             default:
-                die("binary_operator: unsupported op %d\n",op);
+                die("binary_operator: unsupported op %d at line: %d \n",op, lno);
         }
     }
     if(rm1==FLAG_DESTROY_ATTR) destroy_attr(attr1);
@@ -776,6 +810,133 @@ Attribute* binary_operator( Attribute* attr1, Attribute* attr2, int op, int reve
     return result;
 }
 
+//static = attr1
+void assign_operator_to_static(Attribute* attr1, int type, void* value, int rm_attr1, int lno){
+	if(attr1 == NULL)
+        die("NULL Attribute error at line: %d \n", lno);
+	int type1 = attr1->type;
+	if(type1 == type){
+		switch(type){
+			case INT_T:
+				*(int*)value = attr1->value.iv;
+				break;
+			case FLOAT_T:
+				*(float*)value = attr1->value.fv;
+				break;
+			case BOOL_T:
+				*(int*)value = attr1->value.bv;
+				break;
+			case STRING_T:
+				value = attr1->value.sv;
+				break;
+			default:
+                die("incompatible type error at line: %d \n", lno);
+		}
+	}
+	else if(type1==FLOAT_T && type==INT_T){
+		*(int*)value = (int)(attr1->value.fv);
+	}
+	else if(type1==INT_T && type==FLOAT_T){
+		*(float*)value = (float)(attr1->value.iv);
+	}
+	else
+        die("incompatible type error at line: %d \n", lno);
+
+	if(rm_attr1==FLAG_DESTROY_ATTR) destroy_attr(attr1);
+}
+
+//attr1 = attr2
+Attribute* assign_operator(Attribute* attr1, Attribute* attr2, int rm_attr1, int rm_attr2, int lno){
+	if(attr1 == NULL || attr2 == NULL)
+        die("NULL Attribute error at line: %d \n", lno);
+	int type1 = attr1->type, type2 = attr2->type;
+	if(type1 == type2){
+		switch(type1){
+			case INT_T:
+				attr1->value.iv = attr2->value.iv;
+				break;
+			case FLOAT_T:
+				attr1->value.fv = attr2->value.fv;
+				break;
+			case BOOL_T:
+				attr1->value.bv = attr2->value.bv;
+				break;
+			case STRING_T:
+				attr1->value.sv = attr2->value.sv;
+				break;
+			default:
+                die("incompatible type error at line: %d \n", lno);
+		}
+	}
+	else if(type1==FLOAT_T && type2==INT_T){
+		attr1->value.fv = (float)(attr1->value.iv);
+	}
+	else if(type1==INT_T && type2==FLOAT_T){
+		attr1->value.iv = (int)(attr2->value.fv);
+	}
+	else
+        die("incompatible type error at line: %d \n", lno);
+	
+	if(rm_attr2==FLAG_DESTROY_ATTR) destroy_attr(attr2);
+
+	return attr1;
+}
+
+Attribute* unary_operator(Attribute* attr1, int op, int lno){
+	if(attr1 == NULL)
+        die("NULL Attribute error at line: %d \n", lno);
+	int	type1 = attr1->type;
+	switch(op){
+		case OP_PLUS:
+			if(type1 == INT_T)
+				attr1->value.iv = +(attr1->value.iv);
+			else if(type1 == FLOAT_T)
+				attr1->value.fv = +(attr1->value.fv);
+			else
+                die("incompatible type error at line: %d \n", lno);
+			break;
+		case OP_MINUS:
+			if(type1 == INT_T)
+				attr1->value.iv = -(attr1->value.iv);
+			else if(type1 == FLOAT_T)
+				attr1->value.fv = -(attr1->value.fv);
+			else
+                die("incompatible type error at line: %d \n", lno);
+			break;
+		case OP_NOT:
+			if(type1 == BOOL_T)
+				attr1->value.bv = !(attr1->value.bv);
+			else
+                die("incompatible type error at line: %d \n", lno);
+			break;
+		default:
+            die("Unknow unary operator error at line: %d \n", lno);
+			break;
+	}
+	return attr1;
+}
+
+Attribute* cast_operator(Attribute* attr1, int type, int lno){
+	if(attr1 == NULL)
+        die("NULL Attribute error at line: %d \n", lno);
+	int	type1 = attr1->type;
+	if(type1 == type)
+		return attr1;
+	if(type1 == INT_T && type == FLOAT_T){
+		int i = attr1->value.iv;
+		attr1->value.fv = (float)i;
+		attr1->type = type;
+	}
+	else if(type1 == FLOAT_T && type == INT_T){
+		float f = attr1->value.fv;
+		attr1->value.iv = (int)f;
+		attr1->type = type;
+	}
+	else
+        die("Illegal type conversion error at line: %d \n", lno);
+
+	return attr1;
+}
 
 StringType*         assign_operator_string(StringType* s1, StringType* s2) {
     if (s1 != NULL) destroy_string(s1);

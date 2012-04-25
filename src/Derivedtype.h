@@ -19,12 +19,6 @@
 #define FLAG_KEEP_ATTR          0
 #define FLAG_DESTROY_ATTR       1
 
-#define EQ 30
-#define GE 31
-#define LE 32
-#define GT 33
-#define LT 34
-
 
 typedef long int EdgeId;
 typedef long int VertexId;
@@ -34,6 +28,7 @@ typedef GHashTable AttributeTable;
 typedef GString StringType;
 
 typedef union {
+	int			bv;
     int         iv;
     float       fv;
     char *      sv;
@@ -97,7 +92,7 @@ int                 assign_attr( Attribute * attr, int type, void * val );
 int                 cmp_attr( Attribute * attr1, void * val );
 void                output_attr( char * key, Attribute * attr, FILE * out );
 static void         destroy_attr_from_table ( gpointer key, gpointer entry, gpointer dummy2 );
-void *              get_attr_value( Attribute * attr, int type );       //TODO
+void *              get_attr_value( Attribute * attr , int type);       //TODO
 
 int                 edge_assign_direction(EdgeType* e, VertexType* v1, VertexType* v2);
 int                 edge_assign_attribute(EdgeType* e, char* attribute, void* value, int type);
@@ -146,11 +141,11 @@ int                 print_e_attr(EdgeType* e);
 //TODO
 Attribute*          binary_operator( Attribute* attr1, Attribute* attr2, int op, int reverse, int rm_attr1, int rm_attr2, int lno);
 // static = attr1
-void                assign_operator_to_static( Attribute* attr1, int type, void * value, int rm_attr1, int lno);
+void		        assign_operator_to_static( Attribute* attr1, int type, void * value, int rm_attr1, int lno);
 // attr1 = attr2
 Attribute*          assign_operator( Attribute* attr1, Attribute* attr2, int rm_attr1, int rm_attr2, int lno);
-Attribute*          unary_operator( Attribute* attr1, int op, int rm_attr1, int lno);
-Attribute*          cast_operator( Attribute* attr1, int op, int rm_attr1, int lno);
+Attribute*          unary_operator( Attribute* attr1, int op, int lno);
+Attribute*          cast_operator( Attribute* attr1, int type, int lno);
 Attribute*          object_get_attribute(void* v, int obj, char* attribute);
 ListType*           list_match( ListType * l, bool (*func) (void *, int ), int rm_l );
 
@@ -160,6 +155,7 @@ ListType*           assign_operator_list(ListType* l1, ListType* l2);
 VertexType*         assign_operator_vertex(VertexType* v1, VertexType* v2);
 EdgeType*           assign_operator_edge(EdgeType* e1, EdgeType* e2);
 GraphType*          assign_operator_graph(GraphType* g1, GraphType* g2);
+void 				die(char* fmt, ...);
 
 //int list_append(ListType* list, void* data);
 //ListType* list_declare(...);

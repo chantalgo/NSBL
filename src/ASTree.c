@@ -180,7 +180,7 @@ void ast_free_tree(struct Node* node) {
 
 void ast_output_node(struct Node* node, FILE* out, const char * sep) {
     if(node==NULL) return;
-    fprintf(out,"%d::",node->line);
+    fprintf(out,"%lld::",node->line);
     switch (node->token) {
         case INTEGER_CONSTANT :
             fprintf(out, "Node<INT>    : lexval = %d", node->lexval.ival);break;
