@@ -150,7 +150,7 @@ void		        assign_operator_to_static( Attribute* attr1, int type, void * valu
 // attr1 = attr2
 Attribute*          assign_operator( Attribute* attr1, Attribute* attr2, int rm_attr1, int rm_attr2, int lno);
 Attribute*          unary_operator( Attribute* attr1, int op, int rm_attr1, int lno);
-Attribute*          cast_operator( Attribute* attr1, int type, int rm_attr1. int lno);
+Attribute*          cast_operator( Attribute* attr1, int type, int rm_attr1, int lno);
 Attribute*          object_get_attribute(void* v, int obj, char* attribute);
 ListType*           list_match( ListType * l, bool (*func) (void *, int ), int rm_l );
 

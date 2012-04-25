@@ -920,11 +920,11 @@ Attribute* unary_operator(Attribute* attr1, int op,int rm_attr1, int lno){
 			break;
 		case OP_MINUS:
 			if(type1 == INT_T){
-				result = new_attr_int(INT_T, NULL);
+				result = new_attr(INT_T, NULL);
 				result->value.iv = -(attr1->value.iv);
 			}
 			else if(type1 == FLOAT_T){
-				result = new_attr_float(FLOAT_T, NULL);
+				result = new_attr(FLOAT_T, NULL);
 				result->value.fv = -(attr1->value.fv);
 			}
 			else
@@ -932,7 +932,7 @@ Attribute* unary_operator(Attribute* attr1, int op,int rm_attr1, int lno){
 			break;
 		case OP_NOT:
 			if(type1 == BOOL_T){
-				result = new_attr(BOOLT_T, NULL);
+				result = new_attr(BOOL_T, NULL);
 				attr1->value.bv = !(attr1->value.bv);
 			}
 			else
@@ -976,7 +976,7 @@ Attribute* cast_operator(Attribute* attr1, int type, int rm_attr1, int lno){
 
 Attribute* object_get_attribute(void* v, int obj, char* attribute){
 	if(v==NULL)
-        die("NULL object error at line: %d \n", lno);
+        die("NULL object error \n");
 	Attribute* attr;
 	switch(obj){
 		case VERTEX_T:
@@ -986,7 +986,7 @@ Attribute* object_get_attribute(void* v, int obj, char* attribute){
 			attr = edge_get_attribute((EdgeType*)v, attribute);
 			break;
 		default:
-        	die("Illegal object type error at line: %d \n", lno);
+        	die("Illegal object type error \n");
 	}
 	return attr;
 }
