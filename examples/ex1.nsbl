@@ -1,0 +1,48 @@
+/****************************************
+ *  Declaration & simple operations     *
+ ****************************************/
+
+// basic types 
+bool u=true, v=false, w; 
+int i, j=1, k = 2;
+float a=10., b=1., c;
+string r = "Hello", s = "World", t;
+
+// basic operation
+w = u && !v || v;
+i = j+k;
+c = (-a*b)/a;
+//t = r + s;
+print << " w=" << w 
+        << "\t i=" << i 
+            << "\t c=" << c
+                << t << "\n" ;  
+
+// derived type
+vertex v1, v2, v3;
+edge e1, e2, e3;
+
+// assign and del attribute
+v1.attr = "attr";
+print << v1;
+del v1.attr;
+print << v1;
+
+v1.name = "Joe";
+v1.age = 20;
+v1.w = 100;
+v1.male = true;
+
+v2.name = "Tom";
+v2.age = 30;
+v2.w = 150;
+v2.male = true;
+
+v3.name = "Rosie";
+v3.age = 15;
+v3.w = 80;
+v3.male = false;
+
+print << v1 << v2 << v3;
+
+

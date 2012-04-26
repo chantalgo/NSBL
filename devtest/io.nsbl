@@ -1,0 +1,11 @@
+//int i=0;
+//vertex v;
+//v.a = 1.0;
+
+graph g;
+string file = "dsfdsa";
+
+file >> g;
+
+file << g;
+

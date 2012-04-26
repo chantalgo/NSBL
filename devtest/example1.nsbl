@@ -1,0 +1,45 @@
+int x=0, y=0;
+
+vertex v1,v2,v3,v4,v5;
+edge e1,e2,e3,e4;
+list lv = [v1,v2,v3,v4];
+list le = [e1,e2,e3];
+graph g1;
+
+
+string v1::project = "World";
+string v2::name = "Friend One";
+string v3::name = "Friend One";
+print << v1 << v2 << v3;
+v4.name = "Friend four";
+print << v4;
+
+e1.rel = "says";
+print << e1;
+e2.rel = e1.rel;
+e4.rel = "says";
+
+print << e1.rel;
+
+
+lv <: v5;
+le <: e4;
+
+g1 <: lv;
+g1 <: le;
+void hello() {
+    vertex vtemp;
+    edge etemp;
+    int i = 0;
+    int l = 10;
+    for (i; i<l; i=i+1) {
+        //vtemp = lv[i];
+        //etemp = le[i-1];
+        print << vtemp.name;
+        print << etemp.rel;
+        print << "Hello";
+    }
+}
+
+hello();
+

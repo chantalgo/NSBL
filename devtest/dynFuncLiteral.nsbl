@@ -1,0 +1,35 @@
+func axx(int k):bool = {
+
+    @age = 18;
+    int i=0;
+
+    i= @age+k;
+    return i>3;
+};
+
+vertex v1,v2,v3,v4;
+v1.age = 10; v1.w = 100.0;
+v2.age = 2; v2.w = 1000.0;
+v3.age = 4; v3.w = 200.;
+v4.age = -1; v4.w = 300.;
+
+print <<v1<<v2<<v3<<v4;
+
+list j = [ v1, v2, v3, v4];
+list l = [];
+
+l = j?[@age>-100]?[@age>0];
+print << l;
+
+func cond(int k):bool = { return @age > k; };
+print << "xxxxxxx";
+int iii = 250;
+l = j?[@w>iii || cond(5)];
+print << l;
+
+//l = j?[@age>iii]?[@a<v.a];
+
+//int kk = 10;
+//l = j?[a(kk)];
+
+

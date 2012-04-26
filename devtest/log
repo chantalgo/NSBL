@@ -1,0 +1,160 @@
+DEBUG: Symbol Table Initialized.
+DEBUG: ast_new_leaf :: create 2::Node<TYPE>   : lexval = VertexType* lvl=0 
+DEBUG: ast_new_leaf :: create 2::Node<ID>     : lexval = v2  type = -99   lvl=0 
+DEBUG: ast_new_node :: create 
+DEBUG: ==DEBUG INFO==
+Tree<0>::2::Node<DECLAR> lvl=0 
+  Tree<1>::2::Node<TYPE>   : lexval = VertexType* lvl=0 
+  Tree<1>::2::Node<ID>     : lexval = v2  type = -99   lvl=0 
+DEBUG: ast_new_leaf :: create 4::Node<ID>     : lexval = v2  type = -99   lvl=0 
+DEBUG: ast_new_leaf :: create 4::Node<ID>     : lexval = name  type = -99   lvl=0 
+DEBUG: ast_new_node :: create 
+DEBUG: ==DEBUG INFO==
+Tree<0>::4::Node<ATTRIBUTE> lvl=0 
+  Tree<1>::4::Node<ID>     : lexval = v2  type = 6  bind = v2_v0_s0 lvl=0 
+  Tree<1>::4::Node<ID>     : lexval = name  type = -99   lvl=0 
+DEBUG: ast_new_leaf :: create 4::Node<STRING> : lexval = "Friendone" lvl=0  
+ code =`"Friendone"`
+DEBUG: ast_new_node :: create 
+DEBUG: ==DEBUG INFO==
+Tree<0>::4::Node<ASSIGN> lvl=0 
+  Tree<1>::4::Node<ATTRIBUTE> lvl=0 
+    Tree<2>::4::Node<ID>     : lexval = v2  type = 6  bind = v2_v0_s0 lvl=0 
+    Tree<2>::4::Node<ID>     : lexval = ::name  type = -99   lvl=0 
+  Tree<1>::4::Node<STRING> : lexval = "Friendone" lvl=0  
+ code =`"Friendone"`
+DEBUG: ast_new_node :: create 
+DEBUG: ==DEBUG INFO==
+Tree<0>::4::Node<EXP_STAT> lvl=0 
+  Tree<1>::4::Node<ASSIGN> lvl=0 
+    Tree<2>::4::Node<ATTRIBUTE> lvl=0 
+      Tree<3>::4::Node<ID>     : lexval = v2  type = 6  bind = v2_v0_s0 lvl=0 
+      Tree<3>::4::Node<ID>     : lexval = ::name  type = -99   lvl=0 
+    Tree<2>::4::Node<STRING> : lexval = "Friendone" lvl=0  
+ code =`"Friendone"`
+DEBUG: ast_new_node :: create 
+DEBUG: ==DEBUG INFO==
+Tree<0>::2::Node<EXT_STAT_COMMA> lvl=0 
+  Tree<1>::2::Node<DECLAR> lvl=0 
+    Tree<2>::2::Node<TYPE>   : lexval = VertexType* lvl=0 
+    Tree<2>::2::Node<ID>     : lexval = v2  type = 6  bind = v2_v0_s0 lvl=0 
+  Tree<1>::4::Node<EXP_STAT> lvl=0 
+    Tree<2>::4::Node<ASSIGN> lvl=0 
+      Tree<3>::4::Node<ATTRIBUTE> lvl=0 
+        Tree<4>::4::Node<ID>     : lexval = v2  type = 6  bind = v2_v0_s0 lvl=0 
+        Tree<4>::4::Node<ID>     : lexval = ::name  type = -99   lvl=0 
+      Tree<3>::4::Node<STRING> : lexval = "Friendone" lvl=0  
+ code =`"Friendone"`
+=======AST::Syntax + Semantic P1=======
+Tree<0>::2::Node<EXT_STAT_COMMA> lvl=0 
+  Tree<1>::2::Node<DECLAR> lvl=0 
+    Tree<2>::2::Node<TYPE>   : lexval = VertexType* lvl=0 
+    Tree<2>::2::Node<ID>     : lexval = v2  type = 6  bind = v2_v0_s0 lvl=0 
+  Tree<1>::4::Node<EXP_STAT> lvl=0 
+    Tree<2>::4::Node<ASSIGN> lvl=0 
+      Tree<3>::4::Node<ATTRIBUTE> lvl=0 
+        Tree<4>::4::Node<ID>     : lexval = v2  type = 6  bind = v2_v0_s0 lvl=0 
+        Tree<4>::4::Node<ID>     : lexval = ::name  type = -99   lvl=0 
+      Tree<3>::4::Node<STRING> : lexval = "Friendone" lvl=0  
+ code =`"Friendone"`
+=======Symbol Table======
+    Lexeme    T   RT    L   Sp              Key          Binding  Line  || Func Parameters
+        v2    6  -55    0    0              v20         v2_v0_s0     2  ||
+=======AST::Semantic P2 + Code Gen=======
+Tree<0>::2::Node<EXT_STAT_COMMA> lvl=0 
+  Tree<1>::2::Node<DECLAR> lvl=0  
+ code =`v2_v0_s0 = new_vertex();
+`
+  codetmp =`VertexType* v2_v0_s0;
+`
+    Tree<2>::2::Node<TYPE>   : lexval = VertexType* lvl=0  
+ code =`VertexType*`
+    Tree<2>::2::Node<ID>     : lexval = v2  type = 6  bind = v2_v0_s0 lvl=0  
+ code =`v2_v0_s0 = new_vertex();
+`
+  codetmp =`v2_v0_s0`
+  Tree<1>::4::Node<EXP_STAT> lvl=0  
+ code =`assign_operator (vertex_get_attribute( v2_v0_s0 ,  "::name" ) ,  new_attr_STRING_T( "Friendone" ) , FLAG_KEEP_ATTR , FLAG_DESTROY_ATTR , 4 ) ;
+`
+    Tree<2>::4::Node<ASSIGN> lvl=0  
+ code =`assign_operator (vertex_get_attribute( v2_v0_s0 ,  "::name" ) ,  new_attr_STRING_T( "Friendone" ) , FLAG_KEEP_ATTR , FLAG_DESTROY_ATTR , 4 ) `
+      Tree<3>::4::Node<ATTRIBUTE> lvl=0  
+ code =`vertex_get_attribute( v2_v0_s0 ,  "::name" )`
+        Tree<4>::4::Node<ID>     : lexval = v2  type = 6  bind = v2_v0_s0 lvl=0  
+ code =`v2_v0_s0`
+        Tree<4>::4::Node<ID>     : lexval = ::name  type = -99   lvl=0  
+ code =`::name`
+      Tree<3>::4::Node<STRING> : lexval = "Friendone" lvl=0  
+ code =` new_attr_STRING_T( "Friendone" )`
+=======Symbol Table======
+    Lexeme    T   RT    L   Sp              Key          Binding  Line  || Func Parameters
+        v2    6  -55    0    0              v20         v2_v0_s0     2  ||
+DEBUG: TO FREE node:2::Node<EXT_STAT_COMMA> lvl=0 
+DEBUG: TO FREE node:2::Node<DECLAR> lvl=0  
+ code =`v2_v0_s0 = new_vertex();
+`
+  codetmp =`VertexType* v2_v0_s0;
+`
+DEBUG: FREE code: v2_v0_s0 = new_vertex();
+
+DEBUG: FREE codetmp: VertexType* v2_v0_s0;
+
+DEBUG: TO FREE node:2::Node<TYPE>   : lexval = VertexType* lvl=0  
+ code =`VertexType*`
+DEBUG: FREE code: VertexType*
+DEBUG: FREE this node
+DEBUG: TO FREE node:2::Node<ID>     : lexval = v2  type = 6  bind = v2_v0_s0 lvl=0  
+ code =`v2_v0_s0 = new_vertex();
+`
+  codetmp =`v2_v0_s0`
+DEBUG: FREE sval: v2
+DEBUG: FREE code: v2_v0_s0 = new_vertex();
+
+DEBUG: FREE codetmp: v2_v0_s0
+DEBUG: FREE this node
+DEBUG: FREE child ptrs in 2::Node<DECLAR> lvl=0  
+ code =`Ð¥0_s0 = new_vertex();
+`
+  codetmp =`°¥exType* v2_v0_s0;
+`
+DEBUG: FREE this node
+DEBUG: TO FREE node:4::Node<EXP_STAT> lvl=0  
+ code =`assign_operator (vertex_get_attribute( v2_v0_s0 ,  "::name" ) ,  new_attr_STRING_T( "Friendone" ) , FLAG_KEEP_ATTR , FLAG_DESTROY_ATTR , 4 ) ;
+`
+DEBUG: FREE code: assign_operator (vertex_get_attribute( v2_v0_s0 ,  "::name" ) ,  new_attr_STRING_T( "Friendone" ) , FLAG_KEEP_ATTR , FLAG_DESTROY_ATTR , 4 ) ;
+
+DEBUG: TO FREE node:4::Node<ASSIGN> lvl=0  
+ code =`assign_operator (vertex_get_attribute( v2_v0_s0 ,  "::name" ) ,  new_attr_STRING_T( "Friendone" ) , FLAG_KEEP_ATTR , FLAG_DESTROY_ATTR , 4 ) `
+DEBUG: FREE code: assign_operator (vertex_get_attribute( v2_v0_s0 ,  "::name" ) ,  new_attr_STRING_T( "Friendone" ) , FLAG_KEEP_ATTR , FLAG_DESTROY_ATTR , 4 ) 
+DEBUG: TO FREE node:4::Node<ATTRIBUTE> lvl=0  
+ code =`vertex_get_attribute( v2_v0_s0 ,  "::name" )`
+DEBUG: FREE code: vertex_get_attribute( v2_v0_s0 ,  "::name" )
+DEBUG: TO FREE node:4::Node<ID>     : lexval = v2  type = 6  bind = v2_v0_s0 lvl=0  
+ code =`v2_v0_s0`
+DEBUG: FREE sval: v2
+DEBUG: FREE code: v2_v0_s0
+DEBUG: FREE this node
+DEBUG: TO FREE node:4::Node<ID>     : lexval = ::name  type = -99   lvl=0  
+ code =`::name`
+DEBUG: FREE sval: ::name
+DEBUG: FREE code: ::name
+DEBUG: FREE this node
+DEBUG: FREE child ptrs in 4::Node<ATTRIBUTE> lvl=0  
+ code =``
+DEBUG: FREE this node
+DEBUG: TO FREE node:4::Node<STRING> : lexval = "Friendone" lvl=0  
+ code =` new_attr_STRING_T( "Friendone" )`
+DEBUG: FREE sval: "Friendone"
+DEBUG: FREE code:  new_attr_STRING_T( "Friendone" )
+DEBUG: FREE this node
+DEBUG: FREE child ptrs in 4::Node<ASSIGN> lvl=0  
+ code =`assign_operator (vertex_get_attribute( v2_v0_s0 ,  "::name" ) ,  new_attr_STRING_T( "Friendone" ) , FLAG_KEEP_ATTR , FLAG_DESTROY_ATTR , 4 ) `
+DEBUG: FREE this node
+DEBUG: FREE child ptrs in 4::Node<EXP_STAT> lvl=0  
+ code =`assign_operator (vertex_get_attribute( v2_v0_s0 ,  "::name" ) ,  new_attr_STRING_T( "Friendone" ) , FLAG_KEEP_ATTR , FLAG_DESTROY_ATTR , 4 ) ;
+`
+DEBUG: FREE this node
+DEBUG: FREE child ptrs in 2::Node<EXT_STAT_COMMA> lvl=0 
+DEBUG: FREE this node
+DEBUG: Try to destroy Symbol Table
+DEBUG: Destroy Entry:         v2    6  -55    0    0              v20         v2_v0_s0     2  ||
