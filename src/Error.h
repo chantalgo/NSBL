@@ -41,13 +41,15 @@
 #define ErrorIfConditionNotBOOL                         +67
 #define ErrorGetMemberForNotListType                    +68
 #define ErrorVoidTypeVariableNotSupported               +69
+#define ErrorAssignLeftOperand                          +70
+#define ErrorAssignInMatch                              +71
+#define ErrorWrongArgmentType                           +72
 
 
-#define ErrorCallBreakOutsideOfLoop                     +70
-#define ErrorCallContinueOutsideOfLoop                  +71
-#define ErrorCallReturnOutsideOfFunc                    +72
-
-#define ErrorDynamicAttributeUsedInNonDynamicScope      +81
+#define ErrorCallBreakOutsideOfLoop                     +80
+#define ErrorCallContinueOutsideOfLoop                  +81
+#define ErrorCallReturnOutsideOfFunc                    +82
+#define ErrorDynamicAttributeUsedInNonDynamicScope      +83
 
 #define ErrorOperatorNotSupportedByType                 +91
 #define ErrorTypeMisMatch                               +92

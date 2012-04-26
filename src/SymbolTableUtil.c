@@ -171,7 +171,7 @@ int sTableLookupFunc(struct Node* node) {
     GArray* caller = node->typeCon;
     GArray* ref    = entry->typeCon;
     int flag = 0;
-    if(entry->type == FUNC_T) {   // if function
+/*    if(entry->type == FUNC_T) {   // if function
         if(caller->len != ref->len) {
             flag = (ERRNO = ErrorFunctionCallNOTEqualNumberOfParameters); 
             errorInfo(ERRNO, node->line, "function Call `");
@@ -200,7 +200,7 @@ int sTableLookupFunc(struct Node* node) {
         errorInfo(ERRNO, node->line,"`%s' is not declared as a function or function literal\n",funcId->lexval.sval );
         errorInfoNote("`%s' is first declared at line %d\n",funcId->lexval.sval,entry->line);
         return ERRNO;
-    }
+    }*/
     if (flag == ErrorFunctionCallNOTEqualNumberOfParameters ||
             flag == ErrorFunctionCallIncompatibleParameterType ||
                 flag == ErrorFuncLiteralCallIncompatibleParameterType ) {
@@ -229,7 +229,9 @@ int checkTwoTypeCons(GArray* t1, GArray* t2) {
     if (t1->len!=t2->len) return 0;
     int i;
     for (i=0; i<t1->len; ++i) {
-        if (g_array_index(t1, int, i) != g_array_index(t2, int, i) )
+        int it1 = g_array_index(t1, int, i);
+        int it2 = g_array_index(t2, int, i);
+        if ( it1 >= 0 && it2 >= 0 && it1 != it2 ) // ignore dynamic type
             return 0;
     }
     return 1;

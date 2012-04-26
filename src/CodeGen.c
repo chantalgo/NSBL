@@ -163,9 +163,14 @@ int codeAttr ( struct Node * node ) {
     return 0;
 }
 
-char * codeGetAttrVal( char * operand, int type ) {
-    return strCatAlloc("",7 , " *(", sTypeName(type),
-        " *) get_attr_value( ", operand, " , ", typeMacro(type), " ) " );
+char * codeGetAttrVal( char * operand, int type, int lno ) {
+    if(type != BOOL_T && type != INT_T && type != FLOAT_T && type != STRING_T) {
+        ERRNO = ErrorGetAttrForWrongType;
+        errorInfo(ERRNO, lno, "get attribute value for wrong type.\n");
+        return NULL;
+    }
+    return strCatAlloc("",7,"get_attr_value_",typeMacro(type),
+            " ( ",  operand, " , ", strLine(lno), " ) " );
 }
 
 char * codeFrontDecl(int lvl ) {
@@ -176,6 +181,62 @@ char * codeFrontDecl(int lvl ) {
        exsitMATCH = 0;
     }
     return decl;
+}
+
+int codeAssignLeft( struct Node * node) {
+    if (node->token == IDENTIFIER) {
+        codeGen(node);
+    }
+    else if (node->token == AST_ATTRIBUTE) {
+        // assume: NO assignment in MATCH
+        node->child[0]->code = strCatAlloc("", 1, node->child[0]->symbol->bind);
+        node->child[1]->code = strCatAlloc("", 1, node->child[1]->lexval.sval);
+        // put "1" for xxx_get_attribute to auto allocate storage
+        if(node->child[0]->type == VERTEX_T )
+            node->code = strCatAlloc("", 7, "vertex_get_attribute( ",
+                    node->child[0]->code, " ,  \"", node->child[1]->code, "\", 1, ", strLine(node->line)," )");
+        else if(node->child[0]->type == EDGE_T )
+                node->code = strCatAlloc("", 7, "edge_get_attribute( ",
+                    node->child[0]->code, " ,  \"", node->child[1]->code, "\", 1, ", strLine(node->line)," )");
+        else {
+                ERRNO = ErrorGetAttrForWrongType;
+                errorInfo(ERRNO, node->line, "Access attribute for type `%s'.\n",
+                    sTypeName(node->child[0]->type) );
+                node->code = NULL;
+        }
+        node->type = DYNAMIC_T;
+    }
+    else if (node->token == DYN_ATTRIBUTE) {
+        node->code = strCatAlloc("",6,
+                "object_get_attribute( _obj, _obj_type, ",
+                "\"::",node->lexval.sval, "\", 1, ",strLine(node->line)," ) ");
+        node->type = DYNAMIC_T;
+    }
+}
+
+int codeFuncWrapDynArgs(struct Node* node, GArray* tcon, int* cnt){
+    if(node->token == AST_COMMA) {
+        codeFuncWrapDynArgs(node->child[0], tcon, cnt);
+        codeFuncWrapDynArgs(node->child[1], tcon, cnt);
+        node->code = strCatAlloc("", 3, node->child[0]->code, " , ", node->child[1]->code);
+    }
+    else if (node->token == AST_ARG_EXPS) {
+        codeGen(node);
+        if(tcon->len > *cnt) {
+            int rtype = g_array_index(tcon, int, *cnt);
+            if(node->type < 0) {
+                char * ctmp = node->code;
+                node->code = codeGetAttrVal(ctmp, rtype , node->line);
+                free(ctmp);
+            }
+            else if (node->type >=0 && node->type != rtype ) {
+                ERRNO = ErrorFunctionCallIncompatibleParameterType;
+                errorInfo(ERRNO, node->line, "function arg has incompatible arguments to its declaration.\n");
+            }
+        }
+        (*cnt)++;
+    }
+    return 0;
 }
 
 /** recursively generate code piece on each node */
@@ -240,9 +301,10 @@ int codeGen (struct Node * node) {
                 ERRNO = ErrorNoBinderForId;
             break;
         case DYN_ATTRIBUTE :
-            node->code = strCatAlloc("",4,
+            node->code = strCatAlloc("",6,
                 "object_get_attribute( _obj, _obj_type, ", 
-                "\"::",node->lexval.sval, "\" ) ");
+                "\"::",node->lexval.sval, "\", 0, ", strLine(node->line)," ) ");
+            node->type = DYNAMIC_T;
             break;
         case AST_DEL_ATTRIBUTE :
             node->child[0]->code = strCatAlloc("", 1, node->child[0]->symbol->bind);
@@ -327,8 +389,19 @@ int codeGen (struct Node * node) {
         }
 /************************************************************************************/
         case AST_ASSIGN :               // assignment_operator 
+            if(inMATCH > 0) {
+                ERRNO = ErrorAssignInMatch;
+                errorInfo ( ERRNO, node->line, "assignment in Match operator.\n");
+                return ERRNO;
+            }
             lf =  node->child[0]; rt = node->child[1];
-			codeGen(lf);codeGen(rt);
+            if(lf->token != IDENTIFIER && lf->token != AST_ATTRIBUTE && lf->token != DYN_ATTRIBUTE) {
+                ERRNO = ErrorAssignLeftOperand;
+                errorInfo ( ERRNO, node->line, "the left operand of assign operator MUST be IDENTIFIER or ATTRIBUTE.\n");
+                return ERRNO;
+            }
+            codeAssignLeft(lf);
+            codeGen(rt);
             // type check and implicit type conversion
             if(lf->type == rt->type && lf->type>=0 ) {
                 if ( lf->type == INT_T || lf->type == FLOAT_T || lf->type == BOOL_T ) {
@@ -666,20 +739,18 @@ int codeGen (struct Node * node) {
             break;
 /************************************************************************************/
         case AST_FUNC_CALL :
-            // 1> create type constructor for input parameters
-            if(node->nch == 1){ 
-                node->typeCon = astTypeConArgList(NULL, NULL);
-            }
-            else {
-                codeGen(node->child[1]);
-                node->typeCon = astTypeConArgList(node->child[1], NULL);
-            }
-            // 2> lookup symbol table, also set type
+            //  lookup symbol table, also set type
             errflag = sTableLookupFunc(node);
-            // 3> clear up
-            astFreeTypeCon(node->typeCon);
-            // 4> code Gen
+            //  code Gen
             if(!errflag) {
+                if (node->nch > 1){         //    if have args
+                    int cnt = 0;            //    count number of args
+                    codeFuncWrapDynArgs(node->child[1], node->symbol->typeCon, &cnt);
+                    if (node->symbol->typeCon->len != cnt) {
+                        ERRNO = ErrorFunctionCallNOTEqualNumberOfParameters;
+                        errorInfo(ERRNO, node->line, "function Call has inconsistent number of arguments to its declaration. %d, %d\n", node->symbol->typeCon->len, cnt);
+                    }
+                }
                 if(node->symbol->type == FUNC_LITERAL_T && inMATCH > 0) {
                     if(node->nch == 1)
                         node->code = strCatAlloc("",2,node->symbol->bind, " ( _obj, _obj_type )" );
@@ -738,7 +809,7 @@ int codeGen (struct Node * node) {
             // DYNAMIC : get attr val
             if(rt->type < 0) {
                 char * ctmp = rt->code;
-                rt->code = codeGetAttrVal( rt->code,  BOOL_T );
+                rt->code = codeGetAttrVal( rt->code,  BOOL_T, node->line );
                 free(ctmp);
             }
             // first generate struct and func for this match 
@@ -825,11 +896,11 @@ int codeGen (struct Node * node) {
             }
             node->child[1]->code = strCatAlloc("", 1, node->child[1]->lexval.sval); 
             if(node->child[0]->type == VERTEX_T ) 
-                node->code = strCatAlloc("", 5, "vertex_get_attribute( ",
-                    node->child[0]->code, " ,  \"", node->child[1]->code, "\", 1 )");
+                node->code = strCatAlloc("", 7, "vertex_get_attribute( ",
+                    node->child[0]->code, " ,  \"", node->child[1]->code, "\", 0, ", strLine(node->line),")");
             else if(node->child[0]->type == EDGE_T )
-                node->code = strCatAlloc("", 5, "edge_get_attribute( ",
-                    node->child[0]->code, " ,  \"", node->child[1]->code, "\", 1 )");
+                node->code = strCatAlloc("", 7, "edge_get_attribute( ",
+                    node->child[0]->code, " ,  \"", node->child[1]->code, "\", 0, ", strLine(node->line), ")");
             else {
                 ERRNO = ErrorGetAttrForWrongType;
                 errorInfo(ERRNO, node->line, "Access attribute for type `%s'.\n",
@@ -885,9 +956,9 @@ int codeGen (struct Node * node) {
                 node->code = strRightCatAlloc(node->code, "", 17,
                     INDENT[node->scope[0]],"// START_IF\n",
                     INDENT[node->scope[0]],"Attribute* ", ctmp, " = ", lf->code, " ;\n",
-                    INDENT[node->scope[0]],"if ( ", codeGetAttrVal(ctmp, BOOL_T), " ) \n",
+                    INDENT[node->scope[0]],"if ( ", codeGetAttrVal(ctmp, BOOL_T, node->line), " ) \n",
                     rt->code,
-                    INDENT[node->scope[0]],"destory_attr( ", ctmp, " ); // END_IF\n");
+                    INDENT[node->scope[0]],"destroy_attr( ", ctmp, " ); // END_IF\n");
             }
             else {
                 ERRNO = ErrorIfConditionNotBOOL;
@@ -912,10 +983,10 @@ int codeGen (struct Node * node) {
                 node->code = strRightCatAlloc(node->code, "", 20, 
                     INDENT[node->scope[0]],"// START_IF\n",
                     INDENT[node->scope[0]],"Attribute* ", ctmp, " = ", lf->code, " ;\n",
-                    INDENT[node->scope[0]],"if ( ", codeGetAttrVal(ctmp, BOOL_T), " ) \n",
+                    INDENT[node->scope[0]],"if ( ", codeGetAttrVal(ctmp, BOOL_T, node->line), " ) \n",
                     sg->code, 
                     INDENT[node->scope[0]],"else\n", rt->code,
-                    INDENT[node->scope[0]],"destory_attr( ", ctmp, " ); // END_IF\n");
+                    INDENT[node->scope[0]],"destroy_attr( ", ctmp, " ); // END_IF\n");
             }
             else {
                 ERRNO = ErrorIfConditionNotBOOL;
@@ -940,12 +1011,12 @@ int codeGen (struct Node * node) {
                 node->code = strRightCatAlloc(node->code, "", 28,
                     INDENT[node->scope[0]],"// START_OF_WHILE\n",
                     INDENT[node->scope[0]],"Attribute* ", ctmp, " = ", lf->code, " ;\n",
-                    INDENT[node->scope[0]],"while ( ", codeGetAttrVal(ctmp, BOOL_T),
+                    INDENT[node->scope[0]],"while ( ", codeGetAttrVal(ctmp, BOOL_T,node->line),
                     " ) {\n", rt->code, 
-                    INDENT[node->scope[0]],"destory_attr( ", ctmp, " );\n",
+                    INDENT[node->scope[0]],"destroy_attr( ", ctmp, " );\n",
                     INDENT[node->scope[0]],ctmp, " = ", lf->code, " ;\n",
                     INDENT[node->scope[0]],"} \n",
-                    INDENT[node->scope[0]],"destory_attr( ", ctmp, " ); //END_OF_WHILE\n");
+                    INDENT[node->scope[0]],"destroy_attr( ", ctmp, " ); //END_OF_WHILE\n");
             }
             break;
         case AST_FOR : {
@@ -969,13 +1040,13 @@ int codeGen (struct Node * node) {
                     INDENT[node->scope[0]],"// START_OF_FOR\n",
                     INDENT[node->scope[0]],f1->code,";\n",
                     INDENT[node->scope[0]],"Attribute* ", ctmp, " = ", f2->code, " ;\n", 
-                    INDENT[node->scope[0]],"while (", codeGetAttrVal(ctmp, BOOL_T),
+                    INDENT[node->scope[0]],"while (", codeGetAttrVal(ctmp, BOOL_T,node->line),
                     " ) {\n", fs->code,
                     INDENT[node->scope[0]],f3->code,";\n",
-                    INDENT[node->scope[0]],"destory_attr( ", ctmp, " );\n",
+                    INDENT[node->scope[0]],"destroy_attr( ", ctmp, " );\n",
                     INDENT[node->scope[0]],ctmp, " = ", f2->code, " ;\n",
                     "} \n",
-                    INDENT[node->scope[0]],"destory_attr( ", ctmp, " ); // END_OF_FOR\n"
+                    INDENT[node->scope[0]],"destroy_attr( ", ctmp, " ); // END_OF_FOR\n"
                 );
             }
             break;
@@ -1032,7 +1103,7 @@ int codeGen (struct Node * node) {
                     else {
                         node->code = strRightCatAlloc(node->code,"", 4, 
                             INDENT[node->scope[0]], "return ",
-                            codeGetAttrVal( node->child[0]->code, rtype ),";\n" ); 
+                            codeGetAttrVal( node->child[0]->code, rtype, node->line ),";\n" ); 
                     }
                 }
             }
@@ -1061,15 +1132,12 @@ int codeGen (struct Node * node) {
                 errorInfo(ERRNO, node->line, "missing return in function declaration.\n");
                 return ERRNO;
             } 
-            // We need to find out all parameters and return type, which should NOT be free
-            //GList* exVab = getAllParaInFunc(sg->child[1], NULL);
-            //exVab = getReturnVab(rt, exVab);
-            // generate freecode
-            //char * freecode = allFreeCodeInScope(rt->scope[1], exVab, rt->scope[0] );
-            //g_list_free(exVab);
-            // generate all
+            int flag0 = 0;
+            int type0 = lf->lexval.ival;
+            if (type0 == VERTEX_T || type0 == EDGE_T || type0 == VLIST_T ||
+                    type0 == ELIST_T ||type0 == STRING_T || type0 == GRAPH_T) flag0 = 1;
             node->code = strCatAlloc("",9,
-                    sTypeName(lf->lexval.ival)," ",
+                    sTypeName(lf->lexval.ival),(flag0)? " * ":" ",
                     node->symbol->bind,     // func_id
                     " ( ", sg->code," ) ", "{\n",
                     rt->code, "}\n");
@@ -1122,9 +1190,17 @@ int codeGen (struct Node * node) {
             lf = node->child[0];            // declaration_specifiers
             rt = node->child[1];            // IDENTIFIER or attribute
             codeGen(rt);
-            node->code = strCatAlloc(" ",2,
-                    sTypeName(lf->lexval.ival),
-                    rt->code);
+            node->type = node->child[0]->lexval.ival;
+            if (node->type == STRING_T || node->type == VLIST_T || node->type == ELIST_T ||
+                node->type == VERTEX_T || node->type == EDGE_T || node->type == GRAPH_T)
+                    node->code = strCatAlloc("",3,sTypeName(lf->lexval.ival)," * ", node->child[1]->code);
+            else if (node->type == BOOL_T || node->type == INT_T || node->type == FLOAT_T)
+                node->code = strCatAlloc("", 3, sTypeName(lf->lexval.ival)," ", node->child[1]->code );
+            else {
+                ERRNO = ErrorWrongArgmentType;
+                errorInfo(ERRNO, node->line, "invalid argument type.\n");
+                return ERRNO;
+            }    
             break;
 /************************************************************************************/
 	    case AST_PRINT_STAT :

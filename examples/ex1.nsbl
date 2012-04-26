@@ -40,16 +40,20 @@ v3.male = false;
 
 print << v1 << v2 << v3;
 
-// del attribute
-del v1.name, v2.w, v3.male;
-print << v1 << v2 << v3; 
-
+// MATCH operation
 vlist la,lb,lc;
 vlist ll = [v1,v2,v3], l0;
-print << ll ;
+print << "==========MATCH Orig =========\n" << ll ;
 
-la = ll?[@age>25 || !@male];
+int cut = 25;
+la = ll?[@age>cut || !@male];
 
-print << la;
+print << "==========MATCH After=========\n" << la;
+print << "==========ALL VERTEX =========\n";
+print << v1 << v2 << v3; 
 
-v4.a;
+// func_literal
+func cond(int k):bool = { return @age>k || !@male ; };
+la = ll?[cond(cut)];
+print << "==========MATCH cond=========\n" << la;
+
