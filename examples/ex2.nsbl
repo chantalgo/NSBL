@@ -1,0 +1,37 @@
+/******************************
+ *   Function & Statement     *
+ ******************************/
+
+int  add ( int a, int b) { return a+b ;}
+float mul ( float a, float b) { return a*b; }
+int vmul ( vertex a, vertex b ) { return (a.i * b.i ); }
+string vs ( vertex a, vertex b ) { return a.s; }
+
+int fact( int a ) {
+    if ( a == 0 || a == 1 ) return 1;
+    else return a* fact(a-1);
+}
+
+int main() {
+    int i=1, j=2;
+    float a=1, b=1.9;
+    vertex v1,v2;
+    v1.i = a;
+    v2.i = b;
+    v1.s = "J";
+
+    print << add(i,j) << "\n" ;
+    print << mul(a,b) << "\n" ;
+    print << vmul( v1, v2 ) << "\n";
+    print << vs( v1, v2 ) << "\n";
+
+    del v1.i, v2.i;
+
+    for (v1.i=0, j=0; v1.i<=10; v1.i=v1.i+1, j=j+3){
+        print << v1.i << " : "<< fact(v1.i)+j << "\n";
+    }
+    return 0;
+}
+
+main();
+
