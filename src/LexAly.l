@@ -50,6 +50,7 @@ comment         (\/\*([^\*]|(\*+([^\*\/])))*\*+\/)|(\/\/.*)
 "endV"          { MYECHO; yylval.LString.l = LEXLINECOUNTER; return ENDING_VERTICES; }
 "allV"          { MYECHO; yylval.LString.l = LEXLINECOUNTER; return ALL_VERTICES; }
 "allE"          { MYECHO; yylval.LString.l = LEXLINECOUNTER; return ALL_EDGES; }
+"print"		{ MYECHO; yylval.LString.l = LEXLINECOUNTER; return PRINT;}
 
 "=="            { MYECHO; yylval.LString.l = LEXLINECOUNTER; return EQ; }
 "!="            { MYECHO; yylval.LString.l = LEXLINECOUNTER; return NE; }
@@ -87,6 +88,8 @@ comment         (\/\*([^\*]|(\*+([^\*\/])))*\*+\/)|(\/\/.*)
 ">"             { MYECHO; yylval.LString.l = LEXLINECOUNTER; return GT; }
 "<"             { MYECHO; yylval.LString.l = LEXLINECOUNTER; return LT; }
 "del"           { MYECHO; yylval.LString.l = LEXLINECOUNTER; return DEL; }
+"<<"		    { MYECHO; yylval.LString.l = LEXLINECOUNTER; return LIN;}
+">>"		    { MYECHO; yylval.LString.l = LEXLINECOUNTER; return ROUT;}
 
 "true"          { MYECHO; yylval.LString.l = LEXLINECOUNTER; return BOOL_TRUE; }
 "false"         { MYECHO; yylval.LString.l = LEXLINECOUNTER; return BOOL_FALSE; }
@@ -109,7 +112,7 @@ comment         (\/\*([^\*]|(\*+([^\*\/])))*\*+\/)|(\/\/.*)
                   return IDENTIFIER; 
                 }
 {strliteral}    { MYECHO; 
-                  yylval.LString.s = (char *) malloc ( strlen(yytext) ); 
+                  yylval.LString.s = (char *) malloc ( strlen(yytext)+1 ); 
                   yylval.LString.l = LEXLINECOUNTER;
                   strncpy( yylval.LString.s, yytext, strlen(yytext)  ); 
                   yylval.LString.s[strlen(yytext)]='\0';

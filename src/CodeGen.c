@@ -9,13 +9,16 @@
 #include "Error.h"
 #include "operator.h"
 #include "CodeGenUtil.h"
+#include "NSBLio.h"
+#include "Derivedtype.h"
 
 char * OUTFILE; 
 FILE * OUTFILESTREAM;           // Output file
 
 int  inLoop, inFunc;            // flags to indicate inside of loop or func
-int  inMATCH;
+int  inMATCH, exsitMATCH, nMATCHsVab;
 GList *returnList, *noReturn;
+char * matchStaticVab, *matchStrDecl;
 
 void derivedTypeInitCode(struct Node* node, int type, int isglobal){
 	if(node->token == AST_COMMA){
@@ -73,6 +76,7 @@ int listInitCode(struct Node* node, int type, int isglobal){
 	struct Node* tn = node->child[1];
 	if(tn->token != AST_LIST_INIT)
 		return ErrorAssignmentExpression;
+
 	if(tn->child!=NULL){
 		count++;
 		tn = tn->child[0];
@@ -361,7 +365,8 @@ int codeAttr ( struct Node * node ) {
         errorInfo(ERRNO, node->line, "Binary Operation with Dynamic Type.\n");
         return 1;
     }
-    node->code = strCatAlloc("", 5, " new_attr( ", typeMacro(node->type), " , (void *) ( ", node->code, " ) ) ");
+    node->code = strCatAlloc("", 5, " new_attr_", typeMacro(node->type), "( ", code," )");
+    free(code);
     node->tmp[0] = REMOVE_DYN;  // set remove flag
     return 0;
 }
@@ -371,12 +376,30 @@ char * codeGetAttrVal( char * operand, int type ) {
         " *) get_attr_value( ", operand, " , ", typeMacro(type), " ) " );
 }
 
+char * codeFrontDecl(int lvl ) {
+    char * decl = NULL;
+    if(exsitMATCH == 1){ // for MATCH
+       decl = strRightCatAlloc(decl, "", 2,INDENT[lvl],matchStrDecl);
+       free(matchStrDecl); matchStrDecl= NULL;
+       exsitMATCH = 0;
+    }
+    return decl;
+}
+
+
 /** recursively generate code piece on each node */
 int codeGen (struct Node * node) {
     if( node == NULL ) return;
     int token = node->token, errflag = 0;
     char * op = opMacro(token);
     struct Node *lf, *rt, *sg;
+    char* printFunc;
+    char* var;
+    char* endBrace;
+    char* printVattr;
+    char* printCall;    	
+    char* fileloc;
+    char* comma;
     switch (token) {
 /************************************************************************************/
         case INTEGER_CONSTANT :
@@ -389,8 +412,19 @@ int codeGen (struct Node * node) {
         case IDENTIFIER :
             // type is done when insert into symtable
             if (node->symbol->bind!=NULL){ 
-                node->code = strCatAlloc("",1,node->symbol->bind);
-                node->codetmp = strCatAlloc("",1,node->symbol->bind);
+                if(inMATCH==0){
+                    node->code = strCatAlloc("",1,node->symbol->bind);
+                    node->codetmp = strCatAlloc("",1,node->symbol->bind);
+                }
+                else{
+                    node->code = strCatAlloc("",3,"_str->",node->symbol->bind,"_match");
+                    node->codetmp = strCatAlloc("",1,node->code);
+                    matchStaticVab = strRightCatAlloc( matchStaticVab, "", 5, 
+                        INDENT[1], sTypeName(node->type)," ",node->symbol->bind,"_match;\n");
+                    matchStrDecl = strRightCatAlloc( matchStrDecl, "", 2,
+                        (nMATCHsVab++==0) ? "" : " , ",
+                        node->symbol->bind);
+                }
             }
             else
                 ERRNO = ErrorNoBinderForId;
@@ -414,6 +448,7 @@ int codeGen (struct Node * node) {
             node->type = node->child[1]->type;
             break;
 		case AST_LIST_INIT:
+
 			node->type = LIST_T;
 			if(node->child==NULL)
 				node->code = strCatAlloc("", 1, " ");
@@ -465,11 +500,13 @@ int codeGen (struct Node * node) {
 							int r = listInitCode(node->child[1], node->child[0]->lexval.ival, 1);
 							if(r){
 								ERRNO = r;
+
 								return ERRNO;
 							}
 							node->code = strCatAlloc("", 1, node->child[1]->code);
 						}
 						break;
+
 					default:
 						if(node->child[1]->child!=NULL && node->child[1]->child[0]->token == BELONG){
 							int rv = attributeDeclareCode(node->child[1], node->child[0]->lexval.ival);
@@ -480,6 +517,7 @@ int codeGen (struct Node * node) {
 							node->code = strCatAlloc("", 1, node->child[1]->code);
 							node->codetmp = NULL;
 						}else if(existbelong(node->child[1])){
+
 							ERRNO = ErrorAttributeDeclaration;
 							return ERRNO;
 						}else
@@ -943,35 +981,51 @@ int codeGen (struct Node * node) {
             lf = node->child[0];        // list
             rt = node->child[1];        // condition
             codeGen(lf); 
+            // get the STR name, func name, 
+            char * tmpfunc = tmpMatch();
+            char * match_str = tmpMatchStr();
+            char * match_str_val = tmpMatchStrVab();
+            // declaration of STR
+            matchStrDecl = strRightCatAlloc( matchStrDecl, "", 5,
+                "struct ", match_str, " ", match_str_val, " = {"
+            );
+            nMATCHsVab = 0;
             inMATCH++; codeGen(rt); inMATCH--;
+            matchStrDecl = strRightCatAlloc( matchStrDecl,"",1,"};\n" );
             if(lf->type != LIST_T) {
                 ERRNO = ErrorMactchWrongType;
                 errorInfo(ERRNO,node->line," match can NOT be operated on type `%s'.\n",sTypeName(lf->type) );
                 return ERRNO;
             }
-            char * tmpfunc = tmpMatch();
             //  check return type == bool
             if(rt->type != BOOL_T && rt->type >=0 ){
                 ERRNO = ErrorInvalidReturnType;
                 errorInfo(ERRNO,node->line,"the body of Match operator must return bool result.\n");
                 return ERRNO;
             } 
+            // set FLAG for STR declaration
+            // FLAG cleared in AST_EXP_STAT
+            exsitMATCH = 1;
             // DYNAMIC : get attr val
             if(rt->type < 0) {
                 char * ctmp = rt->code;
                 rt->code = codeGetAttrVal( rt->code,  BOOL_T );
                 free(ctmp);
             }
-            // first generate this match func 
-            node->codetmp = strCatAlloc("", 9,
-                INDENT[0], "bool ", tmpfunc, 
-                " ( void * _obj, int _obj_type ) {\n",
+            // first generate struct and func for this match 
+            node->codetmp = strCatAlloc("", 15,
+                "struct {\n",
+                matchStaticVab,
+                "} ", match_str, ";\n",
+                "bool ", tmpfunc, 
+                " ( void * _obj, int _obj_type, struct ", match_str, " * _str ) {\n",
                 INDENT[1], "return ", rt->code, " ;\n",
                 "} // END_MATCH_FUNC \n"
             );
+            free(matchStaticVab); matchStaticVab =NULL;
             // code for match body
-            node->code = strCatAlloc("", 6,
-                "list_match( ", lf->code, " , &" , tmpfunc, 
+            node->code = strCatAlloc("", 8,
+                "list_match( ", lf->code, " , &" , tmpfunc, " , &", match_str_val, 
                 (lf->tmp[0]==REMOVE_DYN) ? " , FLAG_DESTROY_ATTR" : " , FLAG_KEEP_ATTR",
                 " )"
             );  
@@ -980,7 +1034,18 @@ int codeGen (struct Node * node) {
             break;
 /************************************************************************************/
         case AST_ATTRIBUTE :
-            node->child[0]->code = strCatAlloc("", 1, node->child[0]->symbol->bind);
+            if(inMATCH==0){
+                node->child[0]->code = strCatAlloc("", 1, node->child[0]->symbol->bind);
+            }
+            else {
+                node->child[0]->code = strCatAlloc("", 3,"_str->", node->child[0]->symbol->bind,"_match");
+                matchStaticVab = strRightCatAlloc( matchStaticVab,"", 5,
+                    INDENT[1], sTypeName(node->child[0]->symbol->type), 
+                        " ", node->child[0]->symbol->bind,"_match;\n");
+                matchStrDecl = strRightCatAlloc( matchStrDecl, "", 2,
+                    (nMATCHsVab++==0) ? "" : " , ",
+                    node->child[0]->symbol->bind);
+            }
             node->child[1]->code = strCatAlloc("", 1, node->child[1]->lexval.sval); 
             if(node->child[0]->type == VERTEX_T ) 
                 node->code = strCatAlloc("", 5, "vertex_get_attribute( ",
@@ -1022,42 +1087,52 @@ int codeGen (struct Node * node) {
             }
             else {
                 codeGen(node->child[0]);
-                node->code = strCatAlloc("",3,INDENT[node->scope[0]],node->child[0]->code, ";\n");
+                node->code = codeFrontDecl(node->scope[0]);
+                node->code = strRightCatAlloc(node->code,"",3,INDENT[node->scope[0]],node->child[0]->code, ";\n");
             }
             break;
 /************************************************************************************/
         case AST_IF_STAT :              // selection_statement
-            lf = node->child[0]; rt = node->child[1];
-            codeGen(lf); codeGen(rt);
-            if(lf->type>=0) {
-                node->code = strCatAlloc("",7, 
+            lf = node->child[0]; rt = node->child[1];            
+            codeGen(lf); 
+            node->code = codeFrontDecl(node->scope[0]);
+            codeGen(rt);
+            if(lf->type == BOOL_T) {
+                node->code = strRightCatAlloc(node->code, "",7, 
                     INDENT[node->scope[0]],"if ( ", lf->code, " ) \n", 
                     rt->code, 
                     INDENT[node->scope[0]]," // END_IF \n");
             }
-            else { // DYNAMIC
+            else if (lf->type < 0) { // DYNAMIC
                 char * ctmp = tmpAttr();
-                node->code = strCatAlloc("", 17,
+                node->code = strRightCatAlloc(node->code, "", 17,
                     INDENT[node->scope[0]],"// START_IF\n",
                     INDENT[node->scope[0]],"Attribute* ", ctmp, " = ", lf->code, " ;\n",
                     INDENT[node->scope[0]],"if ( ", codeGetAttrVal(ctmp, BOOL_T), " ) \n",
                     rt->code,
                     INDENT[node->scope[0]],"destory_attr( ", ctmp, " ); // END_IF\n");
             }
+            else {
+                ERRNO = ErrorIfConditionNotBOOL;
+                errorInfo(ERRNO, node->line, "condition in IF statement is NOT of type `bool'.\n"); 
+                return ERRNO;
+            }
             break;
         case AST_IFELSE_STAT :
             lf = node->child[0]; sg = node->child[1]; rt = node->child[2];
-            codeGen(lf); codeGen(sg); codeGen(rt);
-            if(lf->type>=0) {
-                node->code = strCatAlloc("",10,
+            codeGen(lf); 
+            node->code = codeFrontDecl(node->scope[0]);
+            codeGen(sg); codeGen(rt);
+            if(lf->type == BOOL_T) {
+                node->code = strRightCatAlloc(node->code, "",10,
                     INDENT[node->scope[0]],"if ( ", lf->code, " ) \n",
                     sg->code, 
                     INDENT[node->scope[0]],"else\n", rt->code, 
                     INDENT[node->scope[0]]," // END_IF\n");
             }
-            else { // DYNAMIC
+            else if (lf->type < 0) { // DYNAMIC
                 char * ctmp = tmpAttr();
-                node->code = strCatAlloc("", 20, 
+                node->code = strRightCatAlloc(node->code, "", 20, 
                     INDENT[node->scope[0]],"// START_IF\n",
                     INDENT[node->scope[0]],"Attribute* ", ctmp, " = ", lf->code, " ;\n",
                     INDENT[node->scope[0]],"if ( ", codeGetAttrVal(ctmp, BOOL_T), " ) \n",
@@ -1065,21 +1140,27 @@ int codeGen (struct Node * node) {
                     INDENT[node->scope[0]],"else\n", rt->code,
                     INDENT[node->scope[0]],"destory_attr( ", ctmp, " ); // END_IF\n");
             }
+            else {
+                ERRNO = ErrorIfConditionNotBOOL;
+                errorInfo(ERRNO, node->line, "condition in IF statement is NOT of type `bool'.\n");
+                return ERRNO;
+            }
             break;
 /************************************************************************************/
         case AST_WHILE :                // iteration_statement
             lf = node->child[0]; rt = node->child[1];
             codeGen(lf); 
+            node->code = codeFrontDecl(node->scope[0] );
             inLoop++; codeGen(rt); inLoop--;
             if(lf->type>=0){
-                node->code = strCatAlloc("", 7, 
+                node->code = strRightCatAlloc(node->code, "", 7, 
                     INDENT[node->scope[0]],"while ( ", lf->code, " ) {\n",
                     rt->code, INDENT[node->scope[0]], 
                     "} //END_OF_WHILE\n");
             }
             else { // DYNAMIC
                 char * ctmp = tmpAttr();
-                node->code = strCatAlloc("", 28,
+                node->code = strRightCatAlloc(node->code, "", 28,
                     INDENT[node->scope[0]],"// START_OF_WHILE\n",
                     INDENT[node->scope[0]],"Attribute* ", ctmp, " = ", lf->code, " ;\n",
                     INDENT[node->scope[0]],"while ( ", codeGetAttrVal(ctmp, BOOL_T),
@@ -1096,9 +1177,10 @@ int codeGen (struct Node * node) {
                         *f3 = node->child[2],
                         *fs = node->child[3];
             codeGen(f1);codeGen(f2);codeGen(f3);
+            node->code = codeFrontDecl(node->scope[0] );
             inLoop++; codeGen(fs); inLoop--;
             if (f1->type>=0 && f2->type>=0 && f3->type>=0){
-                node->code = strCatAlloc("",10, INDENT[node->scope[0]],
+                node->code = strRightCatAlloc(node->code, "",10, INDENT[node->scope[0]],
                     "for (", (f1!=NULL)? f1->code : "", ";", 
                              (f2!=NULL)? f2->code : "", ";", 
                              (f3!=NULL)? f3->code : "", ") {\n",
@@ -1106,7 +1188,7 @@ int codeGen (struct Node * node) {
             }
             else {  // DYNAMIC :: translate for to while
                 char * ctmp = tmpAttr();
-                node->code = strCatAlloc("", 33,
+                node->code = strRightCatAlloc(node->code,"", 33,
                     INDENT[node->scope[0]],"// START_OF_FOR\n",
                     INDENT[node->scope[0]],f1->code,";\n",
                     INDENT[node->scope[0]],"Attribute* ", ctmp, " = ", f2->code, " ;\n", 
@@ -1161,16 +1243,17 @@ int codeGen (struct Node * node) {
                 } 
                 else {
                     codeGen(node->child[0]);
+                    node->code = codeFrontDecl(node->scope[0] );
                     if (rtype != node->child[0]->type && node->child[0]->type >= 0) {
                         ERRNO = ErrorInvalidReturnType;
                         errorInfo(ERRNO, node->line, "invalid return type.\n");
                         return ERRNO;
                     }
                     else if (rtype == node->child[0]->type && node->child[0]->type >= 0) {
-                        node->code = strCatAlloc("", 4,INDENT[node->scope[0]], "return ",node->child[0]->code,";\n");
+                        node->code = strRightCatAlloc(node->code, "", 4,INDENT[node->scope[0]], "return ",node->child[0]->code,";\n");
                     }
                     else {
-                        node->code = strCatAlloc("", 4, 
+                        node->code = strRightCatAlloc(node->code,"", 4, 
                             INDENT[node->scope[0]], "return ",
                             codeGetAttrVal( node->child[0]->code, rtype ),";\n" ); 
                     }
@@ -1267,7 +1350,171 @@ int codeGen (struct Node * node) {
                     rt->code);
             break;
 /************************************************************************************/
+	case AST_PRINT_STAT :
+            codeGen(node->child[0]);
+            break;
+	case AST_PRINT :
+	    {switch(node->child[0]->type)
+		{
+	    	case INT_T:
+			{printFunc=" printInteger("; 
+			var=node->child[0]->symbol->bind;
+			endBrace=");\n";
+			printCall = malloc(strlen(printFunc) + strlen(var) + strlen(endBrace) + 3);
+			strcpy(printCall, printFunc);
+			strcat(printCall, var);
+			strcat(printCall, endBrace);
+			if(node->nch == 1){ 
+	    			node->code = strCatAlloc(" ",3,INDENT[node->child[0]->scope[0]], " ",  printCall);
+            		}
+            		else {
+                		node->code = strCatAlloc(" ",3,INDENT[node->child[0]->scope[0]], " ",  printCall);
+				codeGen(node->child[1]);
+		       	}
+            		break;}
+	    	case FLOAT_T:
+                        {printFunc=" printFloat(";
+                        var=node->child[0]->symbol->bind;
+                        endBrace=");\n";
+                        printCall = malloc(strlen(printFunc) + strlen(var) + strlen(endBrace) + 3);
+			strcpy(printCall, printFunc);
+			strcat(printCall, var);
+			strcat(printCall, endBrace);
+	    		if(node->nch == 1){ 
+	    			node->code = strCatAlloc(" ",3,INDENT[node->child[0]->scope[0]], " ",  printCall);
+            		}
+            		else {
+                		node->code = strCatAlloc(" ",3,INDENT[node->child[0]->scope[0]], " ",  printCall);		
+	    			codeGen(node->child[1]);
+            		}
+            		break;}
+	    	case GRAPH_T:
+                        {printFunc=" print_g(";
+                        var=node->child[0]->symbol->bind;
+                        endBrace=");\n";
+                        printCall = malloc(strlen(printFunc) + strlen(var) + strlen(endBrace) + 3);
+                        strcpy(printCall, printFunc);
+                        strcat(printCall, var);
+                        strcat(printCall, endBrace);
+                         if(node->nch == 1){
+                                node->code = strCatAlloc(" ",3,INDENT[node->child[0]->scope[0]], " ",  printCall);
+                        }
+                        else {
+                                node->code = strCatAlloc(" ",3,INDENT[node->child[0]->scope[0]], " ",  printCall);
+                                codeGen(node->child[1]);
+                        }
+                        break;}
+		case VERTEX_T:
+                        {printFunc=" print_v(";
+                        var=node->child[0]->symbol->bind;
+                        endBrace=");\n";
+			printVattr=" print_v_attr(";
+			printCall = malloc(strlen(printFunc) + 2*(strlen(var) + strlen(endBrace)) + strlen(printVattr) + 6);
+                        strcpy(printCall, printFunc);
+                        strcat(printCall, var);
+                        strcat(printCall, endBrace);
+			strcat(printCall, printVattr);
+			strcat(printCall, var);
+			strcat(printCall, endBrace);
+                         if(node->nch == 1){
+                                node->code = strCatAlloc(" ",3,INDENT[node->child[0]->scope[0]], " ",  printCall);
+                        }
+                        else {
+                                node->code = strCatAlloc(" ",3,INDENT[node->child[0]->scope[0]], " ",  printCall);
+                                codeGen(node->child[1]);
+                        }
+                        break;}
 
+		case EDGE_T:
+			{printFunc=" print_e(";
+                        var=node->child[0]->symbol->bind;
+                        endBrace=");\n";
+                        printVattr=" print_e_attr(";
+                        printCall = malloc(strlen(printFunc) + 2*(strlen(var) + strlen(endBrace)) + strlen(printVattr) + 6);
+                        strcpy(printCall, printFunc);
+                        strcat(printCall, var);
+                        strcat(printCall, endBrace);
+                        strcat(printCall, printVattr);
+                        strcat(printCall, var);
+                        strcat(printCall, endBrace);
+                         if(node->nch == 1){
+                                node->code = strCatAlloc(" ",3,INDENT[node->child[0]->scope[0]], " ",  printCall);
+                        }
+                        else {
+                                node->code = strCatAlloc(" ",3,INDENT[node->child[0]->scope[0]], " ",  printCall);
+                                codeGen(node->child[1]);
+                        }
+                        break;}
+		case STRING_T:
+                        {printFunc=" printString(";
+                        var=node->child[0]->symbol->bind;
+                        endBrace=");\n";
+                        printCall = malloc(strlen(printFunc) + strlen(var) + strlen(endBrace) + 3);
+                        strcpy(printCall, printFunc);
+                        strcat(printCall, var);
+                        strcat(printCall, endBrace);
+                        if(node->nch == 1){
+                                node->code = strCatAlloc(" ",3,INDENT[node->child[0]->scope[0]], " ",  printCall);
+                        }
+                        else {
+                                node->code = strCatAlloc(" ",3,INDENT[node->child[0]->scope[0]], " ",  printCall);
+                                codeGen(node->child[1]);
+                        }
+                        break;}
+		//default:
+			//printf("This is default\n");
+				//break;
+
+
+	}
+	break;}
+/************************************************************************************/
+	case AST_READ_GRAPH:
+		lf=node->child[0];
+		rt=node->child[1];
+		if (lf->type==GRAPH_T && rt->type==STRING_T)
+		{
+			printFunc=" = readGraph(";
+                        var=rt->symbol->bind;
+                        endBrace=");\n";
+                        printCall = malloc(strlen(printFunc) + strlen(var) + strlen(endBrace) + 3);
+                        strcpy(printCall, printFunc);
+			strcat(printCall, var);
+			strcat(printCall, endBrace);
+			node->code =  strCatAlloc(" ",2,lf->symbol->bind,printCall);
+		}
+            	else {
+                	ERRNO = ErrorTypeMisMatch;
+                	errorInfo(ERRNO, node->line, "expected `%s' to be fetched from `%s' file location\n", sTypeName(lf->type), sTypeName(rt->type) );
+                	
+            	}
+		break;
+	case AST_WRITE_GRAPH:
+                lf=node->child[0];
+                rt=node->child[1];
+                if (lf->type==GRAPH_T && rt->type==STRING_T)
+                {
+                        printFunc=" = saveGraph(";
+                        var=lf->symbol->bind;
+                        endBrace=");\n";
+			fileloc=rt->symbol->bind;
+			comma=", ";
+                        printCall = malloc(strlen(printFunc) + strlen(var) + strlen(endBrace) + strlen(comma) + strlen(fileloc) + 3);
+                        strcpy(printCall, printFunc);
+                        strcat(printCall, var);
+                        strcat(printCall, comma);
+			strcat(printCall, fileloc);
+			strcat(printCall, endBrace);
+                
+                        node->code =  strCatAlloc(" ",1,printCall);
+                }
+                else {
+                        ERRNO = ErrorTypeMisMatch;
+                        errorInfo(ERRNO, node->line, "expected `%s' to be written into `%s' file location\n", sTypeName(lf->type), sTypeName(rt->type) );
+                        
+                }
+                break;		
+/************************************************************************************/
         default:
             if(node->code == NULL) {
 #ifdef _DEBUG

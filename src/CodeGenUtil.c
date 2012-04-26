@@ -200,6 +200,20 @@ char * tmpMatch() {
     return tmp;
 }
 
+char * tmpMatchStr() {
+    static char tmp[128];
+    static int i = 0;
+    sprintf(tmp,"_STR_tmp_match_%d\0", i++);
+    return tmp;
+}
+
+char * tmpMatchStrVab() {
+    static char tmp[128];
+    static int i = 0;
+    sprintf(tmp,"_STRV_%d\0", i++);
+    return tmp;
+}
+
 void codeIndentInit(){
     int mlvl = maxLevel, i;
     //printf("Max LEVEL: %d\n", mlvl);

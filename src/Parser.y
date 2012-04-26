@@ -39,11 +39,11 @@ extern int yyparse(void); /* Parser function. */
 %type <LString> IDENTIFIER STRING_LITERAL INTEGER_CONSTANT FLOAT_CONSTANT
 %type <LString> '=' ADD_ASSIGN SUB_ASSIGN MUL_ASSIGN DIV_ASSIGN APPEND
 %type <LString> ADD SUB MUL DIV '!'
-%type <LString> EQ NE LE GE LT GT OR AND BELONG
+%type <LString> EQ NE LE GE LT GT OR AND BELONG LIN ROUT PRINT
 %type <LString> ARROW PIPE AT
 %type <LString> BOOL_TRUE BOOL_FALSE
 %type <LString> OUTCOMING_EDGES INCOMING_EDGES STARTING_VERTICES ENDING_VERTICES
-%type <LString> ALL_VERTICES ALL_EDGES
+%type <LString> ALL_VERTICES ALL_EDGES 
 %type <LString> VOID BOOLEAN INTEGER FLOAT STRING LIST VERTEX EDGE GRAPH
 %type <LString> FUNC_LITERAL
 %type <LString> IF ELSE FOR FOREACH WHILE BREAK CONTINUE RETURN MARK
@@ -70,6 +70,7 @@ extern int yyparse(void); /* Parser function. */
 %type <node> expression_statement compound_statement selection_statement compound_statement_no_scope deletion_statement 
 %type <node> iteration_statement jump_statement declaration_statement
 %type <node> statement_list 
+%type <node> io_statement io_ext
 
 // function
 %type <node> function_definition
@@ -96,6 +97,7 @@ extern int yyparse(void); /* Parser function. */
 %token ADD_ASSIGN SUB_ASSIGN MUL_ASSIGN DIV_ASSIGN
 %token APPEND ARROW PIPE AT MARK
 %token BELONG
+%token LIN ROUT PRINT
 /* CONTROL */
 %token IF ELSE
 %token FOR FOREACH WHILE
@@ -108,6 +110,7 @@ extern int yyparse(void); /* Parser function. */
 %token AST_ASSIGN AST_CAST
 %token AST_UNARY_PLUS AST_UNARY_MINUS AST_UNARY_NOT
 %token AST_FUNC_DECLARATOR AST_PARA_DECLARATION AST_FUNC 
+
 %token AST_INIT_ASSGN AST_LIST_INIT
 %token AST_MATCH AST_ATTRIBUTE AST_GRAPH_PROP
 %token AST_STAT_LIST AST_COMP_STAT AST_COMP_STAT_NO_SCOPE AST_EXT_STAT_COMMA
@@ -117,6 +120,7 @@ extern int yyparse(void); /* Parser function. */
 %token AST_JUMP_CONTINUE AST_JUMP_BREAK AST_JUMP_RETURN
 %token AST_FUNC_CALL AST_ARG_EXPS AST_EXP_STAT
 %token AST_ERROR
+%token AST_PRINT AST_PRINT_STAT AST_READ_GRAPH AST_WRITE_GRAPH
 /**************************
  *  PRECEDENCE & ASSOC    *
  **************************/
@@ -140,12 +144,17 @@ start_nonterminal
         if(!ERRNO) {// no syntax error, or declaration error
             char *mainBodyCode=NULL, *funCode=NULL,*mainCode;
             char *globalDecl=NULL;
+	    printf("\nCHECK PARSER 0\n");
             codeIndentInit();
+	    printf("\nCHECK PARSER 1\n");
             codeAllGen($$, &mainBodyCode, &funCode);
+	    printf("\nCHECK PARSER 2\n");
             codeAllFuncLiteral($$, &funCode);
+	    printf("\CHECK PARSER 3\n");
             codeAllGlobal($$,&globalDecl);
             mainCode = wapperMainCode(mainBodyCode);        
             codeIndentFree();
+	    printf("\nCHECK PARSER 4\n");
             showASTandST($$,"Semantic P2 + Code Gen");
             if(!ERRNO){
                 OUTFILESTREAM = fopen(OUTFILE,"w");
@@ -179,8 +188,12 @@ translation_unit
  *   STATEMENTS           *
  **************************/
 external_statement
-    : function_definition {$$ = $1; }
-    | statement { $$ = $1; }
+    : function_definition{
+        $$ = $1;
+    }
+    | statement{ 
+        $$ = $1;
+    }
     ;
 
 statement
@@ -191,6 +204,7 @@ statement
     | jump_statement                { $$ = $1; }
     | declaration_statement         { $$ = $1; }
     | deletion_statement            { $$ = $1; }
+    | io_statement		            { $$ = $1; }	
     ;
 
 expression_statement
@@ -200,7 +214,7 @@ expression_statement
     | ';' { $$ = astNewNode( AST_EXP_STAT, 0, NULL, $1.l); }
     | expression error {
         astFreeTree($1); $$ = NULL;
-    }
+        }
     ;
 
 statement_list
@@ -211,6 +225,11 @@ statement_list
         if(leftNode!=NULL) ll = leftNode->line;
         $$ = astNewNode( AST_STAT_LIST, 2, astAllChildren(2, $1, $2), ll );
     }
+    | '{' error { $$ = NULL; }
+    | '{' scope_in statement_list scope_out error {
+        astFreeTree($3);
+        $$ = NULL;
+    }
     ;
 
 compound_statement
@@ -219,11 +238,6 @@ compound_statement
     }
     | '{' scope_in statement_list scope_out '}'   { 
         $$ = astNewNode( AST_COMP_STAT, 1, astAllChildren(1, $3), $1.l );
-    }
-    | '{' error { $$ = NULL; }
-    | '{' scope_in statement_list scope_out error {
-        astFreeTree($3);
-        $$ = NULL;
     }
     ;
 
@@ -301,6 +315,38 @@ declaration_statement
 
 deletion_statement
     : deletion                          { $$ = $1; }
+    ;
+
+io_statement
+    : PRINT io_ext ';'			{printf("\n\nPRINT STATEMENT logic is WORKING\n\n");
+                                 $$ =  astNewNode(AST_PRINT_STAT, 1, astAllChildren(1, $2), $1.l); }
+    | IDENTIFIER LIN IDENTIFIER ';'	{printf("\n\nREAD GRAPH WORKING\n\n"); 
+                                    struct Node* tn = astNewLeaf(IDENTIFIER, $1.s, $1.l);
+                                    sTableLookupId(tn);
+					               struct Node* tm = astNewLeaf(IDENTIFIER, $3.s, $3.l);
+                                   sTableLookupId(tm);
+					                $$ = astNewNode(AST_READ_GRAPH, 2, astAllChildren(2, tn, tm), $2.l);
+					               } 
+    | IDENTIFIER ROUT IDENTIFIER 	{printf("\n\nSAVE GRAPH working in grammar\n\n");  
+                                    struct Node* tn = astNewLeaf(IDENTIFIER, $1.s, $1.l);
+                                    sTableLookupId(tn);
+					               struct Node* tm = astNewLeaf(IDENTIFIER, $3.s, $3.l);
+                                   sTableLookupId(tm);
+					               $$ = astNewNode(AST_WRITE_GRAPH, 2, astAllChildren(2, tn, tm), $2.l);  
+					} 
+    ;	
+
+io_ext
+    : LIN IDENTIFIER 			{printf("\n\nPRINTING only one statement\n\n");  
+                                struct Node* tn = astNewLeaf(IDENTIFIER, $2.s, $2.l);
+					           sTableLookupId(tn);
+                                $$ = astNewNode(AST_PRINT, 1, astAllChildren(1,tn),$1.l);
+					           } 
+    | LIN IDENTIFIER io_ext 		{printf("\n\nPRINTING multiple statements\n\n"); 
+                                    struct Node* tn = astNewLeaf(IDENTIFIER, $2.s, $2.l);
+                                    sTableLookupId(tn);
+					               $$ = astNewNode(AST_PRINT, 2, astAllChildren(2, tn, $3),$1.l);
+					               }
     ;
 
 /**************************
@@ -437,9 +483,10 @@ postfix_expression
         $$ = astNewNode ( AST_MATCH, 2, astAllChildren(2, $1, $6), $2.l );
     }
     | postfix_expression '.' IDENTIFIER {
-        $$ = astNewNode ( AST_ATTRIBUTE, 2, astAllChildren(2, $1, astNewLeaf(IDENTIFIER, $3.s, $3.l)), $2.l );
-        char * ctmp = $$->child[1]->lexval.sval;
-        $$->child[1]->lexval.sval = strCatAlloc("", 3, $$->child[0]->lexval.sval,"::",ctmp );
+        struct Node * tnode = astNewLeaf(IDENTIFIER, $3.s, $3.l);
+        $$ = astNewNode ( AST_ATTRIBUTE, 2, astAllChildren(2, $1, tnode), $2.l );
+        char * ctmp = tnode->lexval.sval;
+        $$->child[1]->lexval.sval = strCatAlloc("", 2, "::",ctmp );
         free(ctmp);
     }
     | postfix_expression '.' graph_property {
@@ -575,10 +622,10 @@ declaration
         $$ = astNewNode( AST_DECLARATION, 2, astAllChildren(2, $1, $2), $1->line );    
         sTableDeclare($$);
     }
-    | declaration_specifiers init_declarator_list error {
-        astFreeTree($1);
-        astFreeTree($2);
-        $$ = NULL;
+     | declaration_specifiers init_declarator_list error {
+     astFreeTree($1);
+     astFreeTree($2);
+     $$ = NULL;
     }
     ;
 
@@ -638,7 +685,7 @@ del_declarator
         $$ = astNewNode( BELONG, 2, astAllChildren(2, tnode, astNewLeaf(IDENTIFIER, $3.s, $3.l)), $2.l );
         // set lexval for ID2
         char * ctmp = $$->child[1]->lexval.sval;
-        $$->child[1]->lexval.sval = strCatAlloc("", 3, $$->child[0]->lexval.sval, "::", ctmp);
+        $$->child[1]->lexval.sval = strCatAlloc("", 2, "::", ctmp);
         free(ctmp);
         // DO NOT look up symbol table
         //sTableLookupId($$->child[1]);
@@ -659,7 +706,7 @@ simple_declarator
         $$ = astNewNode( BELONG, 2, astAllChildren(2, tnode, astNewLeaf(IDENTIFIER, $3.s, $3.l)), $2.l );
         // set lexval for ID2
         char * ctmp = $$->child[1]->lexval.sval;
-        $$->child[1]->lexval.sval = strCatAlloc("", 3, $$->child[0]->lexval.sval, "::", ctmp);
+        $$->child[1]->lexval.sval = strCatAlloc("", 2, "::", ctmp);
         free(ctmp);
     }
     ;
@@ -762,7 +809,7 @@ no_type_check_on_dynamic_right
 %%
 
 void yyerror(const char *s) {
-    errorInfo(ErrorSyntax, yylval.LString.l, "%s\n",s);
+errorInfo(ErrorSyntax, yylval.LString.l, "%s\n",s);
 }
 
 void main_init(char * fileName) {
@@ -775,6 +822,9 @@ void main_init(char * fileName) {
     inLoop = 0;
     inFunc = -1;
     inMATCH = 0;
+    exsitMATCH = 0;
+    matchStaticVab = NULL;
+    matchStrDecl = NULL;
     returnList = NULL;
     noReturn = NULL;
     OUTFILE = strCatAlloc("",2,fileName,".c");

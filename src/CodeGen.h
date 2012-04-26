@@ -2,7 +2,11 @@
 #define CODEGEN_H_NSBL_
 #include "ASTree.h"
 
-#define REMOVE_DYN 0xF01
+#define REMOVE_DYN  0xF01
+
+// node->tmp[]
+#define GLOBAL_TMP  0
+#define MATCH_TMP   1
 
 char * strCatAlloc(char* sep, int n, ...);
 char * strRightCatAlloc(char * base, char* sep, int n, ...);
