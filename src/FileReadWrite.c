@@ -486,7 +486,7 @@ B
 			node_temp2 = mxmlGetFirstChild(node_temp1);
                 	//printf("checkpoint node temp 2(attr name): %s\n", mxmlGetElement(node_temp2));
                 	//printf("checkpoint node temp 2(attr name): %s\n", mxmlGetText(node_temp2,NULL));
-			char* attribute=mxmlGetText(node_temp2,NULL);//attr name
+			char* attribute = (char *) mxmlGetText(node_temp2,NULL);//attr name
 			node_temp2=mxmlGetNextSibling(node_temp2);//go to attr value
 			mxml_node_t *n=node_temp2;
 			//printf("checkpoint node temp 2(attr name): %s\n", mxmlGetElement(node_temp2));
@@ -516,7 +516,7 @@ B
                         }
                         if (type==3)
                         {
-                                value=mxmlGetText(n,NULL);
+                                value= (char *)mxmlGetText(n,NULL);
                                 vertex_assign_attribute( v, attribute, value, type);
                                 //printf("\nattribute assigned to edge\n");
                         }
@@ -607,7 +607,7 @@ B
 			node_temp2 = mxmlGetFirstChild(node_temp1);
                         //printf("node_temp2: %s\n", mxmlGetElement(node_temp2));
                         //printf("checkpoint node temp 2(attr name): %s\n", mxmlGetText(node_temp2,NULL));
-			char* attribute=mxmlGetText(node_temp2,NULL);//attr name
+			char* attribute=(char *)mxmlGetText(node_temp2,NULL);//attr name
 			node_temp2=mxmlGetNextSibling(node_temp2);//go to attr value
 			mxml_node_t *n=node_temp2;
 			void* value;//=mxmlGetText(node_temp2,NULL);//needs to be checked
@@ -639,7 +639,7 @@ B
 			}
 			if (type==3)
 			{
-				value=mxmlGetText(n,NULL);
+				value=(char *)mxmlGetText(n,NULL);
                                 edge_assign_attribute( e, attribute, value, type);
                                 //printf("\nattribute assigned to edge\n");
 			}	

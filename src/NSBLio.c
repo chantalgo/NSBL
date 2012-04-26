@@ -20,7 +20,12 @@ void print_INT_T(int val)
 	printf("%d",val);
 }
 
-void print(){}
+void print_BOOL_T(bool b)
+{
+    printf( (b) ? "true" : "false" );
+}
+
+//void print(){}
 
 //function to break line(newline)
 void print_NEWLINE()

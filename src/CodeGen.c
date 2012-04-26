@@ -133,137 +133,6 @@ int listInitCode(struct Node* node, int type, int isglobal){
 	return 0;
 }
 
-int existbelong(struct Node* node){
-	if(node == NULL)
-		return 0;
-	if(node->token == BELONG)
-		return 1;
-	if(node->child == NULL)
-		return 0;
-	return (existbelong(node->child[0]) || existbelong(node->child[1]));
-}
-
-int attributeDeclareCode(struct Node* node, int type){
-	int err = 0;
-    // First generate code for BELONG
-    codeGen(node->child[0]);
-    // Then generate declaration
-    char *tvab = tmpVab();
-	switch(type){
-		case INT_T:
-			if(node->child[1]->type == FLOAT_T)
-				node->code = strCatAlloc("", 16 , 
-                    INDENT[node->child[0]->child[0]->scope[0]], 
-                    "{ ",
-                    sTypeName(type), 
-                    " ", 
-                    tvab,
-                    " = ", 
-                    "(int)",            // type conversion : FLOAT ==> INT 
-                    node->child[1]->code, 
-                    "; ",
-                    "vertex_assign_attribute(", 
-                    node->child[0]->child[0]->symbol->bind, 
-                    ", \"", 
-                    node->child[0]->child[1]->code, 
-                    "\", &", 
-                    node->child[0]->child[1]->code, 
-                    ", INT_T); }\n"
-                );
-			else if(node->child[1]->type == INT_T)
-                node->code = strCatAlloc("",15 ,
-                    INDENT[node->child[0]->child[0]->scope[0]], 
-                    "{ ",
-                    sTypeName(type), 
-                    " ", 
-                    tvab,
-                    " = ", 
-                    node->child[1]->code, 
-                    "; ",
-                    "vertex_assign_attribute(", 
-                    node->child[0]->child[0]->symbol->bind, 
-                    ", \"", 
-                    node->child[0]->child[1]->code, 
-                    "\", &", 
-                    node->child[0]->child[1]->code, 
-                    ", INT_T); }\n"
-                );
-
-			else
-				err = ErrorTypeMisMatch;		
-			break;
-		case FLOAT_T:
-			if(node->child[1]->type == INT_T)
-                node->code = strCatAlloc("", 16 ,
-                    INDENT[node->child[0]->child[0]->scope[0]],
-                    "{ ",
-                    sTypeName(type),
-                    " ",
-                    tvab,
-                    " = ",
-                    "(float)",            // type conversion : INT ==> FLOAT
-                    node->child[1]->code,
-                    "; ",
-                    "vertex_assign_attribute(",
-                    node->child[0]->child[0]->symbol->bind,
-                    ", \"",
-                    node->child[0]->child[1]->code,
-                    "\", &",
-                    node->child[0]->child[1]->code, 
-                    ", FLOAT_T); }\n"
-                );
-			else if(node->child[1]->type == FLOAT_T)
-                node->code = strCatAlloc("", 15 ,
-                    INDENT[node->child[0]->child[0]->scope[0]],
-                    "{ ",
-                    sTypeName(type),
-                    " ",
-                    tvab,
-                    " = ", 
-                    node->child[1]->code,
-                    "; ",
-                    "vertex_assign_attribute(",
-                    node->child[0]->child[0]->symbol->bind,
-                    ", \"",
-                    node->child[0]->child[1]->code,
-                    "\", &",
-                    node->child[0]->child[1]->code,
-                    ", FLOAT_T); }\n"
-                );
-			else
-				err = ErrorTypeMisMatch;
-			break;
-		case STRING_T:
-			if(node->child[1]->type == STRING_T)
-                node->code = strCatAlloc("", 15 ,
-                    INDENT[node->child[0]->child[0]->scope[0]],
-                    "{ ",
-                    sTypeName(type),
-                    "* ",
-                    tvab,
-                    " = ", 
-                    node->child[1]->code,
-                    ";",
-                    "vertex_assign_attribute(",
-                    node->child[0]->child[0]->symbol->bind,
-                    ", \"",
-                    node->child[0]->child[1]->code,
-                    "\", (void *)",
-                    tvab,
-                    ", STRING_T); }\n"
-                );
-			else
-				err = ErrorTypeMisMatch;
-			break;
-		default:
-			break;
-	}
-    if(err) {
-        errorInfo(err, node->line, "Type Mismatch for the assignment\n");
-    }
-	return err;
-}
-
 // not used, JZ 
 char * codeForFreeDerivedVabInScope(ScopeId sid, int type, GList * gl, ScopeId lvl){
     GList * vals = sTableAllVarScope( sid, type );
@@ -344,7 +213,7 @@ char * codeDel( struct Node * node ) {
         char * rtc = codeDel( node->child[1] );
         return strCatAlloc("", 2, lfc, rtc);
     }
-    else if (node->token == BELONG) {
+    else if (node->token == AST_DEL_ATTRIBUTE) {
         codeGen(node);
         char * freeFunc = codeRemoveAttrFuncName(node->child[0]->type);
         return strCatAlloc("", 7, INDENT[node->scope[0]],freeFunc," ( ", node->child[0]->code, " , \"", node->child[1]->code, "\" );\n");
@@ -461,7 +330,7 @@ int codeGen (struct Node * node) {
                 "object_get_attribute( _obj, _obj_type, ", 
                 "\"::",node->lexval.sval, "\" ) ");
             break;
-        case BELONG :
+        case AST_DEL_ATTRIBUTE :
             node->child[0]->code = strCatAlloc("", 1, node->child[0]->symbol->bind);
             node->child[1]->code = strCatAlloc("", 1, node->child[1]->lexval.sval);
             break;
@@ -503,21 +372,8 @@ int codeGen (struct Node * node) {
 						node->code = strCatAlloc("", 1, node->child[1]->code);
 						break;
 					case STRING_T:
-						if(node->child[1]->child!=NULL && node->child[1]->child[0]->token == BELONG){
-							int rv = attributeDeclareCode(node->child[1], node->child[0]->lexval.ival);
-							if(rv!=0){
-								ERRNO = rv;
-								return ERRNO;
-							}
-							node->code = strCatAlloc("", 1, node->child[1]->code);
-							node->codetmp = NULL;
-						}else if(existbelong(node->child[1])){
-							ERRNO = ErrorAttributeDeclaration;
-							return ERRNO;
-						}else{
-							stringInitCode(node->child[1], node->child[0]->lexval.ival, 1);
-							node->code = strCatAlloc("", 1, node->child[1]->code);
-						}
+						stringInitCode(node->child[1], node->child[0]->lexval.ival, 1);
+					    node->code = strCatAlloc("", 1, node->child[1]->code);
 						break;
 					case LIST_T:
 						if(node->child[1]->token!=AST_ASSIGN){
@@ -527,29 +383,13 @@ int codeGen (struct Node * node) {
 							int r = listInitCode(node->child[1], node->child[0]->lexval.ival, 1);
 							if(r){
 								ERRNO = r;
-
 								return ERRNO;
 							}
 							node->code = strCatAlloc("", 1, node->child[1]->code);
 						}
 						break;
-
 					default:
-						if(node->child[1]->child!=NULL && node->child[1]->child[0]->token == BELONG){
-							int rv = attributeDeclareCode(node->child[1], node->child[0]->lexval.ival);
-							if(rv!=0){
-								ERRNO = rv;
-								return ERRNO;
-							}
-							node->code = strCatAlloc("", 1, node->child[1]->code);
-							node->codetmp = NULL;
-						}else if(existbelong(node->child[1])){
-
-							ERRNO = ErrorAttributeDeclaration;
-							return ERRNO;
-						}else
-               				node->code = strCatAlloc("",3,INDENT[node->scope[0]],node->child[1]->code,";\n");
-						break;
+               		    node->code = strCatAlloc("",3,INDENT[node->scope[0]],node->child[1]->code,";\n");
 				}
             }
             // If scope > 0, no bother, just declaration everything in one c declaration
@@ -562,21 +402,8 @@ int codeGen (struct Node * node) {
 						node->code = strCatAlloc("", 1, node->child[1]->code);
 						break;
 					case STRING_T:
-						if(node->child[1]->child!=NULL && node->child[1]->child[0]->token == BELONG){
-							int rv = attributeDeclareCode(node->child[1], node->child[0]->lexval.ival);
-							if(rv != 0){
-								ERRNO = rv;
-								return ERRNO;
-							}
-							node->code = strCatAlloc("", 1, node->child[1]->code);
-							node->codetmp = NULL;
-						}else if(existbelong(node->child[1])){
-							ERRNO = ErrorAttributeDeclaration;
-							return ERRNO;
-						}else{
-							stringInitCode(node->child[1], node->child[0]->lexval.ival, 0);
-							node->code = strCatAlloc("", 1, node->child[1]->code);
-						}
+						stringInitCode(node->child[1], node->child[0]->lexval.ival, 0);
+						node->code = strCatAlloc("", 1, node->child[1]->code);
 						break;
 					case LIST_T:
 						if(node->child[1]->token!=AST_ASSIGN){
@@ -592,20 +419,7 @@ int codeGen (struct Node * node) {
 						}
 						break;
 					default:
-						if(node->child[1]->child!=NULL && node->child[1]->child[0]->token == BELONG){
-							int rv = attributeDeclareCode(node->child[1], node->child[0]->lexval.ival);
-							if(rv != 0){
-								ERRNO = rv;
-								return ERRNO;
-							}
-							node->code = strCatAlloc("", 1, node->child[1]->code);
-							node->codetmp = NULL;
-						}else if(existbelong(node->child[1])){
-							ERRNO = ErrorAttributeDeclaration;
-							return ERRNO;
-						}else
-                			node->code = strCatAlloc("",5,INDENT[node->scope[0]],node->child[0]->code," ",node->child[1]->code,";\n");
-						break;
+                		node->code = strCatAlloc("",5,INDENT[node->scope[0]],node->child[0]->code," ",node->child[1]->code,";\n");
 				}
             }
             break;
@@ -616,15 +430,7 @@ int codeGen (struct Node * node) {
         }
 /************************************************************************************/
         case AST_ASSIGN :               // assignment_operator 
-        //case ADD_ASSIGN :                 // not supported, JZ
-        //case SUB_ASSIGN :   
-        //case MUL_ASSIGN :  
-        //case DIV_ASSIGN : 
             lf =  node->child[0]; rt = node->child[1];
-            if(existbelong(lf)) {
-                codeGen(rt);
-				break;
-            }
 			codeGen(lf);codeGen(rt);
             // type check and implicit type conversion
             if(lf->type == rt->type && lf->type>=0 ) {

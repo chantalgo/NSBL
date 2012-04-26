@@ -39,7 +39,7 @@ extern int yyparse(void); /* Parser function. */
 %type <LString> IDENTIFIER STRING_LITERAL INTEGER_CONSTANT FLOAT_CONSTANT
 %type <LString> '=' ADD_ASSIGN SUB_ASSIGN MUL_ASSIGN DIV_ASSIGN APPEND
 %type <LString> ADD SUB MUL DIV '!'
-%type <LString> EQ NE LE GE LT GT OR AND BELONG LIN ROUT PRINT
+%type <LString> EQ NE LE GE LT GT OR AND LIN ROUT PRINT
 %type <LString> ARROW PIPE AT
 %type <LString> BOOL_TRUE BOOL_FALSE
 %type <LString> OUTCOMING_EDGES INCOMING_EDGES STARTING_VERTICES ENDING_VERTICES
@@ -121,6 +121,7 @@ extern int yyparse(void); /* Parser function. */
 %token AST_FUNC_CALL AST_ARG_EXPS AST_EXP_STAT
 %token AST_ERROR AST_LIST_MEMBER
 %token AST_PRINT AST_PRINT_COMMA AST_PRINT_STAT AST_READ_GRAPH AST_WRITE_GRAPH
+%token AST_DEL_ATTRIBUTE
 /**************************
  *  PRECEDENCE & ASSOC    *
  **************************/
@@ -177,7 +178,6 @@ translation_unit
         if(leftNode!=NULL) ll = leftNode->line;
         $$ = astNewNode( AST_EXT_STAT_COMMA, 2, astAllChildren( 2, $1, $2 ), ll );
     }
-    | translation_unit error { $$ = $1; }
     ;
 
 /**************************
@@ -517,7 +517,6 @@ primary_expression
     | constant              { $$ = $1; }
     | STRING_LITERAL        { $$ = astNewLeaf(STRING_LITERAL, $1.s, $1.l); }
     | '(' expression ')'    { $$ = $2; }
-    | error                 { $$ = NULL; }
     ;
 
 graph_property
@@ -675,39 +674,24 @@ del_declarator
         $$ = astNewLeaf(IDENTIFIER, $1.s, $1.l);
         sTableLookupId($$); 
     }
-    | IDENTIFIER BELONG IDENTIFIER {
+    | IDENTIFIER '.' IDENTIFIER {
         struct Node* tnode = astNewLeaf(IDENTIFIER, $1.s, $1.l); 
         sTableLookupId(tnode);    // check the exsitence of object
         if(tnode->type<=FLOAT_T || tnode->type>=FUNC_T) {
             ERRNO = ErrorDelAttrFromWrongType; 
             errorInfo(ERRNO,tnode->line,"del an attribute from an object of type `%s'.\n",sTypeName(tnode->type) );
         }
-        $$ = astNewNode( BELONG, 2, astAllChildren(2, tnode, astNewLeaf(IDENTIFIER, $3.s, $3.l)), $2.l );
+        $$ = astNewNode( AST_DEL_ATTRIBUTE, 2, astAllChildren(2, tnode, astNewLeaf(IDENTIFIER, $3.s, $3.l)), $2.l );
         // set lexval for ID2
         char * ctmp = $$->child[1]->lexval.sval;
         $$->child[1]->lexval.sval = strCatAlloc("", 2, "::", ctmp);
         free(ctmp);
-        // DO NOT look up symbol table
-        //sTableLookupId($$->child[1]);
     }
     ;
 
 simple_declarator
     : IDENTIFIER {
         $$ = astNewLeaf(IDENTIFIER, $1.s, $1.l);
-    }
-    | IDENTIFIER BELONG IDENTIFIER {
-        struct Node* tnode = astNewLeaf(IDENTIFIER, $1.s, $1.l);
-		sTableLookupId(tnode);      // check whether ID1 is declared
-        if(tnode->type<=FLOAT_T || tnode->type>=FUNC_T) {
-            ERRNO = ErrorDeclareAttrForWrongType;
-            errorInfo(ERRNO,tnode->line,"declare an attribute for an object of type `%s'.\n",sTypeName(tnode->type) );
-        }
-        $$ = astNewNode( BELONG, 2, astAllChildren(2, tnode, astNewLeaf(IDENTIFIER, $3.s, $3.l)), $2.l );
-        // set lexval for ID2
-        char * ctmp = $$->child[1]->lexval.sval;
-        $$->child[1]->lexval.sval = strCatAlloc("", 2, "::", ctmp);
-        free(ctmp);
     }
     ;
 
