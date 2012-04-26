@@ -50,11 +50,17 @@ int sTableInsertTree(struct Node* node, int ttype) {
 
 /** insert one IDENTIFIER or DYN_ATTRIBUTE */
 int sTableInsertId(struct Node* node, int ttype) {
-    if ( ttype < -4  && ttype!=-9) { // take care of declare unsupported type for attribute
+    if ( ttype < DYN_STRING_T  && ttype!=DYNAMIC_T) { // take care of declare unsupported type for attribute
         ERRNO = ErrorAttributeTypeNotSupported;
-        errorInfo(ERRNO, node->line,"Type `%s' is not supported for Attribute\n", sTypeName(ttype));
+        errorInfo(ERRNO, node->line, "Type `%s' is not supported for Attribute\n", sTypeName(ttype));
         return ERRNO;
     } 
+    else if ( ttype == VOID_T ) {
+        ERRNO = ErrorVoidTypeVariableNotSupported;
+        errorInfo(ERRNO, node->line, " cannot declare `void' variable.\n");
+        return ERRNO;
+    }
+   
     SymbolTableEntry* entry = sNewVarEty ( node->lexval.sval, ttype, node->line );
     if ( sTableInsert( entry ) == ErrorSymbolTableKeyAlreadyExsit ) {
         SymbolTableEntry * te = sTableLookup(entry->key);

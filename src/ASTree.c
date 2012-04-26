@@ -163,7 +163,6 @@ void ast_free_tree(struct Node* node) {
     if ( node->nch > 0 && node->child != NULL ) {
         // free children
         int i;for(i=0; i<node->nch; ++i) { 
-            debugInfo("Node<%d> : %d\n", node->token, i);
             ast_free_tree( node->child[i] ); 
             node->child[i] = NULL;
         }

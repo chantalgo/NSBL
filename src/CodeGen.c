@@ -71,136 +71,50 @@ void stringInitCode(struct Node* node, int type, int isglobal){
 	}
 }
 
-int listInitCode(struct Node* node, int type, int isglobal){
-	int etype = UNKNOWN_T;
-	char buffer[20];
-	int count = 0;
-	struct Node* tn = node->child[1];
-	if(tn->token != AST_LIST_INIT)
-		return ErrorAssignmentExpression;
-
-	if(tn->child!=NULL){
-		count++;
-		tn = tn->child[0];
-		if(tn->token == IDENTIFIER)
-			etype = tn->type;
-		else{
-			etype = tn->child[1]->type;
-			while(tn->token == AST_COMMA){
-				count++;
-				if(tn->child[1]->type != etype)
-					return ErrorListMixedType;
-				tn = tn->child[0];
-			}
-		}
-	}
-	sprintf(buffer, "%d", count);
-	if(isglobal){
-		switch(etype){
-			case UNKNOWN_T:
-				node->code = strCatAlloc("", 5, INDENT[node->scope[0]], 
-                    node->child[0]->symbol->bind, " = list_declaration(UNKNOWN_T, ", 
-                        buffer, ");\n"); 
-				break;
-			case VERTEX_T:
-				node->code = strCatAlloc("", 7, INDENT[node->scope[0]], 
-                    node->child[0]->symbol->bind, " = list_declaration(VERTEX_T, ", 
-                        buffer, ", ",node->child[1]->child[0]->code, ");\n");
-				break;
-			case EDGE_T:
-				node->code = strCatAlloc("", 7, INDENT[node->scope[0]], 
-                        node->child[0]->symbol->bind, " = list_declaration(EDGE_T, ",
-                            buffer, ", ",node->child[1]->child[0]->code, ");\n");
-				break;
-			default:
-				break;
-		}
-	}else{
-		switch(etype){
-			case UNKNOWN_T:
-				node->code = strCatAlloc("", 7, INDENT[node->scope[0]], sTypeName(type), " ", node->child[0]->symbol->bind, " = list_declaration(-1, ", buffer, ");\n"); 
-				break;
-			case VERTEX_T:
-				node->code = strCatAlloc("", 9, INDENT[node->scope[0]], sTypeName(type), " ", node->child[0]->symbol->bind, " = list_declaration(VERTEX, ", buffer, ", ",node->child[1]->code, ");\n");
-				break;
-			case EDGE_T:
-				node->code = strCatAlloc("", 9, INDENT[node->scope[0]], sTypeName(type), " ", node->child[0]->symbol->bind, " = list_declaration(EDGE, ", buffer, ", ",node->child[1]->code, ");\n");
-				break;
-			default:
-				break;
-		}
-	}
-	return 0;
-}
-
-// not used, JZ 
-char * codeForFreeDerivedVabInScope(ScopeId sid, int type, GList * gl, ScopeId lvl){
-    GList * vals = sTableAllVarScope( sid, type );
-    char * code = NULL, * freefunc = codeFreeFuncName(type);
-    int i, l = g_list_length( vals );
-    SymbolTableEntry * e;
-#ifdef _DEBUG
-    int ll = g_list_length( gl );
-    debugInfo("codeForFreeDerivedVabInScope: sid=%d, type=%d, l=%d, ll=%d\n", sid,type,l,ll);
-    if(ll>0) {
-        int i;
-        for (i=0; i<ll; ++i) {
-            e = (SymbolTableEntry *) g_list_nth_data( gl, i );
-            debugInfoExt("      gl[%d] ==> %s\n", i, e->bind);
-        }
+void listInitCode(struct Node* node, int type, int isglobal){
+    int mtype = (type == VLIST_T) ? VERTEX_T : EDGE_T;
+    if(node->token == AST_COMMA){
+        listInitCode(node->child[0], type, isglobal);
+        listInitCode(node->child[1], type, isglobal);
+        node->code = strCatAlloc("", 2, node->child[0]->code, node->child[1]->code);
     }
-#endif
-    for ( i=0; i<l; ++i ){
-        e = (SymbolTableEntry *) g_list_nth_data( vals, i );
-        if( g_list_find( gl, (gpointer) e ) == NULL )
-            code = strRightCatAlloc( code, "", 5, INDENT[lvl], freefunc, "( ", e->bind, " );\n" );
-    }
-    g_list_free( vals );
-    return code;
-}
-
-// not used, JZ
-char * allFreeCodeInScope(ScopeId sid, GList * gl, ScopeId lvl) {
-    char * sc = codeForFreeDerivedVabInScope( sid, STRING_T, gl, lvl );
-    char * vc = codeForFreeDerivedVabInScope( sid, VERTEX_T, gl, lvl );
-    char * ec = codeForFreeDerivedVabInScope( sid, EDGE_T, gl, lvl );
-    char * gc = codeForFreeDerivedVabInScope( sid, GRAPH_T, gl, lvl );
-    char * lc = codeForFreeDerivedVabInScope( sid, LIST_T, gl, lvl );
-
-    return strCatAlloc("", 5, sc, vc, ec, gc, lc );
-}
-
-// not used, JZ
-GList * getAllParaInFunc(struct Node * node, GList * gl) {
-    if (node ==NULL) return gl;
-    else if (node->token == AST_COMMA) {
-        gl = getAllParaInFunc(node->child[0], gl);
-        gl = getAllParaInFunc(node->child[1], gl);
-    }
-    else if (node->token == AST_PARA_DECLARATION) {
-        gl = g_list_append( gl, node->child[1]->symbol );
+    else if (node->token == AST_ASSIGN){
+        char num[32];
+        int nArgs = listCountCheck(node->child[1], mtype);
+        sprintf(num,"%d\0", nArgs);
+        node->code = strCatAlloc("", 7, INDENT[node->scope[0]],
+            (isglobal)? "ListType * " : "", node->child[0]->symbol->bind, 
+                " = list_declaration( ", typeMacro(mtype), " , ", num);
+        if(nArgs>0) node->code = strRightCatAlloc( node->code, "",3, " , ", node->child[1]->code, ");\n");
+        else node->code = strRightCatAlloc( node->code, "", 1, ");\n");        
     }
     else {
-        fprintf(stderr, "getAllParaInFunc: unknow node %d !!!!!!!!!!\n", node->token);
-    }
-    return gl;
+        node->code = strCatAlloc("", 6, INDENT[node->scope[0]],
+            (isglobal)? "ListType * " : "", node->symbol->bind,
+                " = list_declaration( ", typeMacro(mtype), " , 0 );\n");    
+    }        
 }
 
-// not used, JZ
-GList * getReturnVab( struct Node * node, GList * gl) {
-    if (node == NULL) return gl;
-    else if (node->token == AST_JUMP_RETURN) {
-        if (node->nch!=0) {
-            gl = g_list_append( gl, node->child[0]->symbol );
-        }
-        return gl;
+
+int listCountCheck(struct Node* node, int type){
+	int count = 0, flag = 0;
+	struct Node* tn = node;
+	if(tn->token != AST_LIST_INIT) return ErrorAssignmentExpression;
+    tn = tn->child[0];
+    while (tn->token == AST_COMMA ) {
+        if ( tn->child[1]->type != type ) flag = ErrorListMixedType;
+        tn = tn->child[0];
+        count++;
     }
-    
-    int i;
-    for (i=0; i<node->nch; ++i) {
-        gl = getReturnVab( node->child[i], gl );
+    if (tn->token == IDENTIFIER) {
+        if ( tn->type != type ) flag = ErrorListMixedType;
+        count++;
     }
-    return gl;
+    if (flag == ErrorListMixedType) {
+        ERRNO = flag;
+        errorInfo(ERRNO, node->line, "list Initialization with wrong type.\n");
+    }
+    return count;
 }
 
 char * codeDel( struct Node * node ) {
@@ -264,7 +178,6 @@ char * codeFrontDecl(int lvl ) {
     return decl;
 }
 
-
 /** recursively generate code piece on each node */
 int codeGen (struct Node * node) {
     if( node == NULL ) return;
@@ -293,8 +206,8 @@ int codeGen (struct Node * node) {
                 if(inMATCH==0){
                     node->code = strCatAlloc("", 1, node->symbol->bind);
                     if (node->type == VERTEX_T || node->type == EDGE_T || 
-                            node->type == LIST_T || node->type == STRING_T ||
-                                node->type == GRAPH_T) {
+                            node->type == VLIST_T || node->type == ELIST_T
+                                || node->type == STRING_T || node->type == GRAPH_T) {
                         node->codetmp = strCatAlloc("",2,"* ",node->symbol->bind);
                     }
                     else {
@@ -304,8 +217,8 @@ int codeGen (struct Node * node) {
                 else{
                     node->code = strCatAlloc("",3,"_str->",node->symbol->bind,"_match");
                     if (node->type == VERTEX_T || node->type == EDGE_T ||
-                            node->type == LIST_T || node->type == STRING_T ||
-                                node->type == GRAPH_T) {
+                            node->type == VLIST_T || node->type == ELIST_T
+                                || node->type == STRING_T || node->type == GRAPH_T) {
                         node->codetmp = strCatAlloc("",2,"* ",node->symbol->bind);
                     }
                     else {
@@ -314,8 +227,9 @@ int codeGen (struct Node * node) {
                     matchStaticVab = strRightCatAlloc( matchStaticVab, "", 5, 
                         INDENT[1], sTypeName(node->type),
                         (node->type == VERTEX_T || node->type == EDGE_T ||
-                            node->type == LIST_T || node->type == STRING_T ||
-                                node->type == GRAPH_T) ? " * " :" ",
+                            node->type == VLIST_T || node->type == ELIST_T
+                                || node->type == STRING_T || node->type == GRAPH_T)
+                                 ? " * " :" ",
                         node->symbol->bind,"_match;\n");
                     matchStrDecl = strRightCatAlloc( matchStrDecl, "", 2,
                         (nMATCHsVab++==0) ? "" : " , ",
@@ -344,14 +258,13 @@ int codeGen (struct Node * node) {
             node->type = node->child[1]->type;
             break;
 		case AST_LIST_INIT:
-
-			node->type = LIST_T;
+			node->type = UNKNOWN_T;
 			if(node->child==NULL)
 				node->code = strCatAlloc("", 1, " ");
 			else{
-				lf = node->child[0];
-				codeGen(lf);
-				node->code = strCatAlloc("", 1, lf->code);
+				sg = node->child[0];
+				codeGen(sg);
+				node->code = strCatAlloc("", 1, sg->code);
 			}
 			break;
         case AST_TYPE_SPECIFIER :
@@ -375,19 +288,11 @@ int codeGen (struct Node * node) {
 						stringInitCode(node->child[1], node->child[0]->lexval.ival, 1);
 					    node->code = strCatAlloc("", 1, node->child[1]->code);
 						break;
-					case LIST_T:
-						if(node->child[1]->token!=AST_ASSIGN){
-							ERRNO = ErrorDerivedTypeDeclaration;
-							return ERRNO;
-						}else{
-							int r = listInitCode(node->child[1], node->child[0]->lexval.ival, 1);
-							if(r){
-								ERRNO = r;
-								return ERRNO;
-							}
-							node->code = strCatAlloc("", 1, node->child[1]->code);
-						}
-						break;
+					case VLIST_T:
+                    case ELIST_T:
+                        listInitCode(node->child[1], node->child[0]->lexval.ival, 1);
+                        node->code = strCatAlloc("", 1, node->child[1]->code);
+                        break;
 					default:
                		    node->code = strCatAlloc("",3,INDENT[node->scope[0]],node->child[1]->code,";\n");
 				}
@@ -405,19 +310,11 @@ int codeGen (struct Node * node) {
 						stringInitCode(node->child[1], node->child[0]->lexval.ival, 0);
 						node->code = strCatAlloc("", 1, node->child[1]->code);
 						break;
-					case LIST_T:
-						if(node->child[1]->token!=AST_ASSIGN){
-							ERRNO = ErrorDerivedTypeDeclaration;
-							return ERRNO;
-						}else{
-							int r = listInitCode(node->child[1], node->child[0]->lexval.ival, 0);
-							if(r){
-								ERRNO = r;
-								return ERRNO;
-							}
-							node->code = strCatAlloc("", 1, node->child[1]->code);
-						}
-						break;
+					case VLIST_T :
+                    case ELIST_T :
+                        listInitCode(node->child[1], node->child[0]->lexval.ival, 0);
+                        node->code = strCatAlloc("", 1, node->child[1]->code);
+                        break;
 					default:
                 		node->code = strCatAlloc("",5,INDENT[node->scope[0]],node->child[0]->code," ",node->child[1]->code,";\n");
 				}
@@ -438,7 +335,7 @@ int codeGen (struct Node * node) {
                     node->code = strCatAlloc(" ",3,lf->code,op,rt->code);
                     node->type = lf->type;
                 }
-                else if ( lf->type == STRING_T || lf->type == LIST_T || 
+                else if ( lf->type == STRING_T || lf->type == VLIST_T || lf->type == ELIST_T ||
                             lf->type == VERTEX_T || lf->type == EDGE_T || 
                                 lf->type == GRAPH_T ){
                     char * func = assignFunc(lf->type);
@@ -513,13 +410,13 @@ int codeGen (struct Node * node) {
 			else if(lf->type==GRAPH_T && rt->type==EDGE_T){
 				node->code = strCatAlloc("", 5, "g_insert_e(", lf->code, ", ", rt->code, ")");	
 			}
-			else if(lf->type==GRAPH_T && rt->type==LIST_T){
+			else if(lf->type==GRAPH_T && (rt->type==VLIST_T || rt->type == ELIST_T) ){
 				node->code = strCatAlloc("", 5, "g_append_list(", lf->code, ", ", rt->code, ")");
 			}
-			else if(lf->type==LIST_T && rt->type==VERTEX_T){
+			else if(lf->type==VLIST_T && rt->type==VERTEX_T){
 				node->code = strCatAlloc("", 5, "list_append(", lf->code, ", VERTEX_T, ", rt->code, ")");
 			}
-			else if(lf->type==LIST_T && rt->type==EDGE_T){
+			else if(lf->type==ELIST_T && rt->type==EDGE_T){
 				node->code = strCatAlloc("", 5, "list_append(", lf->code, ", EDGE_T, ", rt->code, ")");
 			}else{
 				ERRNO = ErrorAssignmentExpression;
@@ -824,7 +721,7 @@ int codeGen (struct Node * node) {
             nMATCHsVab = 0;
             inMATCH++; codeGen(rt); inMATCH--;
             matchStrDecl = strRightCatAlloc( matchStrDecl,"",1,"};\n" );
-            if(lf->type != LIST_T) {
+            if(lf->type != VLIST_T && lf->type != ELIST_T) {
                 ERRNO = ErrorMactchWrongType;
                 errorInfo(ERRNO,node->line," match can NOT be operated on type `%s'.\n",sTypeName(lf->type) );
                 return ERRNO;
@@ -889,7 +786,7 @@ int codeGen (struct Node * node) {
                 " )"
             );*/
             node->code = tlt;  
-            node->type = LIST_T;
+            node->type = lf->type;
             node->tmp[0] = REMOVE_DYN; 
             break;
 /************************************************************************************/
@@ -897,7 +794,7 @@ int codeGen (struct Node * node) {
             lf = node->child[0];
             rt = node->child[1];
             codeGen(lf); codeGen(rt);
-            if(lf->type != LIST_T) {
+            if(lf->type != VLIST_T && lf->type != ELIST_T) {
                 ERRNO = ErrorGetMemberForNotListType;
                 errorInfo( ERRNO, node->line, "get member for not list type.\n");
                 return ERRNO;
@@ -913,7 +810,7 @@ int codeGen (struct Node * node) {
             }
             break;
 /************************************************************************************/
-        case AST_ATTRIBUTE :
+        case AST_ATTRIBUTE : 
             if(inMATCH==0){
                 node->child[0]->code = strCatAlloc("", 1, node->child[0]->symbol->bind);
             }
@@ -929,10 +826,10 @@ int codeGen (struct Node * node) {
             node->child[1]->code = strCatAlloc("", 1, node->child[1]->lexval.sval); 
             if(node->child[0]->type == VERTEX_T ) 
                 node->code = strCatAlloc("", 5, "vertex_get_attribute( ",
-                    node->child[0]->code, " ,  \"", node->child[1]->code, "\" )");
+                    node->child[0]->code, " ,  \"", node->child[1]->code, "\", 1 )");
             else if(node->child[0]->type == EDGE_T )
                 node->code = strCatAlloc("", 5, "edge_get_attribute( ",
-                    node->child[0]->code, " ,  \"", node->child[1]->code, "\" )");
+                    node->child[0]->code, " ,  \"", node->child[1]->code, "\", 1 )");
             else {
                 ERRNO = ErrorGetAttrForWrongType;
                 errorInfo(ERRNO, node->line, "Access attribute for type `%s'.\n",

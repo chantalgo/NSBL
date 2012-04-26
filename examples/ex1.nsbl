@@ -23,11 +23,6 @@ vertex v1, v2, v3;
 edge e1, e2, e3;
 
 // assign and del attribute
-v1.attr = "attr";
-print << v1;
-del v1.attr;
-print << v1;
-
 v1.name = "Joe";
 v1.age = 20;
 v1.w = 100;
@@ -45,4 +40,16 @@ v3.male = false;
 
 print << v1 << v2 << v3;
 
+// del attribute
+del v1.name, v2.w, v3.male;
+print << v1 << v2 << v3; 
 
+vlist la,lb,lc;
+vlist ll = [v1,v2,v3], l0;
+print << ll ;
+
+la = ll?[@age>25 || !@male];
+
+print << la;
+
+v4.a;

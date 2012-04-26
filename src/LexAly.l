@@ -28,7 +28,8 @@ comment         (\/\*([^\*]|(\*+([^\*\/])))*\*+\/)|(\/\/.*)
 "int"           { MYECHO; yylval.LString.l = LEXLINECOUNTER; return INTEGER; }
 "float"         { MYECHO; yylval.LString.l = LEXLINECOUNTER; return FLOAT; }
 "string"        { MYECHO; yylval.LString.l = LEXLINECOUNTER; return STRING; }
-"list"          { MYECHO; yylval.LString.l = LEXLINECOUNTER; return LIST; }
+"vlist"         { MYECHO; yylval.LString.l = LEXLINECOUNTER; return VLIST; }
+"elist"         { MYECHO; yylval.LString.l = LEXLINECOUNTER; return ELIST; }
 "vertex"        { MYECHO; yylval.LString.l = LEXLINECOUNTER; return VERTEX; }
 "edge"          { MYECHO; yylval.LString.l = LEXLINECOUNTER; return EDGE; }
 "graph"         { MYECHO; yylval.LString.l = LEXLINECOUNTER; return GRAPH; }
@@ -62,7 +63,6 @@ comment         (\/\*([^\*]|(\*+([^\*\/])))*\*+\/)|(\/\/.*)
 "/="            { MYECHO; yylval.LString.l = LEXLINECOUNTER; return DIV_ASSIGN; }
 "||"            { MYECHO; yylval.LString.l = LEXLINECOUNTER; return OR; }
 "&&"            { MYECHO; yylval.LString.l = LEXLINECOUNTER; return AND; }
-"::"			{ MYECHO; yylval.LString.l = LEXLINECOUNTER; return BELONG; }
 
 "<:"            { MYECHO; yylval.LString.l = LEXLINECOUNTER; return APPEND; }
 "->"            { MYECHO; yylval.LString.l = LEXLINECOUNTER; return ARROW; }

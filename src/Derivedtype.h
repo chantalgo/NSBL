@@ -102,14 +102,14 @@ void *              get_attr_value( Attribute * attr , int type);       //TODO
 int                 edge_assign_direction(EdgeType* e, VertexType* v1, VertexType* v2);
 int                 edge_assign_attribute(EdgeType* e, char* attribute, void* value, int type);
 int                 edge_remove_attribute(EdgeType* e, char* attribute);
-Attribute*          edge_get_attribute(EdgeType* e, char* attribute);       //TODO
+Attribute*          edge_get_attribute(EdgeType* e, char* attribute, int autoNew);       //TODO
 void*               edge_get_attribute_value(EdgeType* e, char* attribute);
 VertexType*         get_end_vertex(EdgeType* e);
 VertexType*         get_start_vertex(EdgeType* e);
 
 int                 vertex_assign_attribute(VertexType* v, char* attribute, void* value, int type);
 int                 vertex_remove_attribute(VertexType* v, char* attribute);
-Attribute*          vertex_get_attribute(VertexType* v, char* attribute);       //TODO
+Attribute*          vertex_get_attribute(VertexType* v, char* attribute, int autoNew);       //TODO
 void*               vertex_get_attribute_value(VertexType* v, char* attribute);
 GList*              get_v_outedges(VertexType* v);
 GList*              get_v_inedges(VertexType* v);
@@ -143,6 +143,8 @@ int                 print_e(EdgeType* e);
 int                 print_v_attr(VertexType* v);
 int                 print_e_attr(EdgeType* e);
 int                 print_LIST_T(ListType* l);
+#define print_ELIST_T print_LIST_T
+#define print_VLIST_T print_LIST_T
 
 int					print_VERTEX_T(VertexType* v);
 int 				print_EDGE_T(EdgeType* e);
@@ -166,7 +168,7 @@ ListType*           assign_operator_list(ListType** l1, ListType** l2);
 VertexType*         assign_operator_vertex(VertexType** v1, VertexType** v2);
 EdgeType*           assign_operator_edge(EdgeType** e1, EdgeType** e2);
 GraphType*          assign_operator_graph(GraphType** g1, GraphType** g2);
-void 				die(char* fmt, ...);
+void 				die(int lno, char* fmt, ...);
 
 //int list_append(ListType* list, void* data);
 //ListType* list_declare(...);
