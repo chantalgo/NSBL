@@ -4,7 +4,7 @@ MXMLDIR = ../mxmldir
 LIBDIR = ../lib
 INCLUDEDIR = ../include
 
-CFLAGS = -D_NO_LOG
+CFLAGS = -D_NO_LOG 
 ##### CFLAGS Options ############
 # -D_AST_DEBUG
 # -D_AST_DEBUG_ALL

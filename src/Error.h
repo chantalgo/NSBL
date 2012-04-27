@@ -44,12 +44,15 @@
 #define ErrorVoidTypeVariableNotSupported               +69
 #define ErrorPipeWrongType								+70
 #define ErrorForeachType								+71
+#define ErrorAssignLeftOperand                          +72
+#define ErrorAssignInMatch                              +73
+#define ErrorWrongArgmentType                           +74
 
-#define ErrorCallBreakOutsideOfLoop                     +75
-#define ErrorCallContinueOutsideOfLoop                  +76
-#define ErrorCallReturnOutsideOfFunc                    +77
 
-#define ErrorDynamicAttributeUsedInNonDynamicScope      +81
+#define ErrorCallBreakOutsideOfLoop                     +80
+#define ErrorCallContinueOutsideOfLoop                  +81
+#define ErrorCallReturnOutsideOfFunc                    +82
+#define ErrorDynamicAttributeUsedInNonDynamicScope      +83
 
 #define ErrorOperatorNotSupportedByType                 +91
 #define ErrorTypeMisMatch                               +92

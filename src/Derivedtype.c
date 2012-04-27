@@ -311,26 +311,63 @@ static void destroy_attr_from_table ( gpointer key, gpointer entry, gpointer dum
     destroy_attr( attr );
 }
 
-void* get_attr_value(Attribute* attr, int type){
-	if(attr == NULL)
-    	die(-1, "get_attr_value: <null> Attribute error \n");
-	if(type != attr->type && type != RESERVED)
-    	die(-1, "get_attr_value: atttribute type dismatch : %d != %d \n", type, attr->type);
+int get_attr_value_INT_T(Attribute* attr, int lno) {
+    if(attr == NULL) die(lno, "get_attr_value_INT_T: null attribute.\n");
+    if(attr->type == INT_T) 
+        return attr->value.iv;
+    else if (attr->type == FLOAT_T) 
+        return (int) attr->value.fv;
+    else 
+        die(lno, "get_attr_value_INT_T: atttribute type NOT INT or FLOAT\n");
+}
+
+float get_attr_value_FLOAT_T(Attribute* attr, int lno) {
+    if(attr == NULL) die(lno, "get_attr_value_FLOAT_T: null attribute.\n");
+    if(attr->type == INT_T) 
+        return (float) attr->value.iv;
+    else if (attr->type == FLOAT_T) 
+        return attr->value.fv;
+    else 
+        die(lno, "get_attr_value_FLOAT_T: atttribute type NOT INT or FLOAT\n");
+}
+
+bool get_attr_value_BOOL_T(Attribute* attr, int lno) {
+    if(attr == NULL) die(lno, "get_attr_value_BOOL_T: null attribute.\n");
+    if(attr->type == BOOL_T)
+        return attr->value.bv;
+    else
+        die(lno, "get_attr_value_BOOL_T: atttribute type NOT BOOL.\n");
+}
+
+StringType* get_attr_value_STRING_T(Attribute* attr, int lno) {
+    if(attr == NULL) die(lno, "get_attr_value_STRING_T: null attribute.\n");
+    if(attr->type == STRING_T)
+        return attr->value.sv;
+    else
+        die(lno, "get_attr_value_STRING_T: atttribute type NOT STRING.\n");
+}
+
+void* get_attr_value(Attribute* attr, int type, int lno){
+	if(attr == NULL) die(lno, "get_attr_value: <null> Attribute error \n");
+    void * rt = NULL;
 	switch(attr->type){
 		case INT_T:
-			return &(attr->value.iv);
+			rt = (void *) &(attr->value.iv);
 			break;
 		case FLOAT_T:
-			return &(attr->value.fv);
+			rt = (void *) &(attr->value.fv);
 			break;
 		case STRING_T:
-			return attr->value.sv;
+			rt = (void *) attr->value.sv;
 			break;
 		case BOOL_T:
-			return &(attr->value.bv);
+			rt = (void *) &(attr->value.bv);
 		default:
 			return NULL;
 	}
+	if(type != attr->type && type != RESERVED)
+    	die(lno, "get_attr_value: atttribute type dismatch : %d != %d \n", type, attr->type);
+    return rt;
 }
 
 int edge_assign_attribute ( EdgeType* e, char * attr_name, void * val, int type ) {
@@ -362,7 +399,7 @@ int edge_remove_attribute(EdgeType* e, char* attr_name){
     return 0;
 }
 
-Attribute* edge_get_attribute(EdgeType* e, char* attribute, int autoNew){	
+Attribute* edge_get_attribute(EdgeType* e, char* attribute, int autoNew, int lno){	
     Attribute* attr = g_hash_table_lookup(e->attributes, attribute);
     if (attr == NULL && autoNew) {
         attr = new_attr(UNKNOWN_T, NULL);
@@ -371,10 +408,10 @@ Attribute* edge_get_attribute(EdgeType* e, char* attribute, int autoNew){
     return attr;
 }
 
-void* edge_get_attribute_value(EdgeType* e, char* attribute){
+void* edge_get_attribute_value(EdgeType* e, char* attribute, int lno){
 	Attribute* attr;
-	if( (attr = edge_get_attribute(e, attribute, 0)) != NULL)
-		return get_attr_value(attr, RESERVED);
+	if( (attr = edge_get_attribute(e, attribute, 0, lno)) != NULL)
+		return get_attr_value(attr, RESERVED,lno);
 	return NULL;
 }
 
@@ -415,7 +452,7 @@ int vertex_remove_attribute(VertexType* v, char* attr_name) {
     return 0;
 }
 
-Attribute* vertex_get_attribute(VertexType* v, char* attribute, int autoNew){
+Attribute* vertex_get_attribute(VertexType* v, char* attribute, int autoNew, int lno){
     Attribute* attr = g_hash_table_lookup(v->attributes, attribute);
     if (attr == NULL && autoNew) {
         attr = new_attr(UNKNOWN_T, NULL);
@@ -424,10 +461,10 @@ Attribute* vertex_get_attribute(VertexType* v, char* attribute, int autoNew){
     return attr;
 }
 
-void* vertex_get_attribute_value(VertexType* v, char* attribute){
+void* vertex_get_attribute_value(VertexType* v, char* attribute, int lno){
 	Attribute* attr;
-	if( (attr = vertex_get_attribute(v, attribute, 0)) != NULL)
-		return get_attr_value(attr, RESERVED);
+	if( (attr = vertex_get_attribute(v, attribute, 0, lno)) != NULL)
+		return get_attr_value(attr, RESERVED,lno);
 	return NULL;
 }
 
@@ -828,7 +865,6 @@ int print_GRAPH_T(GraphType* g){
 }
 
 int print_attr(Attribute* attr){
-    printf("print_attr:");
 	if(attr==NULL)	
     	die(-1, "print_attr: <null> attribute \n");
 	switch(attr->type){
@@ -1101,7 +1137,6 @@ Attribute* unary_operator(Attribute* attr1, int op,int rm_attr1, int lno){
 	if(attr1 == NULL)
         die(lno, "NULL Attribute error");
 	int	type1 = attr1->type;
-    printf("unary_operator : type = %ld\n", attr1->type);
 	Attribute* result;
 	switch(op){
 		case OP_PLUS:
@@ -1131,7 +1166,7 @@ Attribute* unary_operator(Attribute* attr1, int op,int rm_attr1, int lno){
 		case OP_NOT:
 			if(type1 == BOOL_T){
 				result = new_attr(BOOL_T, NULL);
-				attr1->value.bv = !(attr1->value.bv);
+				result->value.bv = !(attr1->value.bv);
 			}
 			else
                 die(lno, "unary_operator: incompatible type %d.\n", type1);
@@ -1172,22 +1207,22 @@ Attribute* cast_operator(Attribute* attr1, int type, int rm_attr1, int lno){
 	return result;
 }
 
-Attribute* object_get_attribute(void* v, int obj, char* attribute){
+Attribute* object_get_attribute(void* v, int obj, char* attribute, int autoNew, int lno){
 	if(v==NULL)
-        die(-1, "object_get_attribute: null object\n");
+        die(lno, "object_get_attribute: null object\n");
 	Attribute* attr = NULL;
 	switch(obj){
 		case VERTEX_T:
-			attr = vertex_get_attribute((VertexType*)v, attribute, 0);
+			attr = vertex_get_attribute((VertexType*)v, attribute, autoNew, lno);
 			break;
 		case EDGE_T:
-			attr = edge_get_attribute((EdgeType*)v, attribute, 0);
+			attr = edge_get_attribute((EdgeType*)v, attribute, autoNew, lno);
 			break;
 		default:
-        	die(-1, "object_get_attribute: illegal object type\n");
+        	die(lno, "object_get_attribute: illegal object type\n");
 	}
     if(attr==NULL)
-        die(-1, "object_get_attribute: attibute `%s' not exsit.\n");
+        die(lno, "object_get_attribute: attibute `%s' not exsit.\n");
 	return attr;
 }
 

@@ -97,20 +97,24 @@ int                 assign_attr( Attribute * attr, int type, void * val );
 int                 cmp_attr( Attribute * attr1, void * val );
 void                output_attr( char * key, Attribute * attr, FILE * out );
 static void         destroy_attr_from_table ( gpointer key, gpointer entry, gpointer dummy2 );
-void *              get_attr_value( Attribute * attr , int type);       //TODO
+void *              get_attr_value( Attribute * attr , int type, int lno);       //TODO
+int                 get_attr_value_INT_T(Attribute* attr, int lno);
+float               get_attr_value_FLOAT_T(Attribute* attr, int lno);
+bool                get_attr_value_BOOL_T(Attribute* attr, int lno);
+StringType*         get_attr_value_STRING_T(Attribute* attr, int lno);
 
 int                 edge_assign_direction(EdgeType* e, VertexType* v1, VertexType* v2);
 int                 edge_assign_attribute(EdgeType* e, char* attribute, void* value, int type);
 int                 edge_remove_attribute(EdgeType* e, char* attribute);
-Attribute*          edge_get_attribute(EdgeType* e, char* attribute, int autoNew);       //TODO
-void*               edge_get_attribute_value(EdgeType* e, char* attribute);
+Attribute*          edge_get_attribute(EdgeType* e, char* attribute, int autoNew, int lno);       //TODO
+void*               edge_get_attribute_value(EdgeType* e, char* attribute, int lno);
 VertexType*         get_end_vertex(EdgeType* e);
 VertexType*         get_start_vertex(EdgeType* e);
 
 int                 vertex_assign_attribute(VertexType* v, char* attribute, void* value, int type);
 int                 vertex_remove_attribute(VertexType* v, char* attribute);
-Attribute*          vertex_get_attribute(VertexType* v, char* attribute, int autoNew);       //TODO
-void*               vertex_get_attribute_value(VertexType* v, char* attribute);
+Attribute*          vertex_get_attribute(VertexType* v, char* attribute, int autoNew, int lno);       //TODO
+void*               vertex_get_attribute_value(VertexType* v, char* attribute, int lno);
 GList*              get_v_outedges(VertexType* v);
 GList*              get_v_inedges(VertexType* v);
 
@@ -160,9 +164,9 @@ void		        assign_operator_to_static( Attribute* attr1, int type, void * valu
 Attribute*          assign_operator( Attribute* attr1, Attribute* attr2, int rm_attr1, int rm_attr2, int lno);
 Attribute*          unary_operator( Attribute* attr1, int op, int rm_attr1, int lno);
 Attribute*          cast_operator( Attribute* attr1, int type, int rm_attr1, int lno);
-Attribute*          object_get_attribute(void* v, int obj, char* attribute);
 ListType*           list_match( ListType * l, bool (*func) (void *, int ), int rm_l );
 ListType*			list_pipe(ListType* l, int type, int pipe_op, int rm_l);
+Attribute*          object_get_attribute(void* v, int obj, char* attribute, int autoNew, int lno);
 
 // DONE
 StringType*         assign_operator_string(StringType** s1, StringType** s2);

@@ -112,7 +112,7 @@ char* s_table_type_name (int type) {
         case BOOL_T:            return "bool";
         case INT_T:             return "int";
         case FLOAT_T:           return "float";
-        case STRING_T:          return "GString";
+        case STRING_T:          return "StringType";
         case VLIST_T:           return "ListType";
         case ELIST_T:           return "ListType";
         case VERTEX_T:          return "VertexType";

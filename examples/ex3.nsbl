@@ -1,0 +1,58 @@
+vertex v0,v1,v2,v3,v4,v5;
+v1.name = "a";
+v2.name = "b";
+v3.name = "c";
+v4.name = "d";
+v5.name = "e";
+
+v1.age = 10;
+v2.age = 11;
+v3.age = 12;
+v4.age = 13;
+v5.age = 14;
+
+v1.w = 100.1;
+v2.w = 200.1;
+v3.w = 300.1;
+v4.w = 400.1;
+v5.w = 500.1;
+
+v1.m = true;
+v2.m = false;
+v3.m = true;
+v4.m = true;
+v5.m = false;
+
+edge e0,e1,e2,e3,e4,e5;
+
+e1:v1->v2;
+e2:v3->v2;
+e3:v4->v2;
+e4:v2->v3;
+e5:v5->v2;
+
+
+
+
+vlist vl = [v1,v2,v3,v4,v5];
+vlist l1=[],l2,l3=[v3];
+elist le1,le2;
+vlist vp = [v2];
+
+//le1 = vp|inE;
+//print <<"1 pipe for edges"<<le1;
+
+//l1 = le1|strtV;
+//print <<"2 pipe for vertex"<<l1;
+
+
+//print <<"init\n"<<vl;
+print <<v1<<v2<<v3<<v4<<v5;
+
+//l2 = vl?[@age>13 || !@m];
+print<<"===================\n" << l2;
+
+foreach(vertex vt : vp|inE|strtV?[@age>13 || !@m]) print << vt;
+
+del v0, v1, v2, v3, v4, v5;
+del vl, l1, l2, l3;
