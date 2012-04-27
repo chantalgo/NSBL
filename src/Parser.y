@@ -44,7 +44,7 @@ extern int yyparse(void); /* Parser function. */
 %type <LString> BOOL_TRUE BOOL_FALSE
 %type <LString> OUTCOMING_EDGES INCOMING_EDGES STARTING_VERTICES ENDING_VERTICES
 %type <LString> ALL_VERTICES ALL_EDGES 
-%type <LString> VOID BOOLEAN INTEGER FLOAT STRING LIST VERTEX EDGE GRAPH
+%type <LString> VOID BOOLEAN INTEGER FLOAT STRING VLIST ELIST VERTEX EDGE GRAPH
 %type <LString> FUNC_LITERAL
 %type <LString> IF ELSE FOR FOREACH WHILE BREAK CONTINUE RETURN MARK
 %type <LString> '{' '}' '(' ')' '[' ']' ';' ',' ':' '.' '?' DEL 
@@ -81,7 +81,7 @@ extern int yyparse(void); /* Parser function. */
  *      TOKEN LIST        *
  **************************/
 /* TYPE RELATED */
-%token VOID BOOLEAN INTEGER FLOAT STRING LIST VERTEX EDGE GRAPH DYN_ATTRIBUTE
+%token VOID BOOLEAN INTEGER FLOAT STRING VLIST ELIST VERTEX EDGE GRAPH DYN_ATTRIBUTE
 %token IDENTIFIER INTEGER_CONSTANT FLOAT_CONSTANT STRING_LITERAL
 %token BOOL_TRUE BOOL_FALSE
 /* FUNCTIONS RELATED */
@@ -359,7 +359,7 @@ expression
 
 assignment_expression
     : logical_OR_expression { $$ = $1; }
-    | unary_expression assignment_operator assignment_expression {
+    | postfix_expression assignment_operator assignment_expression {
        $$ = astNewNode ( $2.i, 2, astAllChildren(2, $1, $3), $2.l ); 
     }
     ;
@@ -458,7 +458,6 @@ postfix_expression
     | primary_expression ':' primary_expression ARROW primary_expression {
         $$ = astNewNode ( ARROW, 3, astAllChildren(3, $1, $3, $5), $2.l );
     }
-    | primary_expression ':' primary_expression ARROW primary_expression MARK primary_expression 
     | IDENTIFIER '(' argument_expression_list ')' {
         struct Node* tn = astNewLeaf(IDENTIFIER, $1.s, $1.l);
         $$ = astNewNode(AST_FUNC_CALL, 2, astAllChildren(2, tn, $3), tn->line);
@@ -482,10 +481,12 @@ postfix_expression
     | postfix_expression '[' expression ']' {
         $$ = astNewNode ( AST_LIST_MEMBER, 2, astAllChildren(2, $1, $3), $2.l );
     }
-    | postfix_expression '.' IDENTIFIER {
-        struct Node * tnode = astNewLeaf(IDENTIFIER, $3.s, $3.l);
-        $$ = astNewNode ( AST_ATTRIBUTE, 2, astAllChildren(2, $1, tnode), $2.l );
-        char * ctmp = tnode->lexval.sval;
+    | IDENTIFIER '.' IDENTIFIER {
+        struct Node * tn1 = astNewLeaf(IDENTIFIER, $1.s, $1.l);
+        struct Node * tn3 = astNewLeaf(IDENTIFIER, $3.s, $3.l);
+        sTableLookupId(tn1);
+        $$ = astNewNode ( AST_ATTRIBUTE, 2, astAllChildren(2, tn1, tn3), $2.l );
+        char * ctmp = tn3->lexval.sval;
         $$->child[1]->lexval.sval = strCatAlloc("", 2, "::",ctmp );
         free(ctmp);
     }
@@ -610,7 +611,8 @@ basic_type_specifier
     | INTEGER   { int ttype = INT_T;    $$= astNewLeaf(AST_TYPE_SPECIFIER, &(ttype), $1.l); }
     | FLOAT     { int ttype = FLOAT_T;  $$= astNewLeaf(AST_TYPE_SPECIFIER, &(ttype), $1.l); }
     | STRING    { int ttype = STRING_T; $$= astNewLeaf(AST_TYPE_SPECIFIER, &(ttype), $1.l); }
-    | LIST      { int ttype = LIST_T;   $$= astNewLeaf(AST_TYPE_SPECIFIER, &(ttype), $1.l); }
+    | VLIST     { int ttype = VLIST_T;  $$= astNewLeaf(AST_TYPE_SPECIFIER, &(ttype), $1.l); }
+    | ELIST     { int ttype = ELIST_T;  $$= astNewLeaf(AST_TYPE_SPECIFIER, &(ttype), $1.l); }
     | VERTEX    { int ttype = VERTEX_T; $$= astNewLeaf(AST_TYPE_SPECIFIER, &(ttype), $1.l); }
     | EDGE      { int ttype = EDGE_T;   $$= astNewLeaf(AST_TYPE_SPECIFIER, &(ttype), $1.l); }
     | GRAPH     { int ttype = GRAPH_T;  $$= astNewLeaf(AST_TYPE_SPECIFIER, &(ttype), $1.l); }
@@ -746,11 +748,9 @@ initializer
     : assignment_expression { $$ = $1; }
     | '[' initializer_list ']' {
         $$ = astNewNode( AST_LIST_INIT, 1, astAllChildren(1, $2), $1.l );
-        $$->type = LIST_T;
     }
     | '[' ']' {
         $$ = astNewNode( AST_LIST_INIT, 0, NULL, $1.l );
-        $$->type = LIST_T;
     }
     ;
 

@@ -41,11 +41,12 @@
 #define ErrorNoReturnInFunc                             +66
 #define ErrorIfConditionNotBOOL                         +67
 #define ErrorGetMemberForNotListType                    +68
-#define ErrorPipeWrongType								+69
+#define ErrorVoidTypeVariableNotSupported               +69
+#define ErrorPipeWrongType								+70
 
-#define ErrorCallBreakOutsideOfLoop                     +70
-#define ErrorCallContinueOutsideOfLoop                  +71
-#define ErrorCallReturnOutsideOfFunc                    +72
+#define ErrorCallBreakOutsideOfLoop                     +75
+#define ErrorCallContinueOutsideOfLoop                  +76
+#define ErrorCallReturnOutsideOfFunc                    +77
 
 #define ErrorDynamicAttributeUsedInNonDynamicScope      +81
 

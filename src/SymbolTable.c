@@ -113,7 +113,8 @@ char* s_table_type_name (int type) {
         case INT_T:             return "int";
         case FLOAT_T:           return "float";
         case STRING_T:          return "GString";
-        case LIST_T:            return "ListType";
+        case VLIST_T:           return "ListType";
+        case ELIST_T:           return "ListType";
         case VERTEX_T:          return "VertexType";
         case EDGE_T:            return "EdgeType";
         case GRAPH_T:           return "GraphType";
@@ -124,10 +125,6 @@ char* s_table_type_name (int type) {
         case DYN_INT_T:         return "D_int";
         case DYN_FLOAT_T:       return "D_float";
         case DYN_STRING_T:      return "D_string";
-        case DYN_LIST_T:        return "D_list";
-        case DYN_VERTEX_T:      return "D_vertex";
-        case DYN_EDGE_T:        return "D_edge";
-        case DYN_GRAPH_T:       return "D_graph";
         case UNKNOWN_T:         return "UNKOWN";
         case NOT_AVAIL:         return "NOT_AVAL";
         default:                return NULL;
@@ -141,7 +138,8 @@ char* s_table_short_type_name (int type) {
         case INT_T:             return "i";
         case FLOAT_T:           return "f";
         case STRING_T:          return "s";
-        case LIST_T:            return "l";
+        case VLIST_T:           return "vl";
+        case ELIST_T:           return "el";
         case VERTEX_T:          return "v";
         case EDGE_T:            return "e";
         case GRAPH_T:           return "g";
@@ -152,10 +150,6 @@ char* s_table_short_type_name (int type) {
         case DYN_INT_T:         return "Di";
         case DYN_FLOAT_T:       return "Df";
         case DYN_STRING_T:      return "Ds";
-        case DYN_LIST_T:        return "Dl";
-        case DYN_VERTEX_T:      return "Dv";
-        case DYN_EDGE_T:        return "De";
-        case DYN_GRAPH_T:       return "Dg";
         default:                return NULL;
     }
 }
