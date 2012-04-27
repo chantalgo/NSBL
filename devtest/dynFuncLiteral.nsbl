@@ -21,22 +21,22 @@ e3: v2->v3;
 e4: v3->v2;
 e5: v4->v2;
 
-list el = [e1,e2,e3,e4,e5];
+elist el = [e1,e2,e3,e4,e5];
 //print <<el;
 
-list lt1 = [];
-list lt2 = [];
+vlist lt1 = [];
+elist lt2 = [];
 lt1 = el|endV;
 print <<lt1;
 //print <<e1<<e2;
 
 //print <<v1<<v2<<v3<<v4;
 
-list j = [ v1, v3, v4];
+vlist j = [ v1, v3, v4];
 lt2 = j|inE;
 //print << lt1<<lt2;
 
-list l = [];
+vlist l = [];
 
 l = j?[@age>-100]?[@age>0];
 //print << l;

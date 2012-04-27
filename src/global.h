@@ -30,5 +30,5 @@ extern FILE * OUTFILESTREAM;
 extern char ** INDENT;
 extern int  inLoop, inFunc, inMATCH, existMATCH, nMATCHsVab, existPIPE;
 extern GList *returnList, *noReturn;
-extern char * matchStaticVab, *matchStrDecl, *pipeStrDecl;
+extern char * matchStaticVab, *matchStrDecl;
 #endif

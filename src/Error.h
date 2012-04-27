@@ -43,6 +43,7 @@
 #define ErrorGetMemberForNotListType                    +68
 #define ErrorVoidTypeVariableNotSupported               +69
 #define ErrorPipeWrongType								+70
+#define ErrorForeachType								+71
 
 #define ErrorCallBreakOutsideOfLoop                     +75
 #define ErrorCallContinueOutsideOfLoop                  +76

@@ -678,7 +678,7 @@ ListType* list_append(ListType* list, int type, void* obj){
 	if(list->type == UNKNOWN_T)
 		list->type = type;
 	else if(list->type != type){
-		die("unmatched list append element\n");
+		die(-1, "unmatched list append element\n");
 	}
 	if(g_list_index(list->list, obj) == -1){
 		list->list = g_list_append(list->list, obj);
@@ -701,7 +701,7 @@ int list_assign_element(ListType* list, int type, int index, void* obj){
 
 ListType* list_append_gl(ListType* l, GList* gl, int type){
 	if(l->type != type){
-		die("unmatched type for list append glist\n");
+		die(-1,"unmatched type for list append glist\n");
 	}
 	int len = g_list_length(gl);
 	int i;
@@ -749,7 +749,7 @@ int print_v_attr(VertexType* v){
     GList* klist = g_hash_table_get_keys(v->attributes);
     int l = g_list_length(klist);
     int n = 0;
-    printf("<Vertex> : Id = %d\n", v->id);
+    printf("<Vertex> : Id = %ld\n", v->id);
     for(n; n<l; n++){
         void* key = g_list_nth_data(klist, n);
         Attribute* value = g_hash_table_lookup(v->attributes, key);
@@ -769,7 +769,7 @@ int print_e_attr(EdgeType* e){
 	printf("--->vend: ");
 	print_v(e->end);
 	printf("\n");
-    printf("<Edge> : Id = %d\n", e->id);
+    printf("<Edge> : Id = %ld\n", e->id);
     for(n; n<l; n++){
         void* key = g_list_nth_data(klist, n);
         Attribute* value = g_hash_table_lookup(e->attributes, key);
@@ -1101,7 +1101,7 @@ Attribute* unary_operator(Attribute* attr1, int op,int rm_attr1, int lno){
 	if(attr1 == NULL)
         die(lno, "NULL Attribute error");
 	int	type1 = attr1->type;
-    printf("unary_operator : type = %d\n", attr1->type);
+    printf("unary_operator : type = %ld\n", attr1->type);
 	Attribute* result;
 	switch(op){
 		case OP_PLUS:
@@ -1238,7 +1238,7 @@ ListType* list_pipe(ListType* l, int type, int pipe_op, int rm_l){
 				else if(pipe_op==OP_INE)
 					newl = list_append_gl(newl, ((VertexType*)g_list_nth_data(l->list, i))->inEdges, EDGE_T);
 				else
-					die("illegal pipe op for vlist\n");
+					die(-1,"illegal pipe op for vlist\n");
 				break;
 			case VERTEX_T:
 				if(pipe_op==OP_SV)
@@ -1246,9 +1246,9 @@ ListType* list_pipe(ListType* l, int type, int pipe_op, int rm_l){
 				else if(pipe_op==OP_EV)
 					newl = list_append(newl, VERTEX_T, ((EdgeType*)g_list_nth_data(l->list, i))->end);
 				else
-					die("illegel pipe op for elist\n");
+					die(-1,"illegel pipe op for elist\n");
 				break;
-			default: die("illegal pipe type \n");
+			default: die(-1,"illegal pipe type \n");
 		}
 	}
 	if(rm_l == FLAG_DESTROY_ATTR)destroy_list(l);

@@ -18,7 +18,7 @@ FILE * OUTFILESTREAM;           // Output file
 int  inLoop, inFunc;            // flags to indicate inside of loop or func
 int  inMATCH, existMATCH, nMATCHsVab, existPIPE;
 GList *returnList, *noReturn;
-char * matchStaticVab, *matchStrDecl, *pipeStrDecl;
+char * matchStaticVab, *matchStrDecl;
 
 void derivedTypeInitCode(struct Node* node, int type, int isglobal){
 	if(node->token == AST_COMMA){
@@ -170,16 +170,11 @@ char * codeGetAttrVal( char * operand, int type ) {
 
 char * codeFrontDecl(int lvl ) {
     char * decl = NULL;
-    if(existMATCH == 1){ // for MATCH
+    if(existMATCH == 1 || existPIPE == 1){ // for MATCH
        decl = strRightCatAlloc(decl, "", 2,INDENT[lvl],matchStrDecl);
        free(matchStrDecl); matchStrDecl= NULL;
-       existMATCH = 0;
+       existMATCH = 0; existPIPE = 0;
     }
-	if(existPIPE == 1){
-		decl = strRightCatAlloc(decl,"", 2, INDENT[lvl],pipeStrDecl);
-		free(pipeStrDecl); pipeStrDecl=NULL;
-		existPIPE = 0;
-	}
     return decl;
 }
 
@@ -724,15 +719,13 @@ int codeGen (struct Node * node) {
 			lf = node->child[0];
 			rt = node->child[1];
 			codeGen(lf);codeGen(rt);
-			//if(lf->type!=ELIST_T || lf->type!=VLIST){
-			if(lf->type != LIST_T){
+			if(lf->type!=ELIST_T || lf->type!=VLIST){
 				ERRNO = ErrorPipeWrongType;
 				errorInfo(ERRNO, node->line, "pipe can NOT be operated on type `%s'.\n", sTypeName(lf->type));
 			}
 			existPIPE = 1;
 			char* nltype;
-			//if(lf->type == ELIST_T)
-			if(rt->token == STARTING_VERTICES || rt->token == ENDING_VERTICES)
+			if(lf->type == ELIST_T)
 				nltype = strCatAlloc("",1, typeMacro(VERTEX_T));
 			else
 				nltype = strCatAlloc("", 1, typeMacro(EDGE_T));
@@ -746,7 +739,7 @@ int codeGen (struct Node * node) {
 			char* tnl = strCatAlloc("",1, tmpVab());
 			char* tlen = strCatAlloc("", 1, tmpVab());
 			char * ti = strCatAlloc("", 1, tmpVab());
-			pipeStrDecl = strRightCatAlloc( pipeStrDecl,"", 83,
+			matchStrDecl = strRightCatAlloc( matchStrDecl,"", 83,
 					"ListType * ", tnl, " = (ListType*) malloc(sizeof(ListType));\n",
 					tnl, "->list = NULL;\n",
 					tnl, "->type = ", nltype, ";\n",
@@ -772,17 +765,16 @@ int codeGen (struct Node * node) {
 					"}\n"
 					);
             if(lf->tmp[0]==REMOVE_DYN) {
-                pipeStrDecl = strRightCatAlloc(pipeStrDecl,"",3,
+                matchStrDecl = strRightCatAlloc(matchStrDecl,"",3,
                     "destroy_list ( ", lf->code, ");\n"
                 );
             }
             free(pop);free(tlen);free(ti);free(nltype);
             node->code = tnl;  
-			/*if(lf->type == ELIST_T)
+			if(lf->type == ELIST_T)
             	node->type = VLIST_T;
 			else
-				node->type = ELIST_T;*/
-			node->type = LIST_T;
+				node->type = ELIST_T;
             node->tmp[0] = REMOVE_DYN; 
 			}break;
 /************************************************************************************/
@@ -1060,8 +1052,29 @@ int codeGen (struct Node * node) {
             }
             break;
         }
-        case AST_FOREACH :
-            break;
+        case AST_FOREACH :{
+			lf = node->child[0]; sg = node->child[1]; rt = node->child[2];
+			codeGen(lf); codeGen(sg); codeGen(rt);
+			int ltype = lf->child[1]->type, rtype = sg->type;
+			if( !(ltype==VERTEX_T&&rtype==VLIST_T) || !(ltype==EDGE_T&&rtype==ELIST_T)){
+				ERRNO = ErrorForeachType;
+				errorInfo(ERRNO, node->line, "foreach has wrong type\n");
+				return ERRNO;
+			}
+			char* ti = strCatAlloc("", 1, tmpVab());
+			char* tlen = strCatAlloc("", 1, tmpVab());
+			char* tc = strCatAlloc("", 1, tmpVab());
+            node->code = codeFrontDecl(node->scope[0] );
+			node->code = strRightCatAlloc(node->code, "" , 28,
+					INDENT[node->scope[0]], typeMacro(ltype), " * ", ti, ";\n",
+					INDENT[node->scope[0]], "int ", tlen, " = g_list_length(", sg->code, "->list);\n",
+					INDENT[node->scope[0]], "int ", tc, ";\n",
+					INDENT[node->scope[0]], "for (", tc, "=0; ", tc, "<", tlen, "; ", tc, "++) {\n",
+					rt->code,
+					INDENT[node->scope[0]], "}\n //END_OF_FOREACH");
+			free(ti);free(tlen);free(tc);
+			break;
+		}
 /************************************************************************************/
         case AST_JUMP_BREAK :           // jump_statement
             if(inLoop==0) {

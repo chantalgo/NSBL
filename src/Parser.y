@@ -288,8 +288,12 @@ iteration_statement
     | FOR '(' ';' ';' ')' statement {
         $$ = astNewNode(AST_FOR, 4, astAllChildren(4, NULL, NULL, NULL, $6), $1.l);
     }
-    | FOREACH '(' IDENTIFIER ':' postfix_expression ')' statement {
-        $$ = astNewNode(AST_FOREACH, 3, astAllChildren(3, astNewLeaf(IDENTIFIER, $3.s, $3.l), $5, $7), $1.l);
+    | FOREACH '(' basic_type_specifier IDENTIFIER ':' postfix_expression ')' statement {
+		struct Node* temp1 = astNewLeaf(IDENTIFIER, $4.s, $4.l);
+		sTableLookupId(temp1);
+		struct Node* temp2 = astNewNode(AST_DECLARATION, 2, astAllChildren(2, $3, temp1), $1.l);
+		sTableDeclare(temp2);
+        $$ = astNewNode(AST_FOREACH, 3, astAllChildren(3, temp2, $6, $8), $1.l);
     }
     ;
 
@@ -810,7 +814,6 @@ void main_init(char * fileName) {
     matchStaticVab = NULL;
     matchStrDecl = NULL;
 	existPIPE = 0;
-	pipeStrDecl = NULL;
     returnList = NULL;
     noReturn = NULL;
     OUTFILE = strCatAlloc("",2,fileName,".c");
