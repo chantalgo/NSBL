@@ -18,7 +18,7 @@ FILE * OUTFILESTREAM;           // Output file
 int  inLoop, inFunc;            // flags to indicate inside of loop or func
 int  inMATCH, exsitMATCH, nMATCHsVab;
 GList *returnList, *noReturn;
-char * matchStaticVab, *matchStrDecl;
+char * matchStaticVab, *matchStrDecl, *pipeStrDecl;
 
 void derivedTypeInitCode(struct Node* node, int type, int isglobal){
 	if(node->token == AST_COMMA){
@@ -806,8 +806,69 @@ int codeGen (struct Node * node) {
             node->code = strCatAlloc(" ", 1, node->child[0]->code );
             break;
 /************************************************************************************/
-        case PIPE :
-            break;
+        case PIPE :{
+			lf = node->child[0];
+			rt = node->child[1];
+			codeGen(lf);
+			//if(lf->type!=ELIST_T || lf->type!=VLIST){
+			if(lf->type != LIST_T){
+				ERRNO = ErrorPipeWrongType;
+				errorInfo(ERRNO, node->line, "pipe can NOT be operated on type `%s'.\n", sTypeName(lf->type));
+			}
+			char* nltype;
+			//if(lf->type == ELIST_T)
+			if(rt->token == STARTING_VERTICES || rt->token == ENDING_VERTICES)
+				nltype = strCatAlloc("",1, VERTEX_T);
+			else
+				nltype = strCatAlloc("", 1, EDGE_T);
+			char* pop;
+			switch(rt->token){
+				case OUTCOMING_EDGES: pop = strCatAlloc("",1,"OP_OUTE");break;
+				case INCOMING_EDGES: pop = strCatAlloc("", 1, "OP_INE");break;
+				case STARTING_VERTICES: pop = strCatAlloc("", 1, "OP_SV");break;
+				case ENDING_VERTICES: pop == strCatAlloc("", 1, "OP_EV"); break;
+			}
+			char* tnl = strCatAlloc("",1, tmpVab());
+			char* tlen = strCatAlloc("", 1, tmpVab());
+			char * ti = strCatAlloc("", 1, tmpVab());
+			pipeStrDecl = strRightCatAlloc( pipeStrDecl,"", 33,
+					"ListType * ", tnl, " = (ListType*) malloc(sizeof(ListType));\n",
+					tnl, "->list = NULL\n",
+					tnl, "->type = ", nltype, ";\n",
+					"int ", tlen, " = g_list_length(", lf->code, "->list);\n",
+					"for(", ti, "; ", ti, "<", tlen, "; ", ti, "++){\n",
+					"switch(",nltype, "){\n",
+					"case EDGE_T:\n",
+					"if(", pop, "==OP_OUTE)\n",
+					tnl, " = list_append_gl(", tnl, " ((VertexType*)g_list_nth_data(", lf->code, "->list, ", ti, "))->outEdges, EDGE_T);\n",
+					"else if(", pop, "==OP_INE)\n",
+					tnl, " = list_append_gl(", tnl, " ((VertexType*)g_list_nth_data(", lf->code, "->list, ", ti, "))->inEEdges, EDGE_T);\n",
+					"else ", "die(\"illeage pipe op for vlist\"\\n);\n",
+					"break;\n",
+					"case VERTEX_T:\n",
+					"if(", pop, "==OP_SV)\n",
+					tnl, " = list_append(", tnl, ", VERTEX_T, ((EdgeType*)g_list_nth_data(", lf->code, "->list, ", ti, "))->start);\n",
+					"else if(", pop, "==OP_EV)\n",
+					tnl, " = list_append(", tnl, ", EDGE_T,  ((EdgeType*)g_list_nth_data(", lf->code, "->list, ", ti, "))->end);\n",
+					"else ", "die(\"illeage pipe op for elist\"\\n);\n",
+					"break;\n",
+					"}\n",
+					"}\n"
+					);
+            if(lf->tmp[0]==REMOVE_DYN) {
+                pipeStrDecl = strRightCatAlloc(pipeStrDecl,"",3,
+                    "destroy_list ( ", lf->code, ");\n"
+                );
+            }
+            free(pop);free(tlen);free(ti);free(nltype);
+            node->code = tnl;  
+			/*if(lf->type == ELIST_T)
+            	node->type = VLIST_T;
+			else
+				node->type = ELIST_T;*/
+			node->type = LIST_T;
+            node->tmp[0] = REMOVE_DYN; 
+			}break;
 /************************************************************************************/
         case AST_MATCH :
             lf = node->child[0];        // list

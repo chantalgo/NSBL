@@ -40,7 +40,7 @@
 #define ErrorNoReturnInFunc                             +66
 #define ErrorIfConditionNotBOOL                         +67
 #define ErrorGetMemberForNotListType                    +68
-
+#define ErrorPipeWrongType								+69
 
 #define ErrorCallBreakOutsideOfLoop                     +70
 #define ErrorCallContinueOutsideOfLoop                  +71

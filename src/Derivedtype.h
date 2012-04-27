@@ -133,8 +133,9 @@ ListType* 			pipe(ListType* list, int pipiop);
 
 ListType* 			list_declaration(int type, int n, ...);
 void* 				list_getelement(ListType* list, int index);
-int 				list_append(ListType* list, int type, void* obj);
+ListType* 			list_append(ListType* list, int type, void* obj);
 int 				list_assign_element(ListType* list, int type, int index, void* obj);
+ListType*			list_append_gl(ListType *l, GList* gl, int type); 
 
 /*print functions*/
 int                 print_g(GraphType* g);
@@ -159,6 +160,7 @@ Attribute*          unary_operator( Attribute* attr1, int op, int rm_attr1, int 
 Attribute*          cast_operator( Attribute* attr1, int type, int rm_attr1, int lno);
 Attribute*          object_get_attribute(void* v, int obj, char* attribute);
 ListType*           list_match( ListType * l, bool (*func) (void *, int ), int rm_l );
+ListType*			list_pipe(ListType* l, int type, int pipe_op, int rm_l);
 
 // DONE
 StringType*         assign_operator_string(StringType** s1, StringType** s2);

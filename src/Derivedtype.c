@@ -279,7 +279,7 @@ void output_attr( char * key, Attribute * attr, FILE * out ){
             }
             fprintf(out, "%s -> \"%s\"", key, (attr->value.sv)->str); break;
         default :
-            fprintf(stderr,"Derivedtype:output_attr: unknown type %d!!!!\n", attr->type);
+            fprintf(stderr,"Derivedtype:output_attr: unknown type %ld!!!!\n", attr->type);
     }
         printf("\n");
 }
@@ -674,14 +674,14 @@ void* list_getelement(ListType* list, int index){
 	return g_list_nth_data(list->list, index);
 }
 
-int list_append(ListType* list, int type, void* obj){
+ListType* list_append(ListType* list, int type, void* obj){
 	if(list->type == UNKNOWN_T)
 		list->type = type;
 	else if(list->type != type){
-		return 1;
+		die("unmatched list append element");
 	}
 	list->list = g_list_append(list->list, obj);
-	return 0;
+	return list;
 }
 
 int list_assign_element(ListType* list, int type, int index, void* obj){
@@ -696,6 +696,17 @@ int list_assign_element(ListType* list, int type, int index, void* obj){
 	p = obj;
 	return 0;
 } 
+
+ListType* list_append_gl(ListType* l, GList* gl, int type){
+	if(l->type != type)
+		die("unmatched type for list append glist");
+	int len = g_list_length(gl);
+	int i;
+	for(i=0; i<len; i++){
+		l->list = g_list_append(l->list, g_list_nth_data(gl, i));
+	}
+	return l;
+}
 
 int print_list(ListType* list){	
     int i;
@@ -735,7 +746,7 @@ int print_v_attr(VertexType* v){
     for(n; n<l; n++){
         void* key = g_list_nth_data(klist, n);
         Attribute* value = g_hash_table_lookup(v->attributes, key);
-        fprintf(stderr, "key = %s, value = %p\n", key, value);
+        fprintf(stderr, "key = %s, value = %p\n", (char*)key, value);
         output_attr( (char *) key, value, stdout);
     }
     printf("========================================\n");
@@ -831,7 +842,7 @@ int print_attr(Attribute* attr){
 			printf("%f", attr->value.fv);
 			break;
 		case STRING_T:
-			printf("%s", attr->value.sv);
+			printf("%s", (attr->value.sv)->str);
 			break;
 		default:
 			break;
@@ -1200,6 +1211,37 @@ ListType* list_match(ListType* l, bool (*func) (void*, int), int rm_l){
 		}
 		if(b){
 			newl->list = g_list_append(newl->list, obj);
+		}
+	}
+	if(rm_l == FLAG_DESTROY_ATTR)destroy_list(l);
+	return newl;
+}
+
+ListType* list_pipe(ListType* l, int type, int pipe_op, int rm_l){
+	ListType* newl = (ListType*)malloc(sizeof(ListType));
+	newl->list = NULL;
+	newl->type = type;
+	int len = g_list_length(l->list);
+	int i;
+	for(i=0; i<len; i++){
+		switch(type){
+			case EDGE_T:
+				if(pipe_op==OP_OUTE)
+					newl = list_append_gl(newl, ((VertexType*)g_list_nth_data(l->list, i))->outEdges, EDGE_T);
+				else if(pipe_op==OP_INE)
+					newl = list_append_gl(newl, ((VertexType*)g_list_nth_data(l->list, i))->inEdges, EDGE_T);
+				else
+					die("illegal pipe op for vlist\n");
+				break;
+			case VERTEX_T:
+				if(pipe_op==OP_SV)
+					newl = list_append(newl, VERTEX_T, ((EdgeType*)g_list_nth_data(l->list, i))->start);
+				else if(pipe_op==OP_EV)
+					newl = list_append(newl, VERTEX_T, ((EdgeType*)g_list_nth_data(l->list, i))->end);
+				else
+					die("illegel pipe op for elist\n");
+				break;
+			default: die("illegal pipe type \n");
 		}
 	}
 	if(rm_l == FLAG_DESTROY_ATTR)destroy_list(l);

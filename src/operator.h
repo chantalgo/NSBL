@@ -19,6 +19,10 @@
 #define OP_MINUS    0x10E
 #define OP_NOT      0x10F
 
+#define OP_OUTE		0x110
+#define OP_INE		0x111
+#define OP_SV		0x112
+#define OP_EV		0x113
 
 #define OP_UNKNOWN  0x1FF
 
