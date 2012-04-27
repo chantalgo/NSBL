@@ -7,25 +7,45 @@ func axx(int k):bool = {
     return i>3;
 };
 
-vertex v1,v2,v3,v4;
+vertex v0,v1,v2,v3,v4;
 v1.age = 10; v1.w = 100.0;
 v2.age = 2; v2.w = 1000.0;
 v3.age = 4; v3.w = 200.;
 v4.age = -1; v4.w = 300.;
 
-print <<v1<<v2<<v3<<v4;
+edge e1,e2,e3,e4,e5,e6;
 
-list j = [ v1, v2, v3, v4];
+e1: v1->v2;
+e2: v1->v3;
+e3: v2->v3;
+e4: v3->v2;
+e5: v4->v2;
+
+list el = [e1,e2,e3,e4,e5];
+//print <<el;
+
+list lt1 = [];
+list lt2 = [];
+lt1 = el|endV;
+print <<lt1;
+//print <<e1<<e2;
+
+//print <<v1<<v2<<v3<<v4;
+
+list j = [ v1, v3, v4];
+lt2 = j|inE;
+//print << lt1<<lt2;
+
 list l = [];
 
 l = j?[@age>-100]?[@age>0];
-print << l;
+//print << l;
 
 func cond(int k):bool = { return @age > k; };
-print << "xxxxxxx";
+//print << "xxxxxxx";
 int iii = 250;
 l = j?[@w>iii || cond(5)];
-print << l;
+//print << l;
 
 //l = j?[@age>iii]?[@a<v.a];
 

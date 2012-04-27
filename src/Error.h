@@ -20,6 +20,7 @@
 #define ErrorDerivedTypeDeclaration						+23
 #define ErrorAssignmentExpression						+24
 #define ErrorListMixedType								+25
+#define ErrorEdgeAssignExpression						+26
 
 // semantic 51-80
 #define ErrorIdentifierAlreadyDeclared                  +51

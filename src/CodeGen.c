@@ -16,7 +16,7 @@ char * OUTFILE;
 FILE * OUTFILESTREAM;           // Output file
 
 int  inLoop, inFunc;            // flags to indicate inside of loop or func
-int  inMATCH, exsitMATCH, nMATCHsVab;
+int  inMATCH, existMATCH, nMATCHsVab, existPIPE;
 GList *returnList, *noReturn;
 char * matchStaticVab, *matchStrDecl, *pipeStrDecl;
 
@@ -256,11 +256,16 @@ char * codeGetAttrVal( char * operand, int type ) {
 
 char * codeFrontDecl(int lvl ) {
     char * decl = NULL;
-    if(exsitMATCH == 1){ // for MATCH
+    if(existMATCH == 1){ // for MATCH
        decl = strRightCatAlloc(decl, "", 2,INDENT[lvl],matchStrDecl);
        free(matchStrDecl); matchStrDecl= NULL;
-       exsitMATCH = 0;
+       existMATCH = 0;
     }
+	if(existPIPE == 1){
+		decl = strRightCatAlloc(decl,"", 2, INDENT[lvl],pipeStrDecl);
+		free(pipeStrDecl); pipeStrDecl=NULL;
+		existPIPE = 0;
+	}
     return decl;
 }
 
@@ -766,6 +771,18 @@ int codeGen (struct Node * node) {
             break;
 /************************************************************************************/
         case ARROW :
+			lf = node->child[0]; sg = node->child[1]; rt = node->child[2];
+			if(lf->token!=IDENTIFIER || sg->token!=IDENTIFIER || rt->token!=IDENTIFIER){
+				ERRNO = ErrorEdgeAssignExpression;
+				errorInfo(ERRNO, node->line, "edge assign expression error\n");
+			}
+			if(lf->type!=EDGE_T||sg->type!=VERTEX_T||rt->type!=VERTEX_T){
+				ERRNO = ErrorEdgeAssignExpression;
+				errorInfo(ERRNO, node->line, "edge assign illegal var type error\n");
+			}
+			codeGen(lf); codeGen(sg); codeGen(rt);
+			node->code = strCatAlloc("",7,"edge_assign_direction(", lf->code, ", ", sg->code, ", ", rt->code, ")");
+			node->codetmp = NULL;
             break;
 /************************************************************************************/
         case AST_FUNC_CALL :
@@ -809,48 +826,50 @@ int codeGen (struct Node * node) {
         case PIPE :{
 			lf = node->child[0];
 			rt = node->child[1];
-			codeGen(lf);
+			codeGen(lf);codeGen(rt);
 			//if(lf->type!=ELIST_T || lf->type!=VLIST){
 			if(lf->type != LIST_T){
 				ERRNO = ErrorPipeWrongType;
 				errorInfo(ERRNO, node->line, "pipe can NOT be operated on type `%s'.\n", sTypeName(lf->type));
 			}
+			existPIPE = 1;
 			char* nltype;
 			//if(lf->type == ELIST_T)
 			if(rt->token == STARTING_VERTICES || rt->token == ENDING_VERTICES)
-				nltype = strCatAlloc("",1, VERTEX_T);
+				nltype = strCatAlloc("",1, typeMacro(VERTEX_T));
 			else
-				nltype = strCatAlloc("", 1, EDGE_T);
+				nltype = strCatAlloc("", 1, typeMacro(EDGE_T));
 			char* pop;
 			switch(rt->token){
 				case OUTCOMING_EDGES: pop = strCatAlloc("",1,"OP_OUTE");break;
 				case INCOMING_EDGES: pop = strCatAlloc("", 1, "OP_INE");break;
 				case STARTING_VERTICES: pop = strCatAlloc("", 1, "OP_SV");break;
-				case ENDING_VERTICES: pop == strCatAlloc("", 1, "OP_EV"); break;
+				case ENDING_VERTICES: pop = strCatAlloc("", 1, "OP_EV"); break;
 			}
 			char* tnl = strCatAlloc("",1, tmpVab());
 			char* tlen = strCatAlloc("", 1, tmpVab());
 			char * ti = strCatAlloc("", 1, tmpVab());
-			pipeStrDecl = strRightCatAlloc( pipeStrDecl,"", 33,
+			pipeStrDecl = strRightCatAlloc( pipeStrDecl,"", 83,
 					"ListType * ", tnl, " = (ListType*) malloc(sizeof(ListType));\n",
-					tnl, "->list = NULL\n",
+					tnl, "->list = NULL;\n",
 					tnl, "->type = ", nltype, ";\n",
 					"int ", tlen, " = g_list_length(", lf->code, "->list);\n",
-					"for(", ti, "; ", ti, "<", tlen, "; ", ti, "++){\n",
+					"int ", ti, ";\n",
+					"for(", ti, "=0; ", ti, "<", tlen, "; ", ti, "++){\n",
 					"switch(",nltype, "){\n",
 					"case EDGE_T:\n",
 					"if(", pop, "==OP_OUTE)\n",
-					tnl, " = list_append_gl(", tnl, " ((VertexType*)g_list_nth_data(", lf->code, "->list, ", ti, "))->outEdges, EDGE_T);\n",
+					tnl, " = list_append_gl(", tnl, ", ((VertexType*)g_list_nth_data(", lf->code, "->list, ", ti, "))->outEdges, EDGE_T);\n",
 					"else if(", pop, "==OP_INE)\n",
-					tnl, " = list_append_gl(", tnl, " ((VertexType*)g_list_nth_data(", lf->code, "->list, ", ti, "))->inEEdges, EDGE_T);\n",
-					"else ", "die(\"illeage pipe op for vlist\"\\n);\n",
+					tnl, " = list_append_gl(", tnl, ", ((VertexType*)g_list_nth_data(", lf->code, "->list, ", ti, "))->inEdges, EDGE_T);\n",
+					"else ", "die(\"illeage pipe op for vlist\\n\");\n",
 					"break;\n",
 					"case VERTEX_T:\n",
 					"if(", pop, "==OP_SV)\n",
 					tnl, " = list_append(", tnl, ", VERTEX_T, ((EdgeType*)g_list_nth_data(", lf->code, "->list, ", ti, "))->start);\n",
 					"else if(", pop, "==OP_EV)\n",
-					tnl, " = list_append(", tnl, ", EDGE_T,  ((EdgeType*)g_list_nth_data(", lf->code, "->list, ", ti, "))->end);\n",
-					"else ", "die(\"illeage pipe op for elist\"\\n);\n",
+					tnl, " = list_append(", tnl, ", VERTEX_T,  ((EdgeType*)g_list_nth_data(", lf->code, "->list, ", ti, "))->end);\n",
+					"else ", "die(\"illeage pipe op for elist\\n\");\n",
 					"break;\n",
 					"}\n",
 					"}\n"
@@ -898,7 +917,7 @@ int codeGen (struct Node * node) {
             } 
             // set FLAG for STR declaration
             // FLAG cleared in AST_EXP_STAT
-            exsitMATCH = 1;
+            existMATCH = 1;
             // DYNAMIC : get attr val
             if(rt->type < 0) {
                 char * ctmp = rt->code;

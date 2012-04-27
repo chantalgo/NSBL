@@ -28,7 +28,7 @@ extern FILE* ERRORIO;
 extern char * OUTFILE;
 extern FILE * OUTFILESTREAM;
 extern char ** INDENT;
-extern int  inLoop, inFunc, inMATCH, exsitMATCH, nMATCHsVab;
+extern int  inLoop, inFunc, inMATCH, existMATCH, nMATCHsVab, existPIPE;
 extern GList *returnList, *noReturn;
-extern char * matchStaticVab, *matchStrDecl;
+extern char * matchStaticVab, *matchStrDecl, *pipeStrDecl;
 #endif

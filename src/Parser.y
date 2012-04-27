@@ -806,9 +806,11 @@ void main_init(char * fileName) {
     inLoop = 0;
     inFunc = -1;
     inMATCH = 0;
-    exsitMATCH = 0;
+    existMATCH = 0;
     matchStaticVab = NULL;
     matchStrDecl = NULL;
+	existPIPE = 0;
+	pipeStrDecl = NULL;
     returnList = NULL;
     noReturn = NULL;
     OUTFILE = strCatAlloc("",2,fileName,".c");

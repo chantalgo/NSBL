@@ -678,9 +678,11 @@ ListType* list_append(ListType* list, int type, void* obj){
 	if(list->type == UNKNOWN_T)
 		list->type = type;
 	else if(list->type != type){
-		die("unmatched list append element");
+		die("unmatched list append element\n");
 	}
-	list->list = g_list_append(list->list, obj);
+	if(g_list_index(list->list, obj) == -1){
+		list->list = g_list_append(list->list, obj);
+	}
 	return list;
 }
 
@@ -698,12 +700,15 @@ int list_assign_element(ListType* list, int type, int index, void* obj){
 } 
 
 ListType* list_append_gl(ListType* l, GList* gl, int type){
-	if(l->type != type)
-		die("unmatched type for list append glist");
+	if(l->type != type){
+		die("unmatched type for list append glist\n");
+	}
 	int len = g_list_length(gl);
 	int i;
+	void* obj;
 	for(i=0; i<len; i++){
-		l->list = g_list_append(l->list, g_list_nth_data(gl, i));
+		obj = g_list_nth_data(gl,i);
+		list_append(l, type, obj);
 	}
 	return l;
 }
@@ -759,6 +764,11 @@ int print_e_attr(EdgeType* e){
     int l = g_list_length(klist);
     int n = 0;
     printf("\nEdge Attributes=======================\n");
+	printf("vstart: ");
+	print_v(e->start);
+	printf("--->vend: ");
+	print_v(e->end);
+	printf("\n");
     for(n; n<l; n++){
         void* key = g_list_nth_data(klist, n);
         Attribute* value = g_hash_table_lookup(e->attributes, key);
