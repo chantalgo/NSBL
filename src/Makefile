@@ -23,7 +23,6 @@ YFLAGS =
 
 GLIBLINK = `pkg-config --cflags --libs glib-2.0`
 YACCLIB = -ly -lfl
-MXMLIB = ../mxmldir/libmxml.a -lpthread
 
 CC = gcc -g $(CFLAGS) $(GLIBLINK)
 LEX = flex
@@ -35,9 +34,9 @@ OBJ = Parser.tab.o LexAly.yy.o ASTree.o SymbolTable.o SymbolTableUtil.o util.o E
 all : n2c.exe runlibs includes nsbl
 
 n2c.exe : $(OBJ)
-	$(CC) -o n2c.exe $(OBJ) $(MXMLIB) $(YACCLIB)
+	$(CC) -o n2c.exe $(OBJ) $(YACCLIB)
 	mkdir -p $(BINDIR)
-		mv n2c.exe $(BINDIR)
+	mv n2c.exe $(BINDIR)
 Parser.tab.o: Parser.tab.c Parser.tab.h
 	$(CC) -c Parser.tab.c
 LexAly.yy.o: LexAly.yy.c Parser.tab.h
@@ -68,16 +67,15 @@ Derivedtype.o : Derivedtype.h Derivedtype.c
 	$(CC) -c Derivedtype.c
 NSBLio.o: NSBLio.c
 	$(CC) -c NSBLio.c
-FileReadWrite.o: FileReadWrite.h FileReadWrite.c  
+FileReadWrite.o: FileReadWrite.h FileReadWrite.c libmxml.a 
 	$(CC) -c FileReadWrite.c 
 libmxml.a : 
-#	cd $(MXMLDIR); ./configure; make libmxml.a; cd -
-	cp $(MXMLDIR)/libmxml.a .
+	cd $(MXMLDIR); ./configure; make libmxml.a; cd -
+	mkdir -p $(LIBDIR)
 	cp $(MXMLDIR)/libmxml.a $(LIBDIR)
-	cp $(MXMLDIR)/libmxml.a $(INCLUDEDIR)
 runlibs: NSBLio.o Derivedtype.o FileReadWrite.o
 	rm -f libnsblgraph.a
-	$(AR) -cvq libnsblgraph.a NSBLio.o Derivedtype.o FileReadWrite.o $(MXMLDIR)/libmxml.a
+	$(AR) -cvq libnsblgraph.a NSBLio.o Derivedtype.o FileReadWrite.o
 	mkdir -p $(LIBDIR)
 	cp libnsblgraph.a $(LIBDIR)
 nsbl : genScript.sh
@@ -86,7 +84,7 @@ nsbl : genScript.sh
 	cp nsbl $(BINDIR)
 includes : NSBLio.h Derivedtype.h FileReadWrite.h type.h operator.h
 	mkdir -p $(INCLUDEDIR)
-	cp NSBLio.h Derivedtype.h FileReadWrite.h type.h operator.h $(MXMLDIR)/libmxml.a  $(INCLUDEDIR)
+	cp NSBLio.h Derivedtype.h FileReadWrite.h type.h operator.h $(INCLUDEDIR)
 
 testglib : Derivedtype.o graph_lib_test.c
 	$(CC) -c graph_lib_test.c
@@ -94,7 +92,6 @@ testglib : Derivedtype.o graph_lib_test.c
 
 clean-mxml :
 	cd $(MXMLDIR) ; make distclean; cd -
-	rm -f libmxml.a
 
 clean :	
 	rm -f Parser.tab.c Parser.tab.h LexAly.yy.c y.output *.o
@@ -104,7 +101,7 @@ clean :
 clean-include :
 	rm -f $(INCLUDEDIR)/*
 
-distclean : clean clean-include
+distclean : clean clean-include clean-mxml
 	rm -f $(BINDIR)/n2c.exe $(BINDIR)/nsbl nsbl
-	rm -f $(LIBDIR)/libnsblgraph.a
+	rm -f $(LIBDIR)/libnsblgraph.a $(LIBDIR)/libmxml.a
 	rm -f -r $(BINDIR) $(LIBDIR) $(INCLUDEDIR)

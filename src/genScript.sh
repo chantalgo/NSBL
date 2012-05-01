@@ -33,7 +33,7 @@ echo \"\$BIN/n2c.exe \$NSBLFILE\"
 \$BIN/n2c.exe \$NSBLFILE
 if [ \$? -eq 0 ]
 then
-    echo \"\$CC \$CFLAG \$CFILE -I\$INCLUDE \$LIB/libnsblgraph.a \$CLIB\"
+    echo \"\$CC \$CFLAG \$CFILE -I\$INCLUDE \$LIB/libnsblgraph.a \$LIB/libmxml.a \$CLIB\"
     \$CC \$CFLAG \$CFILE -I\$INCLUDE \$LIB/libnsblgraph.a \$LIB/libmxml.a \$CLIB
 fi
 " > nsbl
