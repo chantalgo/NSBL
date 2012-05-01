@@ -56,7 +56,7 @@ foreach(vertex vt : vp|inE|strtV?[@age>13 || !@m]) print << vt;
 
 // list member
 int i;
-for (i=0; i<5; i=i+1)
+for (i=0; i<length(vl); i=i+1)
 print << "list Member :\n" << vl[i];
 
 vertex tmp;

@@ -51,7 +51,9 @@ comment         (\/\*([^\*]|(\*+([^\*\/])))*\*+\/)|(\/\/.*)
 "endV"          { MYECHO; yylval.LString.l = LEXLINECOUNTER; return ENDING_VERTICES; }
 "allV"          { MYECHO; yylval.LString.l = LEXLINECOUNTER; return ALL_VERTICES; }
 "allE"          { MYECHO; yylval.LString.l = LEXLINECOUNTER; return ALL_EDGES; }
-"print"		{ MYECHO; yylval.LString.l = LEXLINECOUNTER; return PRINT;}
+
+"print"		    { MYECHO; yylval.LString.l = LEXLINECOUNTER; return PRINT;}
+"length"        { MYECHO; yylval.LString.l = LEXLINECOUNTER; return LENGTH;}
 
 "=="            { MYECHO; yylval.LString.l = LEXLINECOUNTER; return EQ; }
 "!="            { MYECHO; yylval.LString.l = LEXLINECOUNTER; return NE; }
