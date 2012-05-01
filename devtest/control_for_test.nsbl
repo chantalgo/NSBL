@@ -1,0 +1,63 @@
+vertex v0,v1,v2,v3,v4,v5,v6;
+v1.name = "Va";
+v2.name = "Vb";
+v3.name = "Vc";
+v4.name = "Vd";
+v5.name = "Ve";
+
+v1.age = 10;
+v2.age = 11;
+v3.age = 12;
+v4.age = 13;
+v5.age = 14;
+
+v1.w = 100.1;
+v2.w = 200.1;
+v3.w = 300.1;
+v4.w = 400.1;
+v5.w = 500.1;
+
+v1.m = true;
+v2.m = false;
+v3.m = true;
+v4.m = true;
+v5.m = false;
+
+edge e0,e1,e2,e3,e4,e5;
+
+e1:v1->v2;
+e2:v3->v2;
+e3:v4->v2;
+e4:v2->v3;
+e5:v5->v2;
+
+e1.level = 4;
+e2.level = 2;
+e3.level = 6;
+e4.level = 1;
+e5.level = 9;
+
+
+vlist vl1 = [v1,v2,v3,v4,v5];
+vlist vl2=[],vl3,vl4=[v3];
+elist el1,el2;
+
+int testlocal(){
+	elist testl;
+	return 0;
+	}
+
+
+//attribute value used in for loop
+for(v0.i = 0; v0.i<5; v0.i = v0.i+1){
+	elist el_in_for;
+	el_in_for = vl1|outE?[@level>v0.i];
+	print << "leves greater then: "<<v0.i<<"\n";
+	foreach(edge et : el_in_for) print <<et;
+	print <<"EDN=========\n";
+	del el_in_for;
+}
+
+
+del v0, v1, v2, v3, v4, v5;
+del vl1, vl2, vl3, vl4, el1, el2;

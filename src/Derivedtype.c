@@ -335,8 +335,10 @@ bool get_attr_value_BOOL_T(Attribute* attr, int lno) {
     if(attr == NULL) die(lno, "get_attr_value_BOOL_T: null attribute.\n");
     if(attr->type == BOOL_T)
         return attr->value.bv;
-    else
+    else{
+		printf("attr_type: %d\n", attr->type);
         die(lno, "get_attr_value_BOOL_T: atttribute type NOT BOOL.\n");
+	}
 }
 
 StringType* get_attr_value_STRING_T(Attribute* attr, int lno) {
