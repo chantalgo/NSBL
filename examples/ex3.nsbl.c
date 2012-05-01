@@ -55,13 +55,13 @@ edge_assign_direction(e2_e8_s0, v3_v3_s0, v2_v2_s0);
 edge_assign_direction(e3_e9_s0, v4_v4_s0, v2_v2_s0);
 edge_assign_direction(e4_e10_s0, v2_v2_s0, v3_v3_s0);
 edge_assign_direction(e5_e11_s0, v5_v5_s0, v2_v2_s0);
-ListType * vl_vl12_s0 = list_declaration( VERTEX_T , 5 , v1_v1_s0 , v2_v2_s0 , v3_v3_s0 , v4_v4_s0 , v5_v5_s0);
-ListType * l1_vl13_s0 = list_declaration( VERTEX_T , 0);
-ListType * l2_vl14_s0 = list_declaration( VERTEX_T , 0 );
-ListType * l3_vl15_s0 = list_declaration( VERTEX_T , 1 , v3_v3_s0);
-ListType * le1_el16_s0 = list_declaration( EDGE_T , 0 );
-ListType * le2_el17_s0 = list_declaration( EDGE_T , 0 );
-ListType * vp_vl18_s0 = list_declaration( VERTEX_T , 1 , v2_v2_s0);
+vl_vl12_s0 = list_declaration( VERTEX_T , 5 , v1_v1_s0 , v2_v2_s0 , v3_v3_s0 , v4_v4_s0 , v5_v5_s0);
+l1_vl13_s0 = list_declaration( VERTEX_T , 0);
+l2_vl14_s0 = list_declaration( VERTEX_T , 0 );
+l3_vl15_s0 = list_declaration( VERTEX_T , 1 , v3_v3_s0);
+le1_el16_s0 = list_declaration( EDGE_T , 0 );
+le2_el17_s0 = list_declaration( EDGE_T , 0 );
+vp_vl18_s0 = list_declaration( VERTEX_T , 1 , v2_v2_s0);
 print_VERTEX_T ( v1_v1_s0 );
 print_VERTEX_T ( v2_v2_s0 );
 print_VERTEX_T ( v3_v3_s0 );
@@ -139,7 +139,7 @@ print_VERTEX_T ( vt_v19_s0 );
 } //END_OF_FOREACH
 destroy_list ( _tmp_vab_6 );
 i_i20_s0;
-for (i_i20_s0 = 0;i_i20_s0 < 5;i_i20_s0 = i_i20_s0 + 1) {
+for (i_i20_s0 = 0;i_i20_s0 < g_list_length( vl_vl12_s0->list );i_i20_s0 = i_i20_s0 + 1) {
 print_STRING_T ( g_string_new ( "list Member :\n" ) );
 print_VERTEX_T ( (VertexType *) list_getelement ( vl_vl12_s0 , i_i20_s0 ) );
 } //END_OF_FOR

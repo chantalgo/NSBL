@@ -52,9 +52,9 @@ int testlocal(){
 for(v0.i = 0; v0.i<5; v0.i = v0.i+1){
 	elist el_in_for;
 	el_in_for = vl1|outE?[@level>v0.i];
-	print << "leves greater then: "<<v0.i<<"\n";
+	print << "leves greater than: "<<v0.i<<"\n";
 	foreach(edge et : el_in_for) print <<et;
-	print <<"EDN=========\n";
+	print <<"END=========\n";
 	del el_in_for;
 }
 
