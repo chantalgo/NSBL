@@ -83,14 +83,14 @@ void listInitCode(struct Node* node, int type, int isglobal){
         int nArgs = listCountCheck(node->child[1], mtype);
         sprintf(num,"%d\0", nArgs);
         node->code = strCatAlloc("", 7, INDENT[node->scope[0]],
-            (isglobal)? "ListType * " : "", node->child[0]->symbol->bind, 
+            (isglobal)? "" : "ListType * ", node->child[0]->symbol->bind, 
                 " = list_declaration( ", typeMacro(mtype), " , ", num);
         if(nArgs>0) node->code = strRightCatAlloc( node->code, "",3, " , ", node->child[1]->code, ");\n");
         else node->code = strRightCatAlloc( node->code, "", 1, ");\n");        
     }
     else {
         node->code = strCatAlloc("", 6, INDENT[node->scope[0]],
-            (isglobal)? "ListType * " : "", node->symbol->bind,
+            (isglobal)? "" : "ListType * ", node->symbol->bind,
                 " = list_declaration( ", typeMacro(mtype), " , 0 );\n");    
     }        
 }
@@ -1086,12 +1086,12 @@ int codeGen (struct Node * node) {
             }
             else { // DYNAMIC
                 char * ctmp = tmpAttr();
-                node->code = strRightCatAlloc(node->code, "", 28,
+                node->code = strRightCatAlloc(node->code, "", 24,
                     INDENT[node->scope[0]],"// START_OF_WHILE\n",
                     INDENT[node->scope[0]],"Attribute* ", ctmp, " = ", lf->code, " ;\n",
                     INDENT[node->scope[0]],"while ( ", codeGetAttrVal(ctmp, BOOL_T,node->line),
                     " ) {\n", rt->code, 
-                    INDENT[node->scope[0]],"destroy_attr( ", ctmp, " );\n",
+                   // INDENT[node->scope[0]],"destroy_attr( ", ctmp, " );\n",
                     INDENT[node->scope[0]],ctmp, " = ", lf->code, " ;\n",
                     INDENT[node->scope[0]],"} \n",
                     INDENT[node->scope[0]],"destroy_attr( ", ctmp, " ); //END_OF_WHILE\n");
