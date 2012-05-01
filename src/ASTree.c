@@ -342,6 +342,8 @@ void ast_output_node(struct Node* node, FILE* out, const char * sep) {
 	        fprintf(out, "Node<AST_WRITE_GRAPH>");break;
         case AST_LIST_MEMBER :
             fprintf(out, "Node<AST_LIST_MEMBER>");break;
+        case AST_LENGTH :
+            fprintf(out, "Node<AST_LENGTH>");break;
         default :
             fprintf(out, "Node<UNKNOWN> !!!!!!!!!!!!!!!!");
     }

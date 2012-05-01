@@ -47,6 +47,7 @@
 #define ErrorAssignLeftOperand                          +72
 #define ErrorAssignInMatch                              +73
 #define ErrorWrongArgmentType                           +74
+#define ErrorGetLengthForTypeNotList                    +75
 
 
 #define ErrorCallBreakOutsideOfLoop                     +80

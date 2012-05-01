@@ -958,6 +958,18 @@ int codeGen (struct Node * node) {
             }
             node->type = (lf->type == VLIST_T) ? VERTEX_T : EDGE_T;
             break;
+        case AST_LENGTH:
+            sg = node->child[0];
+            codeGen(sg);
+            if(sg->type != VLIST_T && sg->type != ELIST_T) {
+                ERRNO = ErrorGetLengthForTypeNotList;
+                errorInfo( ERRNO, node->line, "get length for type not list.\n");
+                return ERRNO;
+            }
+            node->code = strCatAlloc( "", 3,
+                "g_list_length( ",sg->code,"->list )" );
+            node->type = INT_T; 
+            break;
 /************************************************************************************/
         case AST_ATTRIBUTE : 
             if(inMATCH==0){

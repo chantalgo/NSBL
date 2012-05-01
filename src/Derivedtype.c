@@ -393,7 +393,7 @@ int edge_remove_attribute(EdgeType* e, char* attr_name){
         return 1;
     }
     if (!g_hash_table_remove(e->attributes, attr_name)) {
-        fprintf(stderr, "Runtime Error: edge_remove_attribute FAILURE to remove %s.\n", attr_name);
+        die(-1, "edge_remove_attribute FAILURE to remove %s.\n", attr_name);
         return 2;
     }
     return 0;
@@ -446,7 +446,7 @@ int vertex_remove_attribute(VertexType* v, char* attr_name) {
         return 1;
     }
     if (!g_hash_table_remove(v->attributes, attr_name)) {
-        fprintf(stderr, "Runtime Error: vertex_remove_attribute FAILURE to remove %s.\n", attr_name);
+        die(-1, "vertex_remove_attribute FAILURE to remove %s.\n", attr_name);
         return 2;
     }
     return 0;
@@ -708,6 +708,8 @@ ListType* list_declaration(int type,int n, ...){
 void* list_getelement(ListType* list, int index){
 	//if(g_list_length(list->list)<(index+1))
 	//	return NULL;
+	void * rlt = (void *) g_list_nth_data(list->list, index);
+    if (rlt == NULL) die(-1,"list_getelement: member NOT exist.\n");
 	return g_list_nth_data(list->list, index);
 }
 

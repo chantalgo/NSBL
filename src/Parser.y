@@ -47,7 +47,7 @@ extern int yyparse(void); /* Parser function. */
 %type <LString> VOID BOOLEAN INTEGER FLOAT STRING VLIST ELIST VERTEX EDGE GRAPH
 %type <LString> FUNC_LITERAL
 %type <LString> IF ELSE FOR FOREACH WHILE BREAK CONTINUE RETURN MARK
-%type <LString> '{' '}' '(' ')' '[' ']' ';' ',' ':' '.' '?' DEL 
+%type <LString> '{' '}' '(' ')' '[' ']' ';' ',' ':' '.' '?' DEL LENGTH 
 // declaration
 %type <node> declaration
 %type <node> basic_type_specifier declaration_specifiers 
@@ -97,7 +97,7 @@ extern int yyparse(void); /* Parser function. */
 %token ADD_ASSIGN SUB_ASSIGN MUL_ASSIGN DIV_ASSIGN
 %token APPEND ARROW PIPE AT MARK
 %token BELONG
-%token LIN ROUT PRINT
+%token LIN ROUT PRINT LENGTH
 /* CONTROL */
 %token IF ELSE
 %token FOR FOREACH WHILE
@@ -121,7 +121,7 @@ extern int yyparse(void); /* Parser function. */
 %token AST_FUNC_CALL AST_ARG_EXPS AST_EXP_STAT
 %token AST_ERROR AST_LIST_MEMBER
 %token AST_PRINT AST_PRINT_COMMA AST_PRINT_STAT AST_READ_GRAPH AST_WRITE_GRAPH
-%token AST_DEL_ATTRIBUTE
+%token AST_DEL_ATTRIBUTE AST_LENGTH
 /**************************
  *  PRECEDENCE & ASSOC    *
  **************************/
@@ -496,8 +496,10 @@ postfix_expression
         $$->child[1]->lexval.sval = strCatAlloc("", 2, "::",ctmp );
         free(ctmp);
     }
-    | postfix_expression '.' graph_property {
-        $$ = astNewNode ( AST_GRAPH_PROP, 2, astAllChildren(2, $1, $3), $2.l );
+    | IDENTIFIER '.' graph_property {
+        struct Node * tn1 = astNewLeaf(IDENTIFIER, $1.s, $1.l);
+        sTableLookupId(tn1);
+        $$ = astNewNode ( AST_GRAPH_PROP, 2, astAllChildren(2, tn1, $3), $2.l );
     }
     ;
 
@@ -548,7 +550,6 @@ argument_expression_list
 argument_expression
     : assignment_expression {
         $$ = astNewNode ( AST_ARG_EXPS, 1, astAllChildren(1, $1), $1->line );
-        //$$->type = $1->type;
     }
     ;
 
@@ -567,6 +568,11 @@ constant
     | FLOAT_CONSTANT        { $$ = astNewLeaf(FLOAT_CONSTANT, $1.s, $1.l); }
     | BOOL_TRUE             { $$ = astNewLeaf(BOOL_TRUE, NULL, $1.l); }
     | BOOL_FALSE            { $$ = astNewLeaf(BOOL_FALSE, NULL, $1.l); }
+    | LENGTH '(' IDENTIFIER ')' {
+        struct Node * tnode = astNewLeaf(IDENTIFIER, $3.s, $3.l);
+        sTableLookupId(tnode);
+        $$ = astNewNode(AST_LENGTH, 1, astAllChildren(1, tnode), $1.l );
+    }
     ;
 
 /**************************
