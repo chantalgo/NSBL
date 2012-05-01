@@ -23,7 +23,7 @@ YFLAGS =
 
 GLIBLINK = `pkg-config --cflags --libs glib-2.0`
 YACCLIB = -ly -lfl
-MXMLIB = $(MXMLDIR)/libmxml.a -lpthread
+MXMLIB = ../mxmldir/libmxml.a -lpthread
 
 CC = gcc -g $(CFLAGS) $(GLIBLINK)
 LEX = flex
@@ -35,9 +35,9 @@ OBJ = Parser.tab.o LexAly.yy.o ASTree.o SymbolTable.o SymbolTableUtil.o util.o E
 all : n2c.exe runlibs includes nsbl
 
 n2c.exe : $(OBJ)
-	$(CC) -o n2c.exe $(OBJ) $(YACCLIB)
+	$(CC) -o n2c.exe $(OBJ) $(MXMLIB) $(YACCLIB)
 	mkdir -p $(BINDIR)
-	mv n2c.exe $(BINDIR)
+		mv n2c.exe $(BINDIR)
 Parser.tab.o: Parser.tab.c Parser.tab.h
 	$(CC) -c Parser.tab.c
 LexAly.yy.o: LexAly.yy.c Parser.tab.h
@@ -68,24 +68,25 @@ Derivedtype.o : Derivedtype.h Derivedtype.c
 	$(CC) -c Derivedtype.c
 NSBLio.o: NSBLio.c
 	$(CC) -c NSBLio.c
-FileReadWrite.o: FileReadWrite.h FileReadWrite.c libmxml.a 
+FileReadWrite.o: FileReadWrite.h FileReadWrite.c  
 	$(CC) -c FileReadWrite.c 
 libmxml.a : 
-	cd $(MXMLDIR); ./configure; make libmxml.a; cd -
+#	cd $(MXMLDIR); ./configure; make libmxml.a; cd -
 	cp $(MXMLDIR)/libmxml.a .
+	cp $(MXMLDIR)/libmxml.a $(LIBDIR)
+	cp $(MXMLDIR)/libmxml.a $(INCLUDEDIR)
 runlibs: NSBLio.o Derivedtype.o FileReadWrite.o
 	rm -f libnsblgraph.a
-	$(AR) -cvq libnsblgraph.a NSBLio.o Derivedtype.o FileReadWrite.o libmxml.a
+	$(AR) -cvq libnsblgraph.a NSBLio.o Derivedtype.o FileReadWrite.o $(MXMLDIR)/libmxml.a
 	mkdir -p $(LIBDIR)
 	cp libnsblgraph.a $(LIBDIR)
 nsbl : genScript.sh
 	sh ./genScript.sh
 	chmod +x ./nsbl
 	cp nsbl $(BINDIR)
-
 includes : NSBLio.h Derivedtype.h FileReadWrite.h type.h operator.h
 	mkdir -p $(INCLUDEDIR)
-	cp NSBLio.h Derivedtype.h FileReadWrite.h type.h operator.h $(INCLUDEDIR)
+	cp NSBLio.h Derivedtype.h FileReadWrite.h type.h operator.h $(MXMLDIR)/libmxml.a  $(INCLUDEDIR)
 
 testglib : Derivedtype.o graph_lib_test.c
 	$(CC) -c graph_lib_test.c
@@ -95,7 +96,7 @@ clean-mxml :
 	cd $(MXMLDIR) ; make distclean; cd -
 	rm -f libmxml.a
 
-clean :	clean-mxml
+clean :	
 	rm -f Parser.tab.c Parser.tab.h LexAly.yy.c y.output *.o
 	rm -f Derivedtype.o graph_lib_test.o $(BINDIR)/graph_lib_test.exe
 	rm -f libnsblgraph.a
