@@ -455,7 +455,7 @@ int codeGen (struct Node * node) {
                     //debugInfo("%s %d %s\n", rt->code, lf->type, lf->code);
                     node->code = strCatAlloc("", 12,
                         "( assign_operator_to_static (", rt->code, " , ", typeMacro(lf->type), 
-                        " , (void *) ", lf->code,  
+                        " , (void *)&", lf->code,  
                         (rt->tmp[0]==REMOVE_DYN) ? " , FLAG_DESTROY_ATTR" : " , FLAG_KEEP_ATTR",
                         " , ", strLine(node->line), " ),  ", lf->code, " ) "
                     );
@@ -946,14 +946,17 @@ int codeGen (struct Node * node) {
                 return ERRNO;
             }
             if(rt->type == INT_T){
-                node->code = strCatAlloc( "",8 ,
-                    lf->code, "->type",
+                node->code = strCatAlloc( "", 6 ,
+                    (lf->type == VLIST_T) ? "(VertexType *) " : "(EdgeType *) ",
                     "list_getelement ( ", lf->code, " , " ,rt->code, " )" );
             }
-            else if (rt->type < 0) {
-                node->code = strCatAlloc( "" , 1, 
-                    "get_attr_value ( ");
+            else if (rt->type < 0) {  // DYNAMIC
+                node->code = strCatAlloc( "" , 8, 
+                    (lf->type == VLIST_T) ? "(VertexType *) " : "(EdgeType *) ",
+                    "list_getelement ( ", lf->code,
+                    ", get_attr_value_INT_T ( ", rt->code, " , ", strLine(node->line), " ) )");
             }
+            node->type = (lf->type == VLIST_T) ? VERTEX_T : EDGE_T;
             break;
 /************************************************************************************/
         case AST_ATTRIBUTE : 

@@ -706,8 +706,8 @@ ListType* list_declaration(int type,int n, ...){
 }
 
 void* list_getelement(ListType* list, int index){
-	if(g_list_length(list->list)<=(index+1))
-		return NULL;
+	//if(g_list_length(list->list)<(index+1))
+	//	return NULL;
 	return g_list_nth_data(list->list, index);
 }
 
@@ -783,6 +783,8 @@ int print_e(EdgeType* e){
 }
 
 int print_v_attr(VertexType* v){
+    if( v == NULL ) 
+        die(-1, "print_v_attr: NULL pointer.\n");
     GList* klist = g_hash_table_get_keys(v->attributes);
     int l = g_list_length(klist);
     int n = 0;
