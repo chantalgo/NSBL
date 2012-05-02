@@ -123,6 +123,10 @@ GList*              get_ving_inedges(GraphType* g, VertexType* v);
 
 GList*              get_g_alle(GraphType* g);
 GList*              get_g_allv(GraphType* g);
+ListType*			get_g_elist(GraphType* g);
+ListType*			get_g_vlist(GraphType* g);
+
+
 int                 g_remove_edge(GraphType* g, EdgeType* e);
 int                 g_remove_vertex(GraphType* g, VertexType* v);
 int                 g_insert_v(GraphType* g, VertexType* v);
@@ -169,11 +173,11 @@ ListType*			list_pipe(ListType* l, int type, int pipe_op, int rm_l);
 Attribute*          object_get_attribute(void* v, int obj, char* attribute, int autoNew, int lno);
 
 // DONE
-StringType*         assign_operator_string(StringType** s1, StringType** s2);
-ListType*           assign_operator_list(ListType** l1, ListType** l2);
-VertexType*         assign_operator_vertex(VertexType** v1, VertexType** v2);
-EdgeType*           assign_operator_edge(EdgeType** e1, EdgeType** e2);
-GraphType*          assign_operator_graph(GraphType** g1, GraphType** g2);
+StringType*         assign_operator_string(StringType** s1, StringType* s2);
+ListType*           assign_operator_list(ListType** l1, ListType* l2);
+VertexType*         assign_operator_vertex(VertexType** v1, VertexType* v2);
+EdgeType*           assign_operator_edge(EdgeType** e1, EdgeType* e2);
+GraphType*          assign_operator_graph(GraphType** g1, GraphType* g2);
 void 				die(int lno, char* fmt, ...);
 
 //int list_append(ListType* list, void* data);

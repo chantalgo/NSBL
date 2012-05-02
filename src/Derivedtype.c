@@ -336,7 +336,7 @@ bool get_attr_value_BOOL_T(Attribute* attr, int lno) {
     if(attr->type == BOOL_T)
         return attr->value.bv;
     else{
-		printf("attr_type: %d\n", attr->type);
+		printf("attr_type: %ld\n", attr->type);
         die(lno, "get_attr_value_BOOL_T: atttribute type NOT BOOL.\n");
 	}
 }
@@ -512,6 +512,13 @@ GList* get_g_allv(GraphType* g){
     return list;
 }
 
+ListType* get_g_vlist(GraphType* g){
+	ListType* lt = new_list();
+	lt->type = VERTEX_T;
+	lt->list = get_g_allv(g);
+	return lt;
+}
+
 GList* get_g_alle(GraphType* g){
     GList* list = NULL;
     int l = g_list_length(g->edgeIdList);
@@ -522,6 +529,13 @@ GList* get_g_alle(GraphType* g){
         list = g_list_append(list, e);
     }
     return list;
+}
+
+ListType* get_g_elist(GraphType* g){
+	ListType* lt = new_list();
+	lt->type = EDGE_T;
+	lt->list = get_g_alle(g);
+	return lt;
 }
 
 int g_remove_edge(GraphType* g, EdgeType* e){
@@ -1232,9 +1246,9 @@ Attribute* object_get_attribute(void* v, int obj, char* attribute, int autoNew, 
 	return attr;
 }
 
-StringType*	assign_operator_string(StringType** s1, StringType** s2) {
+StringType*	assign_operator_string(StringType** s1, StringType* s2) {
     if (s1 != NULL) destroy_string(*s1);
-    return (*s1 = *s2);
+    return (*s1 = s2);
 }
 
 ListType* list_match(ListType* l, bool (*func) (void*, int), int rm_l){
@@ -1296,22 +1310,22 @@ ListType* list_pipe(ListType* l, int type, int pipe_op, int rm_l){
 	return newl;
 }
 
-ListType*           assign_operator_list(ListType** l1, ListType** l2) {
+ListType*           assign_operator_list(ListType** l1, ListType* l2) {
     if (l1 != NULL) destroy_list(*l1);
-    return (*l1 = *l2);
+    return (*l1 = l2);
 }
 
-VertexType*         assign_operator_vertex(VertexType** v1, VertexType** v2) {
+VertexType*         assign_operator_vertex(VertexType** v1, VertexType* v2) {
     if (v1 != NULL) destroy_vertex(*v1);
-    return (*v1 = *v2);
+    return (*v1 = v2);
 }
 
-EdgeType*           assign_operator_edge(EdgeType** e1, EdgeType** e2) {
+EdgeType*           assign_operator_edge(EdgeType** e1, EdgeType* e2) {
     if (e1 != NULL) destroy_edge(*e1);
-    return (*e1 = *e2);
+    return (*e1 = e2);
 }
 
-GraphType*          assign_operator_graph(GraphType** g1, GraphType** g2) {
+GraphType*          assign_operator_graph(GraphType** g1, GraphType* g2) {
     if (g1 != NULL) destroy_graph(*g1);
-    return (*g1 = *g2);
+    return (*g1 = g2);
 }

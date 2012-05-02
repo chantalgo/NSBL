@@ -40,14 +40,14 @@ e5.level = 9;
 
 vlist vl1 = [v1,v2,v3];
 vlist vl2=[],vl3,vl4=[v3];
-elist el1,el2;
+elist el1=[e1,e2,e3,e4,e5],el2;
 vl1 <: v4;
 vl1 <: v5;
 print << vl1;
 
-int elistlength(elist l){
+int vlistlength(vlist l){
 	int i = 0;
-	foreach(edge et : l) {
+	foreach(vertex vt : l) {
 		i = i+1;
 	}
 	return i;
@@ -57,19 +57,35 @@ v0.name = "control";
 v0.b = true;
 v0.itr = 0;
 
-foreach(vertex vt : vl1){
-	elist elt1;
-	vlist result, vlt1;
-	vlt1 <: vt;
-	vlt1 = vlt1|outE|strtV;
-    foreach(vertex vt : vlt1){
-		if(vt.age>12 && vt.w<900)
-			result<:vt;
-	}
-	print<<"list is: "<<result;
-	del result, elt1, vlt1;
+graph g1;
 
-}
+foreach(edge et : el1) g1 <: et;
+foreach(vertex vt : vl1) g1 <: vt;
+
+print << g1.allV;
+print << g1.allE;
+
+//foreach(vertex vt : vl1){
+//	elist elt1;
+//	vlist result, vlt1;
+//	vlt1 <: vt;
+//	vlt1 = vlt1|outE|strtV;
+//	for(v0.i = 0; v0.i < vlistlength(vlt1); v0.i = v0.i+1){
+//		vertex tm;
+//		tm = vlt1[v0.i];
+//		if(tm.age >= 11 || tm.w <900)
+//			result <: tm;
+//		else{
+//			if(tm.m == true)
+//				result <: tm;
+//			else
+//				continue;
+//		}
+//	}
+//	print<<"list is: "<<result;
+//	del result, elt1, vlt1;
+//
+//}
 
 del v0, v1, v2, v3, v4, v5;
 del vl1, vl2, vl3, vl4, el1, el2;

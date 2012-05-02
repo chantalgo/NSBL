@@ -168,8 +168,8 @@ char * typeMacro(int t) {
         case INT_T :            return "INT_T";
         case FLOAT_T :          return "FLOAT_T";
         case STRING_T :         return "STRING_T";
-        case VLIST_T :          return "ELIST_T";
-        case ELIST_T :          return "VLIST_T";
+        case VLIST_T :          return "VLIST_T";
+        case ELIST_T :          return "ELIST_T";
         case VERTEX_T :         return "VERTEX_T";
         case EDGE_T :           return "EDGE_T";
         case GRAPH_T :          return "GRAPH_T";

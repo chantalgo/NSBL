@@ -415,7 +415,7 @@ int codeGen (struct Node * node) {
                                 lf->type == GRAPH_T ){
                     char * func = assignFunc(lf->type);
                     node->code = strCatAlloc("", 6,
-                        func, " ( & (", lf->code, ") , &(",
+                        func, " ( &(", lf->code, ") , (",
                         rt->code, ") ) " 
                     );
                 }
@@ -1001,6 +1001,28 @@ int codeGen (struct Node * node) {
             break;
 /************************************************************************************/
         case AST_GRAPH_PROP :
+			lf = node->child[0]; rt = node->child[1];
+			codeGen(lf); codeGen(rt);
+			if(lf->type != GRAPH_T){
+				ERRNO = ErrorWrongArgmentType;
+				errorInfo(ERRNO, node->line, "need a graph type for AllV and AllE operation, but type used is `%s'. \n",
+						sTypeName(lf->type) );
+				return;
+			}
+			switch(rt->token){
+				case ALL_VERTICES:
+					node->type = VLIST_T;
+					node->code = strCatAlloc("", 3, "get_g_vlist(", lf->code, ")");
+					break;
+				case ALL_EDGES:
+					node->type = ELIST_T;
+					node->code = strCatAlloc("", 3, "get_g_elist(", lf->code, ")");
+					break;
+				default:
+					ERRNO = ErrorOperatorNotSupportedByType;
+					errorInfo(ERRNO, node->line, "Undifined Operation for graph \n");
+					return;
+			}
             break;
 /************************************************************************************/
         case AST_COMP_STAT :            // compound_statement
@@ -1037,18 +1059,18 @@ int codeGen (struct Node * node) {
             codeGen(rt);
             if(lf->type == BOOL_T) {
                 node->code = strRightCatAlloc(node->code, "",7, 
-                    INDENT[node->scope[0]],"if ( ", lf->code, " ) \n", 
+                    INDENT[node->scope[0]],"if ( ", lf->code, " ){ \n", 
                     rt->code, 
-                    INDENT[node->scope[0]]," // END_IF \n");
+                    INDENT[node->scope[0]]," }// END_IF \n");
             }
             else if (lf->type < 0) { // DYNAMIC
                 char * ctmp = tmpAttr();
                 node->code = strRightCatAlloc(node->code, "", 17,
                     INDENT[node->scope[0]],"// START_IF\n",
                     INDENT[node->scope[0]],"Attribute* ", ctmp, " = ", lf->code, " ;\n",
-                    INDENT[node->scope[0]],"if ( ", codeGetAttrVal(ctmp, BOOL_T, node->line), " ) \n",
+                    INDENT[node->scope[0]],"if ( ", codeGetAttrVal(ctmp, BOOL_T, node->line), " ){ \n",
                     rt->code,
-                    INDENT[node->scope[0]],"destroy_attr( ", ctmp, " ); // END_IF\n");
+                    INDENT[node->scope[0]],"destroy_attr( ", ctmp, " ); }// END_IF\n");
             }
             else {
                 ERRNO = ErrorIfConditionNotBOOL;
@@ -1063,20 +1085,20 @@ int codeGen (struct Node * node) {
             codeGen(sg); codeGen(rt);
             if(lf->type == BOOL_T) {
                 node->code = strRightCatAlloc(node->code, "",10,
-                    INDENT[node->scope[0]],"if ( ", lf->code, " ) \n",
+                    INDENT[node->scope[0]],"if ( ", lf->code, " ){ \n",
                     sg->code, 
                     INDENT[node->scope[0]],"else\n", rt->code, 
-                    INDENT[node->scope[0]]," // END_IF\n");
+                    INDENT[node->scope[0]]," }// END_IF\n");
             }
             else if (lf->type < 0) { // DYNAMIC
                 char * ctmp = tmpAttr();
                 node->code = strRightCatAlloc(node->code, "", 20, 
                     INDENT[node->scope[0]],"// START_IF\n",
                     INDENT[node->scope[0]],"Attribute* ", ctmp, " = ", lf->code, " ;\n",
-                    INDENT[node->scope[0]],"if ( ", codeGetAttrVal(ctmp, BOOL_T, node->line), " ) \n",
+                    INDENT[node->scope[0]],"if ( ", codeGetAttrVal(ctmp, BOOL_T, node->line), " ){ \n",
                     sg->code, 
-                    INDENT[node->scope[0]],"else\n", rt->code,
-                    INDENT[node->scope[0]],"destroy_attr( ", ctmp, " ); // END_IF\n");
+                    INDENT[node->scope[0]],"} \n else{\n", rt->code,
+                    INDENT[node->scope[0]],"destroy_attr( ", ctmp, " ); }// END_IF\n");
             }
             else {
                 ERRNO = ErrorIfConditionNotBOOL;
@@ -1143,7 +1165,7 @@ int codeGen (struct Node * node) {
         }
         case AST_FOREACH :{
 			lf = node->child[0]; sg = node->child[1]; rt = node->child[2];
-			codeGen(lf); codeGen(sg); codeGen(rt);
+			inLoop++; codeGen(lf); codeGen(sg); codeGen(rt); inLoop--;
 			int ltype = lf->child[1]->type, rtype = sg->type;
 			if( ltype==VERTEX_T&&rtype==VLIST_T || ltype==EDGE_T&&rtype==ELIST_T ){
 				char* ti = lf->child[1]->symbol->bind;
