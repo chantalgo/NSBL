@@ -1,3 +1,9 @@
+/********************************************************************
+ * CodeGen.c                                                        *
+ * This is the source for code generation in NSBL. Code Gen is done *
+ * on the ASTree, via post-order traversal.                         *
+ *******************************************************************/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
@@ -12,11 +18,15 @@
 #include "NSBLio.h"
 #include "Derivedtype.h"
 
-char * OUTFILE; 
-FILE * OUTFILESTREAM;           // Output file
+char * OUTFILE;                 // Output file name 
+FILE * OUTFILESTREAM;           // Output file stream
 
-int  inLoop, inFunc;            // flags to indicate inside of loop or func
-int  inMATCH, existMATCH, nMATCHsVab, existPIPE;
+int     inLoop, 
+        inFunc;                 // flags to indicate : inside of loop or func
+int     inMATCH,                // flags to indicate : inside of match operator
+        existMATCH,             //                   : exist match operator in subtree of AST
+        existPIPE,              //                   : exist pipe operator in subtree of AST
+        nMATCHsVab;             // count number of dynamic variables in Match
 GList *returnList, *noReturn;
 char * matchStaticVab, *matchStrDecl;
 
@@ -25,7 +35,7 @@ void derivedTypeInitCode(struct Node* node, int type, int isglobal){
 		derivedTypeInitCode(node->child[0], type, isglobal);
 		derivedTypeInitCode(node->child[1], type, isglobal);
     	node->code = strCatAlloc("",2, node->child[0]->code, node->child[1]->code);
-	}else{
+	}else if (node->token == IDENTIFIER) {
 		switch(type){
 			case GRAPH_T:
 				if(isglobal)
@@ -49,6 +59,22 @@ void derivedTypeInitCode(struct Node* node, int type, int isglobal){
 				break;
 		}
 	}
+    else if (node->token == AST_ASSIGN) {
+        if (node->child[1]->type != type) {
+            ERRNO= ErrorInitDerivedType;
+            errorInfo(ERRNO, node->line, "type mismatch for the initialization of derived type.\n");
+            node->code = NULL;
+            return;
+        }
+        if(isglobal) 
+            node->code = strCatAlloc("",5, INDENT[node->scope[0]], node->child[0]->symbol->bind, " = ", node->child[1]->code, ";\n");
+        else
+            node->code = strCatAlloc("",7, INDENT[node->scope[0]], sTypeName(type), "* ",node->child[0]->symbol->bind, " = ", node->child[1]->code, ";\n");
+    }
+    else {
+        ERRNO = ErrorIllegalDerivedTypeDeclaration;
+        errorInfo(ERRNO, node->line, "Illegal declaration of derived type  (vertex, edge, graph).\n");
+    }
 }
 
 void stringInitCode(struct Node* node, int type, int isglobal){
@@ -80,13 +106,20 @@ void listInitCode(struct Node* node, int type, int isglobal){
     }
     else if (node->token == AST_ASSIGN){
         char num[32];
-        int nArgs = listCountCheck(node->child[1], mtype);
+        int flag = listCountCheck(node->child[1], mtype);
+        int nArgs = (flag > 0)? flag : 0;
         sprintf(num,"%d\0", nArgs);
         node->code = strCatAlloc("", 7, INDENT[node->scope[0]],
             (isglobal)? "" : "ListType * ", node->child[0]->symbol->bind, 
                 " = list_declaration( ", typeMacro(mtype), " , ", num);
         if(nArgs>0) node->code = strRightCatAlloc( node->code, "",3, " , ", node->child[1]->code, ");\n");
         else node->code = strRightCatAlloc( node->code, "", 1, ");\n");        
+        // if not init by [], 
+        if (flag<0) {
+            node->code = strRightCatAlloc( node->code, "", 5,
+                "assign_operator_list ( & (", node->child[0]->symbol->bind, " ) , & ( ",
+                node->child[1]->code, " ) );\n");
+        }
     }
     else {
         node->code = strCatAlloc("", 6, INDENT[node->scope[0]],
@@ -95,11 +128,13 @@ void listInitCode(struct Node* node, int type, int isglobal){
     }        
 }
 
-
+// count number of initializor in [ ...]
 int listCountCheck(struct Node* node, int type){
 	int count = 0, flag = 0;
 	struct Node* tn = node;
-	if(tn->token != AST_LIST_INIT) return ErrorAssignmentExpression;
+	if(tn->token != AST_LIST_INIT) {
+        return -1;
+    }
     if(tn->nch > 0) {
 		tn = tn->child[0];
     	while (tn->token == AST_COMMA ) {
@@ -336,6 +371,7 @@ int codeGen (struct Node * node) {
             break;
         case AST_DECLARATION :
             codeGen( node->child[0] );codeGen( node->child[1] );
+            node->code = codeFrontDecl(node->scope[0] );
             // when the declaration is in scope 0, we need to generate two places of code for c
             // 1. external global declaration 
             // 2. assignment in main func, if possible
@@ -346,19 +382,19 @@ int codeGen (struct Node * node) {
 					case VERTEX_T:
 					case EDGE_T:
 						derivedTypeInitCode(node->child[1], node->child[0]->lexval.ival, 1);
-						node->code = strCatAlloc("", 1, node->child[1]->code);
+						node->code = strRightCatAlloc(node->code,"", 1, node->child[1]->code);
 						break;
 					case STRING_T:
 						stringInitCode(node->child[1], node->child[0]->lexval.ival, 1);
-					    node->code = strCatAlloc("", 1, node->child[1]->code);
+					    node->code = strRightCatAlloc(node->code,"", 1, node->child[1]->code);
 						break;
 					case VLIST_T:
                     case ELIST_T:
                         listInitCode(node->child[1], node->child[0]->lexval.ival, 1);
-                        node->code = strCatAlloc("", 1, node->child[1]->code);
+                        node->code = strRightCatAlloc(node->code,"", 1, node->child[1]->code);
                         break;
 					default:
-               		    node->code = strCatAlloc("",3,INDENT[node->scope[0]],node->child[1]->code,";\n");
+               		    node->code = strRightCatAlloc(node->code,"",3,INDENT[node->scope[0]],node->child[1]->code,";\n");
 				}
             }
             // If scope > 0, no bother, just declaration everything in one c declaration
@@ -368,19 +404,19 @@ int codeGen (struct Node * node) {
 					case VERTEX_T:
 					case EDGE_T:
 						derivedTypeInitCode(node->child[1], node->child[0]->lexval.ival, 0);
-						node->code = strCatAlloc("", 1, node->child[1]->code);
+						node->code = strRightCatAlloc(node->code,"", 1, node->child[1]->code);
 						break;
 					case STRING_T:
 						stringInitCode(node->child[1], node->child[0]->lexval.ival, 0);
-						node->code = strCatAlloc("", 1, node->child[1]->code);
+						node->code = strRightCatAlloc(node->code,"", 1, node->child[1]->code);
 						break;
 					case VLIST_T :
                     case ELIST_T :
                         listInitCode(node->child[1], node->child[0]->lexval.ival, 0);
-                        node->code = strCatAlloc("", 1, node->child[1]->code);
+                        node->code = strRightCatAlloc(node->code,"", 1, node->child[1]->code);
                         break;
 					default:
-                		node->code = strCatAlloc("",5,INDENT[node->scope[0]],node->child[0]->code," ",node->child[1]->code,";\n");
+                		node->code = strRightCatAlloc(node->code,"",5,INDENT[node->scope[0]],node->child[0]->code," ",node->child[1]->code,";\n");
 				}
             }
             break;
@@ -1068,9 +1104,9 @@ int codeGen (struct Node * node) {
                 node->code = strRightCatAlloc(node->code, "", 17,
                     INDENT[node->scope[0]],"// START_IF\n",
                     INDENT[node->scope[0]],"Attribute* ", ctmp, " = ", lf->code, " ;\n",
-                    INDENT[node->scope[0]],"if ( ", codeGetAttrVal(ctmp, BOOL_T, node->line), " ){ \n",
+                    INDENT[node->scope[0]],"if ( ", codeGetAttrVal(ctmp, BOOL_T, node->line), " ) {\n",
                     rt->code,
-                    INDENT[node->scope[0]],"destroy_attr( ", ctmp, " ); }// END_IF\n");
+                    INDENT[node->scope[0]],"} \ndestroy_attr( ", ctmp, " ); // END_IF\n");
             }
             else {
                 ERRNO = ErrorIfConditionNotBOOL;
@@ -1095,10 +1131,10 @@ int codeGen (struct Node * node) {
                 node->code = strRightCatAlloc(node->code, "", 20, 
                     INDENT[node->scope[0]],"// START_IF\n",
                     INDENT[node->scope[0]],"Attribute* ", ctmp, " = ", lf->code, " ;\n",
-                    INDENT[node->scope[0]],"if ( ", codeGetAttrVal(ctmp, BOOL_T, node->line), " ){ \n",
+                    INDENT[node->scope[0]],"if ( ", codeGetAttrVal(ctmp, BOOL_T, node->line), " ) {\n",
                     sg->code, 
-                    INDENT[node->scope[0]],"} \n else{\n", rt->code,
-                    INDENT[node->scope[0]],"destroy_attr( ", ctmp, " ); }// END_IF\n");
+                    INDENT[node->scope[0]],"} else {\n", rt->code,
+                    INDENT[node->scope[0]],"}\ndestroy_attr( ", ctmp, " ); // END_IF\n");
             }
             else {
                 ERRNO = ErrorIfConditionNotBOOL;

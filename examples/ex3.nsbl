@@ -39,6 +39,8 @@ vlist l1=[],l2,l3=[v3];
 elist le1,le2;
 vlist vp = [v2];
 
+vertex vv =  vl[0];
+
 //le1 = vp|inE;
 //print <<"1 pipe for edges"<<le1;
 
@@ -56,11 +58,8 @@ foreach(vertex vt : vp|inE|strtV?[@age>13 || !@m]) print << vt;
 
 // list member
 int i;
-vertex vv;
-for (i=0; i<length(vl); i=i+1){
-	vv = vl[i];
-print << "list Member :\n" << vl[i];
-}
+for (i=0; i<length(vl); i=i+1)
+    if (i==1) print << "list Member :\n" << vl[i];
 
 vertex tmp;
 tmp.i = 0;

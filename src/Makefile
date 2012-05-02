@@ -69,8 +69,8 @@ NSBLio.o: NSBLio.c
 	$(CC) -c NSBLio.c
 FileReadWrite.o: FileReadWrite.h FileReadWrite.c libmxml.a 
 	$(CC) -c FileReadWrite.c 
-libmxml.a : 
-	cd $(MXMLDIR); ./configure; make libmxml.a; cd -
+libmxml.a :  
+#	cd $(MXMLDIR); ./configure; make libmxml.a; cd -
 	mkdir -p $(LIBDIR)
 	cp $(MXMLDIR)/libmxml.a $(LIBDIR)
 runlibs: NSBLio.o Derivedtype.o FileReadWrite.o
@@ -101,7 +101,7 @@ clean :
 clean-include :
 	rm -f $(INCLUDEDIR)/*
 
-distclean : clean clean-include clean-mxml
+distclean : clean clean-include
 	rm -f $(BINDIR)/n2c.exe $(BINDIR)/nsbl nsbl
 	rm -f $(LIBDIR)/libnsblgraph.a $(LIBDIR)/libmxml.a
 	rm -f -r $(BINDIR) $(LIBDIR) $(INCLUDEDIR)
