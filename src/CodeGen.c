@@ -59,9 +59,15 @@ void derivedTypeInitCode(struct Node* node, int type, int isglobal){
 				break;
 		}
 	}
+    else if (node->token == AST_ASSIGN) {
+        if(isglobal) 
+            node->code = strCatAlloc("",5, INDENT[node->scope[0]], node->child[0]->symbol->bind, " = ", node->child[1]->code, ";\n");
+        else
+            node->code = strCatAlloc("",7, INDENT[node->scope[0]], sTypeName(type), "* ",node->child[0]->symbol->bind, " = ", node->child[1]->code, ";\n");
+    }
     else {
-        ERRNO = ErrorInitWhenDeclartion;
-        errorInfo(ERRNO, node->line, "Initialize a derived type variable (vertex, edge, graph) in declaration.\n");
+        ERRNO = ErrorIllegalDerivedTypeDeclaration;
+        errorInfo(ERRNO, node->line, "Illegal declaration of derived type  (vertex, edge, graph).\n");
     }
 }
 
