@@ -146,10 +146,20 @@ int listCountCheck(struct Node* node, int type){
         	if ( tn->type != type ) flag = ErrorListMixedType;
         	count++;
     	}
+		else if(tn->token == AST_ASSIGN){
+        	if ( tn->type != type ) flag = ErrorListMixedType;
+        	count++;
+		}else{
+			flag = ErrorAssignmentExpression;
+		}
     	if (flag == ErrorListMixedType) {
         	ERRNO = flag;
         	errorInfo(ERRNO, node->line, "list Initialization with wrong type.\n");
     	}
+		else if(flag == ErrorAssignmentExpression){
+			ERRNO = flag;
+			errorInfo(ERRNO, node->line, "list Initialization with wrong argument expression.\n");
+		}
 	}
     return count;
 }
@@ -450,6 +460,7 @@ int codeGen (struct Node * node) {
                             lf->type == VERTEX_T || lf->type == EDGE_T || 
                                 lf->type == GRAPH_T ){
                     char * func = assignFunc(lf->type);
+					node->type = lf->type;
                     node->code = strCatAlloc("", 6,
                         func, " ( &(", lf->code, ") , (",
                         rt->code, ") ) " 
@@ -531,6 +542,7 @@ int codeGen (struct Node * node) {
 				node->code = strCatAlloc("", 5, "list_append(", lf->code, ", EDGE_T, ", rt->code, ")");
 			}else{
 				ERRNO = ErrorAssignmentExpression;
+				errorInfo(ERRNO, node->line, "append expression error\n");
 				return ERRNO;
 			}
             break;
@@ -759,6 +771,7 @@ int codeGen (struct Node * node) {
                 else {
                     ERRNO = ErrorOperatorNotSupportedByType;
                     errorInfo(ERRNO, node->line, "unary operator `%s' is not supported by type `%s'.\n",op,sTypeName(sg->type));
+					return ERRNO;
                 }
             }
             else { // DYNAMIC
