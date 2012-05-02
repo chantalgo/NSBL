@@ -117,7 +117,7 @@ void listInitCode(struct Node* node, int type, int isglobal){
         // if not init by [], 
         if (flag<0) {
             node->code = strRightCatAlloc( node->code, "", 5,
-                "assign_operator_list ( & (", node->child[0]->symbol->bind, " ) , & ( ",
+                "assign_operator_list ( & (", node->child[0]->symbol->bind, " ) , ( ",
                 node->child[1]->code, " ) );\n");
         }
     }

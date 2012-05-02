@@ -2,7 +2,7 @@ int j=10;
 print<<j;
 graph g;
 edge e;
-vertex v;
+vertex v1,v2;
 float f=12.35;
 
 string x="try.xml";
@@ -11,22 +11,27 @@ int k=10;
 int u=10;
 print<<i<<k<<u;
 
+v1.name = "testio1";
+v2.name = "testio2";
+e:v1->v2;
+e.level = 5;
+
+g<:v1; g<:v2; g<:e;
+
 print<<g;
-
-print<<v;
-
-print<<e;
-
-print<<v<<g<<e;
-
-print<<f<<x;
-
-x>>g;
-
-int kkk;
 x<<g;
+vlist vl1 = g.allV;
+foreach(vertex vt1 : vl1) print<<vt1;
+elist el1 = g.allE;
+foreach(edge et1 : el1) print<<et1;
 
-print<<x<<g<<i<<v<<k;
+graph g2;
+x>>g2;
+print<<g2;
+vlist vl2 = g2.allV;
+foreach(vertex vt2 : vl2) print<<vt2;
+elist el2= g.allE;
+foreach(edge et2 : el2) print<<et2;
 
 
 
