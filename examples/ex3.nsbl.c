@@ -7,13 +7,14 @@ ListType * vl_vl12_s0;
 ListType * l1_vl13_s0 , * l2_vl14_s0 , * l3_vl15_s0;
 ListType * le1_el16_s0 , * le2_el17_s0;
 ListType * vp_vl18_s0;
-VertexType * vt_v19_s0;
-int i_i20_s0;
-VertexType * tmp_v21_s0;
+VertexType * vv_v19_s0;
+VertexType * vt_v20_s0;
+int i_i21_s0;
+VertexType * tmp_v22_s0;
 struct _STR_tmp_match_0 {
 };
 bool _tmp_match_0 ( void * _obj, int _obj_type, struct _STR_tmp_match_0 * _str ) {
-  return get_attr_value_BOOL_T (  binary_operator (  binary_operator ( object_get_attribute( _obj, _obj_type, "::age", 0, 55 )  ,  new_attr_INT_T( 13 ) , OP_GT, FLAG_NO_REVERSE , FLAG_KEEP_ATTR , FLAG_DESTROY_ATTR , 55 ) , unary_operator (object_get_attribute( _obj, _obj_type, "::m", 0, 55 )  , OP_NOT , FLAG_KEEP_ATTR , 55 ) , OP_OR, FLAG_NO_REVERSE , FLAG_DESTROY_ATTR , FLAG_DESTROY_ATTR , 55 ) , 55 )  ;
+  return get_attr_value_BOOL_T (  binary_operator (  binary_operator ( object_get_attribute( _obj, _obj_type, "::age", 0, 58 )  ,  new_attr_INT_T( 13 ) , OP_GT, FLAG_NO_REVERSE , FLAG_KEEP_ATTR , FLAG_DESTROY_ATTR , 58 ) , unary_operator (object_get_attribute( _obj, _obj_type, "::m", 0, 58 )  , OP_NOT , FLAG_KEEP_ATTR , 58 ) , OP_OR, FLAG_NO_REVERSE , FLAG_DESTROY_ATTR , FLAG_DESTROY_ATTR , 58 ) , 58 )  ;
 } // END_MATCH_FUNC 
 
 int main() {
@@ -62,6 +63,8 @@ l3_vl15_s0 = list_declaration( VERTEX_T , 1 , v3_v3_s0);
 le1_el16_s0 = list_declaration( EDGE_T , 0 );
 le2_el17_s0 = list_declaration( EDGE_T , 0 );
 vp_vl18_s0 = list_declaration( VERTEX_T , 1 , v2_v2_s0);
+vv_v19_s0 = new_vertex();
+assign_operator_vertex ( & (vv_v19_s0) , &((VertexType *) list_getelement ( vl_vl12_s0 , 0 )) ) ;
 print_VERTEX_T ( v1_v1_s0 );
 print_VERTEX_T ( v2_v2_s0 );
 print_VERTEX_T ( v3_v3_s0 );
@@ -81,14 +84,14 @@ if(OP_INE==OP_OUTE)
 _tmp_vab_0 = list_append_gl(_tmp_vab_0, ((VertexType*)g_list_nth_data(vp_vl18_s0->list, _tmp_vab_2))->outEdges, EDGE_T);
 else if(OP_INE==OP_INE)
 _tmp_vab_0 = list_append_gl(_tmp_vab_0, ((VertexType*)g_list_nth_data(vp_vl18_s0->list, _tmp_vab_2))->inEdges, EDGE_T);
-else die(55, "illeage pipe op for vlist\n");
+else die(58, "illeage pipe op for vlist\n");
 break;
 case VERTEX_T:
 if(OP_INE==OP_SV)
 _tmp_vab_0 = list_append(_tmp_vab_0, VERTEX_T, ((EdgeType*)g_list_nth_data(vp_vl18_s0->list, _tmp_vab_2))->start);
 else if(OP_INE==OP_EV)
 _tmp_vab_0 = list_append(_tmp_vab_0, VERTEX_T,  ((EdgeType*)g_list_nth_data(vp_vl18_s0->list, _tmp_vab_2))->end);
-else die(55, "illeage pipe op for elist\n");
+else die(58, "illeage pipe op for elist\n");
 break;
 }
 }
@@ -104,14 +107,14 @@ if(OP_SV==OP_OUTE)
 _tmp_vab_3 = list_append_gl(_tmp_vab_3, ((VertexType*)g_list_nth_data(_tmp_vab_0->list, _tmp_vab_5))->outEdges, EDGE_T);
 else if(OP_SV==OP_INE)
 _tmp_vab_3 = list_append_gl(_tmp_vab_3, ((VertexType*)g_list_nth_data(_tmp_vab_0->list, _tmp_vab_5))->inEdges, EDGE_T);
-else die(55, "illeage pipe op for vlist\n");
+else die(58, "illeage pipe op for vlist\n");
 break;
 case VERTEX_T:
 if(OP_SV==OP_SV)
 _tmp_vab_3 = list_append(_tmp_vab_3, VERTEX_T, ((EdgeType*)g_list_nth_data(_tmp_vab_0->list, _tmp_vab_5))->start);
 else if(OP_SV==OP_EV)
 _tmp_vab_3 = list_append(_tmp_vab_3, VERTEX_T,  ((EdgeType*)g_list_nth_data(_tmp_vab_0->list, _tmp_vab_5))->end);
-else die(55, "illeage pipe op for elist\n");
+else die(58, "illeage pipe op for elist\n");
 break;
 }
 }
@@ -130,23 +133,25 @@ _tmp_vab_6->list = g_list_append ( _tmp_vab_6->list , _tmp_vab_10);
 }
 }
 destroy_list ( _tmp_vab_3);
-VertexType * vt_v19_s0;
+VertexType * vt_v20_s0;
 int _tmp_vab_11 = g_list_length(_tmp_vab_6->list);
 int _tmp_vab_12;
 for (_tmp_vab_12=0; _tmp_vab_12<_tmp_vab_11; _tmp_vab_12++) {
-vt_v19_s0 = g_list_nth_data ( _tmp_vab_6->list, _tmp_vab_12 );
-print_VERTEX_T ( vt_v19_s0 );
+vt_v20_s0 = g_list_nth_data ( _tmp_vab_6->list, _tmp_vab_12 );
+print_VERTEX_T ( vt_v20_s0 );
 } //END_OF_FOREACH
 destroy_list ( _tmp_vab_6 );
-i_i20_s0;
-for (i_i20_s0 = 0;i_i20_s0 < g_list_length( vl_vl12_s0->list );i_i20_s0 = i_i20_s0 + 1) {
+i_i21_s0;
+for (i_i21_s0 = 0;i_i21_s0 < g_list_length( vl_vl12_s0->list );i_i21_s0 = i_i21_s0 + 1) {
+if ( i_i21_s0 == 1 ) {
 print_STRING_T ( g_string_new ( "list Member :\n" ) );
-print_VERTEX_T ( (VertexType *) list_getelement ( vl_vl12_s0 , i_i20_s0 ) );
+print_VERTEX_T ( (VertexType *) list_getelement ( vl_vl12_s0 , i_i21_s0 ) );
+} // END_IF 
 } //END_OF_FOR
-tmp_v21_s0 = new_vertex();
-assign_operator (vertex_get_attribute( tmp_v21_s0 ,  "::i", 1, 63 ) ,  new_attr_INT_T( 0 ) , FLAG_KEEP_ATTR , FLAG_DESTROY_ATTR , 63 ) ;
+tmp_v22_s0 = new_vertex();
+assign_operator (vertex_get_attribute( tmp_v22_s0 ,  "::i", 1, 66 ) ,  new_attr_INT_T( 0 ) , FLAG_KEEP_ATTR , FLAG_DESTROY_ATTR , 66 ) ;
 print_STRING_T ( g_string_new ( "list Member :\n" ) );
-print_VERTEX_T ( (VertexType *) list_getelement ( vl_vl12_s0, get_attr_value_INT_T (  binary_operator( vertex_get_attribute( tmp_v21_s0 ,  "::i", 0, 64) ,  new_attr_INT_T( 4 ) , OP_ADD, FLAG_NO_REVERSE , FLAG_KEEP_ATTR , FLAG_DESTROY_ATTR , 64 ) , 64 ) ) );
+print_VERTEX_T ( (VertexType *) list_getelement ( vl_vl12_s0, get_attr_value_INT_T (  binary_operator( vertex_get_attribute( tmp_v22_s0 ,  "::i", 0, 67) ,  new_attr_INT_T( 4 ) , OP_ADD, FLAG_NO_REVERSE , FLAG_KEEP_ATTR , FLAG_DESTROY_ATTR , 67 ) , 67 ) ) );
 destroy_vertex ( v0_v0_s0 );
 destroy_vertex ( v1_v1_s0 );
 destroy_vertex ( v2_v2_s0 );

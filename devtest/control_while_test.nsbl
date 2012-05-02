@@ -55,8 +55,7 @@ v0.b = true;
 v0.itr = 0;
 
 while(v0.b){
-	elist el_in_for;
-	el_in_for = vl1|outE?[@level>v0.itr];
+	elist el_in_for  = vl1|outE?[@level>v0.itr];
 	if(elistlength(el_in_for) == 0)
 		break;
 	print << "leves greater then: "<<v0.itr<<"\n";

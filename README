@@ -94,3 +94,8 @@ codegen for append operations
 
 4/26/2012
 Makefile: 
+
+5/1/2012
+length(list)
+vlist l = lv|...?[...]
+missing {} in if-stmt
