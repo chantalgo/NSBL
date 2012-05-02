@@ -1,0 +1,10 @@
+vertex v0,v1,v2,v3,v4,v5;
+edge e0,e1,e2,e3,e4,e5;
+
+
+//this works.
+elist el1 = [e0=e1, e3];
+
+string s0 = "haha";
+string s1="abc", s2 = s0;
+
