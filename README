@@ -99,3 +99,6 @@ Makefile:
 length(list)
 vlist l = lv|...?[...]
 missing {} in if-stmt
+
+5/2/2012
+File Read Write working and tested with devtest/io.nsbl (kunal) 
