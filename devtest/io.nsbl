@@ -1,11 +1,85 @@
-//int i=0;
-//vertex v;
-//v.a = 1.0;
+vertex v0,v1,v2,v3,v4,v5;
+v1.name = "v1";
+v2.name = "v2";
+v3.name = "v3";
+v4.name = "v4";
+v5.name = "v5";
 
-graph g;
-string file = "dsfdsa";
+v1.age = 10;
+v2.age = 11;
+v3.age = 12;
+v4.age = 13;
+v5.age = 14;
 
-file >> g;
+v1.w = 100.1;
+v2.w = 200.1;
+v3.w = 300.1;
+v4.w = 400.1;
+v5.w = 500.1;
 
+//v1.name="v1";
+//v2.name="v2";
+
+edge e0,e1,e2,e3,e4,e5;
+
+e1:v1->v2;
+e2:v3->v2;
+e3:v4->v2;
+e4:v2->v3;
+e5:v5->v2;
+
+e1.name = "e1";
+e2.name = "e2";
+e3.name = "e3";
+e4.name = "e4";
+e5.name = "e5";
+
+//e1.w=45.89;
+//e1.age=45;
+//e1.name="e1";
+
+graph g, g1;
+
+g <: v1;
+g <: v2;
+g <: v3;
+g <: v4;
+g <: v5;
+
+g <: e1;
+g <: e2;
+g <: e3;
+g <: e4;
+g <: e5;
+
+
+string file = "try.xml";
+string f="test.xml";
+print<<g;
 file << g;
+print<<"the file has been written\n";
+print<<"reading file\n";
+file >> g1;
+print<<"printing g1\n";
+print<<g1;
+f<<g1;
 
+elist le = g.allE;
+
+vlist lv= g.allV;
+
+print<<"\n================printing g's==================\n";
+foreach(edge e: le) print<<e;
+
+foreach(vertex v: lv) print<<v;
+
+
+elist le1 = g1.allE;
+
+vlist lv1 = g1.allV;
+
+print<<"\n================printing g1's==================\n";
+
+foreach(edge ee: le1) print<<ee; 
+
+foreach(vertex ve: lv1) print<<ve;

@@ -146,8 +146,12 @@
 
 	  vertex_attribute_value_type=mxmlNewElement(vertex_attribute, "vertex_attribute_value_type");
 	//mxmlNewText(vertex_attribute_value_type,1,  
-	int len = snprintf(str, 100, "%d",(int)((Attribute*)(g_list_nth_data(v_attr_value,x)))->type);
-
+	int len = snprintf(str, 100, "%d",((int)((Attribute*)(g_list_nth_data(v_attr_value,x)))->type));
+	//printf("\nPrinting type of value in vertex by jing :: %s\n", str);
+	//printf("\nVertex attr value derived by me : %d\n", type);
+	//printf("\n INT value: %d\n", INT_T);
+	//printf("\n FLOAT value: %d\n", FLOAT_T);
+	//printf("\n STRING value: %d\n", STRING_T);
 	mxmlNewText(vertex_attribute_value_type, 0, str);
 	  	
 	  		
@@ -219,8 +223,9 @@
         //mxmlNewText(edge_attribute_value,1, (char*)(((Attribute*)(g_list_nth_data(e_attr_value,y)))->value));
 //need to check if cast works as returns void*
 		edge_attribute_value_type=mxmlNewElement(edge_attribute, "edge_attribute_value_type");
-	        len = snprintf(str, 100, "%d",(int)((Attribute*)(g_list_nth_data(e_attr_value,y)))->type);
-
+	        len = snprintf(str, 100, "%d",((int)((Attribute*)(g_list_nth_data(e_attr_value,y)))->type));
+		//printf("\nPrinting the attribute value of edge derived from jing: %s\n", str);
+		//printf("\nEdge attr value derived by me: %d\n", type);
         mxmlNewText(edge_attribute_value_type, 0, str);
 	    
      }
@@ -476,7 +481,7 @@ B
 		 //printf("checkpoint node temp 2(attr name): %s\n", mxmlGetElement(node_v));
 		//node_temp1 = mxmlGetLastChild(node_v);
 		node_temp1 = mxmlGetFirstChild(node_v);
-		 //printf("checkpoint node temp 2(attr name): %s\n", mxmlGetElement(node_temp1));
+		// printf("checkpoint node temp 2(attr name): %s\n", mxmlGetElement(node_temp1));
 		//node_temp2 = mxmlGetFirstChild(node_temp1);
 		//printf("checkpoint node temp 2(attr name): %s\n", mxmlGetElement(node_temp2));
 		 //printf("checkpoint node temp 2(attr name): %s\n", mxmlGetText(node_temp2,NULL));
@@ -494,7 +499,7 @@ B
 			node_temp2=mxmlGetNextSibling(node_temp2);//go to attr value type
 			//printf("checkpoint node temp 2(attr name): %s\n", mxmlGetElement(node_temp2));
 			int type=atoi(mxmlGetText(node_temp2,NULL));
-                        if (type==1)
+                        if (type==INT_T)
                         {
                                 int val=atoi(mxmlGetText(n,NULL));
 				//printf("printing int val: %d\n",val);
@@ -504,7 +509,7 @@ B
                                 //printf("\nattribute assigned to vertex\n");
                                 //value=&val;
                         }
-                        if (type==2)
+                        if (type==FLOAT_T)
                         {
                                 float val=atof(mxmlGetText(n,NULL));
 				//printf("printing float val: %f\n",val);
@@ -514,10 +519,14 @@ B
                                 //printf("\nattribute assigned to vertex\n");	
                                 //value=&val;
                         }
-                        if (type==3)
+                        if (type==STRING_T)
                         {
-                                value= (char *)mxmlGetText(n,NULL);
-                                vertex_assign_attribute( v, attribute, value, type);
+                                //value= (char *)mxmlGetText(n,NULL);
+				char* c = (char*) malloc(sizeof(char));
+				c = (char*)mxmlGetText(n,NULL);
+				//printf("printing char val: %s\n",c);
+				GString* s=g_string_new(c);   
+                                vertex_assign_attribute( v, attribute, s, type);
                                 //printf("\nattribute assigned to edge\n");
                         }
 
@@ -527,7 +536,7 @@ B
 			node_temp1=mxmlGetNextSibling(node_temp1);
 		}
 		//testing if vetrex is assigned attrubute or not .
-		
+		//print_v_attr(v);		
 		//inserting vertex into graph
 		 g_insert_v(g, v);//check if its correct as it returns int
 		//printf("vertex inserted\n");
@@ -613,7 +622,7 @@ B
 			void* value;//=mxmlGetText(node_temp2,NULL);//needs to be checked
  			node_temp2=mxmlGetNextSibling(node_temp2);//go to attr value type
 			int type=atoi(mxmlGetText(node_temp2,NULL));
-			if (type==1)
+			if (type==INT_T)
 			{
 				int val=atoi(mxmlGetText(n,NULL));
 				//printf("printing int val: %d\n", val); 
@@ -624,7 +633,7 @@ B
 				//printf("\nattribute assigned to edge\n");
 				//value=&val;
 			}
-			if (type==2)
+			if (type==FLOAT_T)
 			{
 				 //int len = snprintf(str, 100, "%f",(mxmlGetText(n,NULL))); 
 				float val=atof(mxmlGetText(n,NULL));
@@ -637,10 +646,13 @@ B
                                 
 				//value=&val;
 			}
-			if (type==3)
+			if (type==STRING_T)
 			{
-				value=(char *)mxmlGetText(n,NULL);
-                                edge_assign_attribute( e, attribute, value, type);
+				//value=(char *)mxmlGetText(n,NULL);
+                                char* c = (char*) malloc(sizeof(char));
+                                c = (char*)mxmlGetText(n,NULL);
+				GString* s=g_string_new(c);
+                                edge_assign_attribute( e, attribute, s, type);
                                 //printf("\nattribute assigned to edge\n");
 			}	
 			
