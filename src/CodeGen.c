@@ -60,6 +60,12 @@ void derivedTypeInitCode(struct Node* node, int type, int isglobal){
 		}
 	}
     else if (node->token == AST_ASSIGN) {
+        if (node->child[1]->type != type) {
+            ERRNO= ErrorInitDerivedType;
+            errorInfo(ERRNO, node->line, "type mismatch for the initialization of derived type.\n");
+            node->code = NULL;
+            return;
+        }
         if(isglobal) 
             node->code = strCatAlloc("",5, INDENT[node->scope[0]], node->child[0]->symbol->bind, " = ", node->child[1]->code, ";\n");
         else
