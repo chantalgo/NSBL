@@ -3,7 +3,7 @@ edge e0,e1,e2,e3,e4,e5;
 
 
 //this works.
-//elist el1 = [e0=e1, e3];
+elist el1 = [e0, e3];
 
 string s0 = "haha";
 string s1="abc", s2 = s0;

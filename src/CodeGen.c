@@ -138,6 +138,7 @@ int listCountCheck(struct Node* node, int type){
     if(tn->nch > 0) {
 		tn = tn->child[0];
     	while (tn->token == AST_COMMA ) {
+			if (tn->child[1]->token != IDENTIFIER) flag = ErrorAssignmentExpression;
         	if ( tn->child[1]->type != type ) flag = ErrorListMixedType;
         	tn = tn->child[0];
         	count++;
@@ -145,10 +146,10 @@ int listCountCheck(struct Node* node, int type){
     	if (tn->token == IDENTIFIER) {
         	if ( tn->type != type ) flag = ErrorListMixedType;
         	count++;
-    	}
-		else if(tn->token == AST_ASSIGN){
-        	if ( tn->type != type ) flag = ErrorListMixedType;
-        	count++;
+    	//}
+		//else if(tn->token == AST_ASSIGN){
+        //	if ( tn->type != type ) flag = ErrorListMixedType;
+        //	count++;
 		}else{
 			flag = ErrorAssignmentExpression;
 		}
