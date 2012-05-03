@@ -19,9 +19,11 @@ GraphId new_graphId(){
     return gid++;
 }
 
-//
+//key1 needs to ba a pointer to an int
 int g_hash_table_contains(GHashTable* t, void* key1){
-    GList* list = g_hash_table_get_keys(t);
+    if(t==NULL || key1==NULL)
+		return 0;
+	GList* list = g_hash_table_get_keys(t);
     int l = g_list_length(list);
     int n = 0;
     for(n; n<l; n++){
@@ -37,6 +39,8 @@ int g_hash_table_contains(GHashTable* t, void* key1){
 
 EdgeType* new_edge(){
     EdgeType* edge = (EdgeType*) malloc(sizeof(EdgeType));
+	if(edge == NULL)
+		die(-1, "memory allocation failed in function: new_edge()\n");
     edge->id = new_edgeId();
     edge->start = NULL;
     edge->end = NULL;
@@ -47,10 +51,10 @@ EdgeType* new_edge(){
 
 VertexType* new_vertex(){
     VertexType* vertex = (VertexType*) malloc(sizeof(VertexType));
+	if(vertex == NULL)
+		die(-1, "memory allocation failed in function: new_vertex()\n");
     vertex->id = new_vertexId();
     vertex->attributes = g_hash_table_new(g_str_hash, g_str_equal);
-    //vertex->number_of_out = 0;
-    //vertex->number_of_in = 0;
     vertex->outEdges = NULL;
     vertex->inEdges = NULL;
     vertex->ings = NULL;
@@ -59,9 +63,9 @@ VertexType* new_vertex(){
 
 GraphType* new_graph(){
     GraphType* graph = (GraphType*) malloc(sizeof(GraphType));
+	if(graph==NULL)
+		die(-1, "memory allocation failed in function: new_graph()\n");
     graph->id = new_graphId();
-    //graph->number_of_e = 0;
-    //graph->number_of_v = 0;
     graph->edgeIdList = NULL;
     graph->vertexIdList = NULL;
     graph->edges = g_hash_table_new(g_str_hash, g_str_equal);
@@ -71,6 +75,8 @@ GraphType* new_graph(){
 
 ListType* new_list(){
 	ListType* l = (ListType*)malloc(sizeof(ListType));
+	if(l==NULL)
+		die(-1, "memory allocation failed in function: new_list()\n");
 	l->type = UNKNOWN_T;
     l->list = NULL;
 	return l;
@@ -87,6 +93,8 @@ int destroy_edge(EdgeType* e){
     fprintf(stdout, "\n");
     fprintf(stdout, "------ REMOVE ATTR\n");
 #endif
+	if(e==NULL)
+		return 0;
     g_hash_table_foreach(e->attributes, &destroy_attr_from_table, NULL);
     g_hash_table_destroy(e->attributes);
 #ifdef _DEBUG
@@ -94,8 +102,10 @@ int destroy_edge(EdgeType* e){
 #endif
     VertexType* v1 = e->start;
     VertexType* v2 = e->end;
-    v1->outEdges = g_list_remove(v1->outEdges, e);
-    v2->inEdges = g_list_remove(v2->inEdges, e);
+	if(v1!=NULL)
+    	v1->outEdges = g_list_remove(v1->outEdges, e);
+    if(v2!=NULL)	
+		v2->inEdges = g_list_remove(v2->inEdges, e);
     e->start = NULL;
     e->end = NULL;
 #ifdef _DEBUG
@@ -122,6 +132,8 @@ int destroy_vertex(VertexType* v){
     fprintf(stdout, "\n");
     fprintf(stdout, "====== REMOVE ALL ATTR\n");
 #endif
+	if(v==NULL)
+		return 0;
     g_hash_table_foreach(v->attributes, &destroy_attr_from_table, NULL);
     g_hash_table_destroy(v->attributes);
     EdgeType* e;
@@ -162,6 +174,8 @@ int destroy_vertex(VertexType* v){
 }
 
 int destroy_graph(GraphType* g){
+	if(g==NULL)
+		return 0;
     g_list_free_1(g->edgeIdList);
     g_list_free_1(g->vertexIdList);
     g_hash_table_destroy(g->edges);
@@ -171,24 +185,29 @@ int destroy_graph(GraphType* g){
 }
 
 int destroy_list(ListType* list){
+	if(list == NULL)
+		return 0;
 	g_list_free(list->list);
 	free(list);
 	return 0;
 }
 
 int destroy_string(StringType* s){
+	if(s == NULL)
+		return 0;
 	g_string_free((GString*)s, 1);
 	return 0;
 }
 
 int edge_assign_direction(EdgeType* e, VertexType* v1, VertexType* v2){
-    e->start = v1;
+    if(e == NULL)
+		die(-1, "assign direction to a NULL edge in function: edge_assign_direction\n");
+	if(v1==NULL || v2==NULL)
+		die(-1, "assign direction for NULL vertex in function: edge_assign_direction\n");
+	e->start = v1;
     e->end = v2;
     v1->outEdges = g_list_append(v1->outEdges, e);
-    //v1->number_of_out++;
-    //
     v2->inEdges = g_list_append(v2->inEdges, e);
-    //v2->number_of_in++;
     return 0;
 }
 
@@ -230,7 +249,11 @@ Attribute* new_attr_STRING_T(GString* s){
 }
 
 int assign_attr( Attribute * attr, int type, void * val ) {
-    switch (type) {
+    if(attr == NULL)
+		die(-1, "assign value to a NULL attribute in function: assign_attr()\n");
+	if(val == NULL)
+		die(-1, "assign NULL value to an attribute in function: assign_attr()\n");
+	switch (type) {
         case INT_T :
             attr->value.iv = * (int *) val; break;
         case FLOAT_T :
@@ -247,6 +270,8 @@ int assign_attr( Attribute * attr, int type, void * val ) {
 }
 
 int cmp_attr( Attribute * attr1, void * val ) {
+	if(attr1==NULL || val==NULL)
+		die(-1, "compare to NULL in function: cmp_attr()\n");
     switch (attr1->type) {
         case INT_T :
             return attr1->value.iv - * (int *) val;
@@ -266,7 +291,13 @@ int cmp_attr( Attribute * attr1, void * val ) {
 }
 
 void output_attr( char * key, Attribute * attr, FILE * out ){
-    switch (attr->type) {
+    if(attr==NULL)
+		die(-1, "NULL attr in function: output_attr()\n");
+	if(key==NULL)
+		die(-1, "NULL key in function: output_attr()\n");
+	if(out==NULL)
+		die(-1, "NULL file pointer out in function: output_attr()\n");
+	switch (attr->type) {
         case INT_T :
             fprintf(out, "%s -> %d", key, attr->value.iv); break;
         case FLOAT_T :
@@ -285,6 +316,8 @@ void output_attr( char * key, Attribute * attr, FILE * out ){
 }
 
 void destroy_attr ( Attribute * attr ) {
+	if(attr == NULL)
+		return;
 #ifdef _DEBUG
     fprintf(stderr, "DEBUG: Destroy Attr : ");
     switch ( attr->type ) {
@@ -303,9 +336,11 @@ void destroy_attr ( Attribute * attr ) {
 }
 
 static void destroy_attr_from_table ( gpointer key, gpointer entry, gpointer dummy2 ) {
-    Attribute * attr = (Attribute *) entry;
-    char * attr_name = (char *) key;
+    if(entry == NULL)
+		return;
+	Attribute * attr = (Attribute *) entry;
 #ifdef _DEBUG
+    char * attr_name = (char *) key;
     fprintf(stderr, "DEBUG: Remove attr `%s' from table \n", attr_name);
 #endif
     destroy_attr( attr );
@@ -373,7 +408,11 @@ void* get_attr_value(Attribute* attr, int type, int lno){
 }
 
 int edge_assign_attribute ( EdgeType* e, char * attr_name, void * val, int type ) {
-    Attribute* attr = (Attribute*)g_hash_table_lookup(e->attributes, attr_name);
+    if(e==NULL)
+		die(-1, "NULL edge in function: edge_assign_attribute()\n");
+	if(attr_name==NULL)
+		die(-1, "NULL attr_name in function: edge_assign_attribute()\n");
+	Attribute* attr = (Attribute*)g_hash_table_lookup(e->attributes, attr_name);
     if (attr != NULL) {
         if ( attr->type != type ) {
     		die(-1, "edge_assign_attribute: attribute type mismatch error \n");
@@ -402,7 +441,9 @@ int edge_remove_attribute(EdgeType* e, char* attr_name){
 }
 
 Attribute* edge_get_attribute(EdgeType* e, char* attribute, int autoNew, int lno){	
-    Attribute* attr = g_hash_table_lookup(e->attributes, attribute);
+    if(e==NULL)
+		die(lno, "NULL edge in function: edge_get_attribute()\n");
+	Attribute* attr = g_hash_table_lookup(e->attributes, attribute);
     if (attr == NULL && autoNew) {
         attr = new_attr(UNKNOWN_T, NULL);
         g_hash_table_insert( e->attributes, attribute, attr );
@@ -411,6 +452,8 @@ Attribute* edge_get_attribute(EdgeType* e, char* attribute, int autoNew, int lno
 }
 
 void* edge_get_attribute_value(EdgeType* e, char* attribute, int lno){
+	if(e==NULL)
+		die(lno, "NULL edge in function: edge_get_attribute_value()\n");
 	Attribute* attr;
 	if( (attr = edge_get_attribute(e, attribute, 0, lno)) != NULL)
 		return get_attr_value(attr, RESERVED,lno);
@@ -418,14 +461,22 @@ void* edge_get_attribute_value(EdgeType* e, char* attribute, int lno){
 }
 
 VertexType* get_start_vertex(EdgeType* e){
+	if(e==NULL)
+		die(-1, "NULL edge in function: get_start_vertex()\n");
     return e->start;
 }
 
 VertexType* get_end_vertex(EdgeType* e){
+	if(e==NULL)
+		die(-1, "NULL edge in function: get_end_vertex()\n");
     return e->end;
 }
 
 int vertex_assign_attribute(VertexType* v, char* attr_name, void * val, int type ) {
+	if(v==NULL)
+		die(-1, "NULL vertex in function: vertex_assign_attribute()\n");
+	if(attr_name==NULL)
+		die(-1, "NULL attr_name in function: vertex_assign_attribute()\n");
     Attribute* attr = (Attribute*)g_hash_table_lookup(v->attributes, attr_name);
     if (attr != NULL) {
         if ( attr->type != type ) {
@@ -455,6 +506,8 @@ int vertex_remove_attribute(VertexType* v, char* attr_name) {
 }
 
 Attribute* vertex_get_attribute(VertexType* v, char* attribute, int autoNew, int lno){
+	if(v==NULL)
+		die(lno, "NULL vertex in function: vertex_get_attribute()\n");
     Attribute* attr = g_hash_table_lookup(v->attributes, attribute);
     if (attr == NULL && autoNew) {
         attr = new_attr(UNKNOWN_T, NULL);
@@ -464,6 +517,8 @@ Attribute* vertex_get_attribute(VertexType* v, char* attribute, int autoNew, int
 }
 
 void* vertex_get_attribute_value(VertexType* v, char* attribute, int lno){
+	if(v==NULL)
+		die(lno, "NULL vertex in function: vertex_get_attribute_value()\n");
 	Attribute* attr;
 	if( (attr = vertex_get_attribute(v, attribute, 0, lno)) != NULL)
 		return get_attr_value(attr, RESERVED,lno);
@@ -471,15 +526,21 @@ void* vertex_get_attribute_value(VertexType* v, char* attribute, int lno){
 }
 
 GList* get_v_outedges(VertexType* v){
+	if(v==NULL)
+		die(-1, "NULL vertex in function: get_v_outedges()\n");
     return v->outEdges;
 }
 
 GList* get_v_inedges(VertexType* v){
+	if(v==NULL)
+		die(-1, "NULL vertex in function: get_v_inedges()\n");
     return v->inEdges;
 }
 
 GList* get_common_edges(GHashTable* edges, GList* list){
     GList* common = NULL;
+	if(edges==NULL || list==NULL)
+		return common;
     int l = g_list_length(list);
     int n = 0;
     for(n; n<l; n++){
@@ -491,16 +552,22 @@ GList* get_common_edges(GHashTable* edges, GList* list){
 }
 
 GList* get_ving_outedges(GraphType* g, VertexType* v){
+	if(g==NULL || v==NULL)
+		return NULL;
     GList* elist = get_v_outedges(v);
     return get_common_edges(g->edges, elist);
 }
 
 GList* get_ving_inedges(GraphType* g, VertexType* v){
+	if(g==NULL || v==NULL)
+		return NULL;
     GList* elist = get_v_inedges(v);
     return get_common_edges(g->edges, elist);
 }
 
 GList* get_g_allv(GraphType* g){
+	if(g==NULL)
+		return NULL;
     GList* list = NULL;
     int l = g_list_length(g->vertexIdList);
     int n = 0;
@@ -520,6 +587,8 @@ ListType* get_g_vlist(GraphType* g){
 }
 
 GList* get_g_alle(GraphType* g){
+	if(g==NULL)
+		return NULL;
     GList* list = NULL;
     int l = g_list_length(g->edgeIdList);
     int n = 0;
@@ -539,18 +608,24 @@ ListType* get_g_elist(GraphType* g){
 }
 
 int g_remove_edge(GraphType* g, EdgeType* e){
+	if(g==NULL || e==NULL)
+		return 0;
     g->edgeIdList = g_list_remove(g->edgeIdList, &(e->id));
     g_hash_table_remove(g->edges, e);
     return 0;
 }
 
 int g_remove_vertex(GraphType* g, VertexType* v){
+	if(g==NULL || v==NULL)
+		return 0;
     g->vertexIdList = g_list_remove(g->vertexIdList, &(v->id));
     g_hash_table_remove(g->vertices, v);
     return 0;
 }
 
 int g_insert_v(GraphType* g, VertexType* v){
+	if(g==NULL || v==NULL)
+		return 0;
     g->vertexIdList = g_list_append(g->vertexIdList, &(v->id));
     g_hash_table_insert(g->vertices, &(v->id), v);
     v->ings = g_list_append(v->ings, g);
@@ -558,6 +633,8 @@ int g_insert_v(GraphType* g, VertexType* v){
 }
 
 int g_insert_e(GraphType* g, EdgeType* e){
+	if(g==NULL || e==NULL)
+		return 0;
     g->edgeIdList = g_list_append(g->edgeIdList, &(e->id));
     g_hash_table_insert(g->edges, &(e->id), e);
     e->ings = g_list_append(e->ings, g);
@@ -566,6 +643,8 @@ int g_insert_e(GraphType* g, EdgeType* e){
 }
 
 int g_append_list(GraphType* g, ListType* list){
+	if(g==NULL || list==NULL)
+		return 0;
 	int length = g_list_length(list->list);
 	int i;
 	for(i=0; i<length; i++){
@@ -584,6 +663,8 @@ int g_append_list(GraphType* g, ListType* list){
 }
 
 int g_insert_subg(GraphType* g, GraphType* subg){
+	if(g==NULL || subg==NULL)
+		return 0;
     int l,n;
     l = g_list_length(subg->vertexIdList);
     for(n=0; n<l; n++){
@@ -610,9 +691,15 @@ int g_insert_subg(GraphType* g, GraphType* subg){
 }
 
 ListType* match_string(ListType* list, char* attribute, char* s){
+	GList* result=NULL;
+	if(list==NULL)
+		die(-1, "NULL list in function match_string()\n");
+	if(attribute==NULL || s==NULL){
+		list->list = NULL;
+		return list;
+	}
 	int l = g_list_length(list->list);
 	int n = 0;
-	GList* result;
 	switch(list->type){
 		case EDGE_T:
 			for(n; n<l; n++){
@@ -641,9 +728,15 @@ ListType* match_string(ListType* list, char* attribute, char* s){
 }
 
 ListType* match_num(ListType* list, char* attribute, float cmpv, int op){
+	GList* result=NULL;
+	if(list==NULL)
+		die(-1, "NULL list in function match_num()\n");
+	if(attribute==NULL){
+		list->list = NULL;
+		return list;
+	}
 	int l = g_list_length(list->list);
 	int n = 0;
-	GList* result;
 	void* e;
 	for(n; n<l; n++){
 		Attribute* attr_v;
@@ -696,6 +789,8 @@ ListType* match_num(ListType* list, char* attribute, float cmpv, int op){
 
 ListType* list_declaration(int type,int n, ...){
 	ListType* newlist = (ListType*)malloc(sizeof(ListType));
+	if(newlist==NULL)
+		die(-1, "failed to allocate memory for newlist in function: list_declaration()\n");
 	newlist->list = NULL;
 	newlist->type = type;
 	int i;
@@ -722,14 +817,18 @@ ListType* list_declaration(int type,int n, ...){
 }
 
 void* list_getelement(ListType* list, int index){
-	//if(g_list_length(list->list)<(index+1))
-	//	return NULL;
+	if(list==NULL)
+		die(-1, "list is NULL in function: list_getelement()\n");
 	void * rlt = (void *) g_list_nth_data(list->list, index);
     if (rlt == NULL) die(-1,"list_getelement: member NOT exist.\n");
 	return g_list_nth_data(list->list, index);
 }
 
 ListType* list_append(ListType* list, int type, void* obj){
+	if(list == NULL)
+		die(-1, "list is NULL in function: list_append()\n");
+	if(obj==NULL)
+		return list;
 	if(list->type == UNKNOWN_T)
 		list->type = type;
 	else if(list->type != type){
@@ -742,6 +841,10 @@ ListType* list_append(ListType* list, int type, void* obj){
 }
 
 int list_assign_element(ListType* list, int type, int index, void* obj){
+	if(list == NULL)
+		die(-1, "list is NULL in function: list_assign_element()\n");
+	if(obj == NULL)
+		return list;
 	if(g_list_length(list->list)<=(index+1))
 		return 1;
 	if(list->type == UNKNOWN_T)
@@ -755,6 +858,8 @@ int list_assign_element(ListType* list, int type, int index, void* obj){
 } 
 
 ListType* list_append_gl(ListType* l, GList* gl, int type){
+	if(l==NULL)
+		die(-1, "list l is NULL if function: list_append_gl()\n");
 	if(l->type != type){
 		die(-1,"unmatched type for list append glist\n");
 	}
@@ -769,6 +874,8 @@ ListType* list_append_gl(ListType* l, GList* gl, int type){
 }
 
 int print_list(ListType* list){	
+	if(list==NULL)
+		die(-1, "list is NULL if function: print_list()\n");
     int i;
 	int type = list->type;
 	int length = g_list_length(list->list);
@@ -791,11 +898,15 @@ int print_list(ListType* list){
 }
 
 int print_v(VertexType* v){
+	if(v==NULL)
+		return 0;
     printf("<Vertex: %ld>", v->id);
     return 0;
 }
 
 int print_e(EdgeType* e){
+	if(e==NULL)
+		return 0;
     printf("<Edge: %ld> : %ld -> %ld ", e->id, e->start->id, e->end->id);
     return 0;
 }
@@ -817,11 +928,13 @@ int print_v_attr(VertexType* v){
 }
 
 int print_e_attr(EdgeType* e){
+    if( e == NULL ) 
+        die(-1, "print_e_attr: NULL pointer.\n");
     GList* klist = g_hash_table_get_keys(e->attributes);
     int l = g_list_length(klist);
     int n = 0;
-    printf("\nEdge Attributes=======================\n");
-	printf("vstart: ");
+    //printf("\nEdge Attributes=======================\n");
+	printf("\nvstart: ");
 	print_v(e->start);
 	printf("--->vend: ");
 	print_v(e->end);
@@ -837,6 +950,8 @@ int print_e_attr(EdgeType* e){
 }
 
 int print_g(GraphType* g){
+	if(g==NULL)
+		return 0;
     GList* vlist = get_g_allv(g);
     GList* elist = get_g_alle(g);
     int l,n;
@@ -865,21 +980,29 @@ int print_g(GraphType* g){
 }
 
 int print_LIST_T(ListType* l){
+	if(l==NULL)
+		return 0;
     print_list(l);
     return 0;
 }
 
 int print_VERTEX_T(VertexType* v){
+	if(v==NULL)
+		return 0;
 	print_v_attr(v);
 	return 0;
 }
 
 int print_EDGE_T(EdgeType* e){
+	if(e==NULL)
+		return 0;
 	print_e_attr(e);
 	return 0;
 }
 
 int print_GRAPH_T(GraphType* g){
+	if(g==NULL)
+		return 0;
 	print_g(g);
 	return 0;
 }
@@ -923,7 +1046,9 @@ void die(int lno, char* fmt, ...){
 
 
 static Attribute* relational_operator( Attribute* attr1, Attribute* attr2, int op, int lno) {
-    int type1 = attr1->type, type2 = attr2->type, resultype;
+    if(attr1==NULL || attr2==NULL)
+		die(lno, "NULL pointer for attr1 or attr2\n");
+	int type1 = attr1->type, type2 = attr2->type, resultype;
     Attribute* result;
     float f1, f2;
     if(type1 == INT_T)
@@ -953,6 +1078,8 @@ static Attribute* relational_operator( Attribute* attr1, Attribute* attr2, int o
 }
 
 static Attribute* math_operator( Attribute* attr1, Attribute* attr2, int op, int lno) {
+    if(attr1==NULL || attr2==NULL)
+		die(lno, "NULL pointer for attr1 or attr2\n");
     int type1 = attr1->type, type2 = attr2->type, resultype;
     Attribute* result;
     if(type1 == INT_T && type2 == INT_T) {
@@ -1009,6 +1136,8 @@ static Attribute* math_operator( Attribute* attr1, Attribute* attr2, int op, int
 }
 
 static Attribute* logic_operator( Attribute* attr1, Attribute* attr2, int op, int lno) {
+    if(attr1==NULL || attr2==NULL)
+		die(lno, "NULL pointer for attr1 or attr2\n");
     int type1 = attr1->type, type2 = attr2->type, resultype;
     Attribute* result;
     if(attr1->type == BOOL_T && attr2->type == BOOL_T){
@@ -1026,6 +1155,8 @@ static Attribute* logic_operator( Attribute* attr1, Attribute* attr2, int op, in
 }
 
 static Attribute* equal_operator( Attribute* attr1, Attribute* attr2, int op, int lno) {
+    if(attr1==NULL || attr2==NULL)
+		die(lno, "NULL pointer for attr1 or attr2\n");
     int type1 = attr1->type, type2 = attr2->type, resultype;
     Attribute* result;
     if(type1 == type2){
@@ -1046,6 +1177,8 @@ static Attribute* equal_operator( Attribute* attr1, Attribute* attr2, int op, in
 }
 
 Attribute* binary_operator( Attribute* attr1, Attribute* attr2, int op, int reverse, int rm1, int rm2, int lno) {
+    if(attr1==NULL || attr2==NULL)
+		die(lno, "NULL pointer for attr1 or attr2\n");
     if(reverse) {
         Attribute* tmp = attr1;
         attr1 = attr2;

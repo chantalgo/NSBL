@@ -30,7 +30,7 @@ x>>g2;
 print<<g2;
 vlist vl2 = g2.allV;
 foreach(vertex vt2 : vl2) print<<vt2;
-elist el2= g.allE;
+elist el2= g2.allE;
 foreach(edge et2 : el2) print<<et2;
 
 

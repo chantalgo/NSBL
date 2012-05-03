@@ -3,8 +3,18 @@ edge e0,e1,e2,e3,e4,e5;
 
 
 //this works.
-elist el1 = [e0=e1, e3];
+//elist el1 = [e0=e1, e3];
 
 string s0 = "haha";
 string s1="abc", s2 = s0;
 
+elist el2 = [e0,e1,e2];
+
+edge ee;
+ee = el2[0];
+print <<ee;
+
+vlist vl2 = [v0,v1,v2];
+vertex vv;
+vv = vl2[0];
+print <<vv;

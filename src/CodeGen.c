@@ -1136,7 +1136,7 @@ int codeGen (struct Node * node) {
                 node->code = strRightCatAlloc(node->code, "",10,
                     INDENT[node->scope[0]],"if ( ", lf->code, " ){ \n",
                     sg->code, 
-                    INDENT[node->scope[0]],"else\n", rt->code, 
+                    INDENT[node->scope[0]],"}\nelse{\n", rt->code, 
                     INDENT[node->scope[0]]," }// END_IF\n");
             }
             else if (lf->type < 0) { // DYNAMIC

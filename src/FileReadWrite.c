@@ -59,7 +59,7 @@
      VertexType* v = (VertexType*)(g_list_nth_data(listV,n));
      vertex = mxmlNewElement(vertices, "vertex");
      vertex_id=mxmlNewElement(vertex,"vertex_id");
-     int len = snprintf(str, 100, "%d",v->id );
+     int len = snprintf(str, 100, "%ld",v->id );
      //printf("%s\n",str);
      mxmlNewText(vertex_id,0,str);
 		
@@ -70,7 +70,7 @@
 	 {
 		outedge=mxmlNewElement(outedges,"outedge");
 		EdgeType* e_temp = g_list_nth_data(v->outEdges,y);
-		int len = snprintf(str, 100, "%d",e_temp->id );
+		int len = snprintf(str, 100, "%ld",e_temp->id );
 		mxmlNewText(outedge, 0, str);
 	 }
   
@@ -82,7 +82,7 @@
 	 {
 		inedge=mxmlNewElement(inedges,"inedge");
 		EdgeType* e_temp = g_list_nth_data(v->inEdges,d);
-		int len = snprintf(str, 100, "%d",e_temp->id );
+		int len = snprintf(str, 100, "%ld",e_temp->id );
 		mxmlNewText(inedge, 0, str);
 	 }
      vertex_attributes =  mxmlNewElement(vertex,"vertex_attributes");
@@ -167,14 +167,14 @@
       EdgeType* e= g_list_nth_data(listE,m);
       edge =mxmlNewElement(edges,"edge");
       edge_id=mxmlNewElement(edge, "edge_id");
-      int len = snprintf(str, 100, "%d",(e->id) );
+      int len = snprintf(str, 100, "%ld",(e->id) );
       mxmlNewText(edge_id,0,str);
       startV = mxmlNewElement(edge, "startV");
-      len = snprintf(str, 100, "%d",e->start->id );
+      len = snprintf(str, 100, "%ld",e->start->id );
       mxmlNewText(startV,0,str);
       endV = mxmlNewElement(edge,"endV");
 
-     len = snprintf(str, 100, "%d",(e->end->id) );
+     len = snprintf(str, 100, "%ld",(e->end->id) );
       mxmlNewText(endV,0,str);
       edge_attributes = mxmlNewElement(edge, "edge_attributes");
       //edge_attribute = mxmlNewElement(edge_attributes, "edge_attribute");
