@@ -907,7 +907,15 @@ int print_v(VertexType* v){
 int print_e(EdgeType* e){
 	if(e==NULL)
 		return 0;
-    printf("<Edge: %ld> : %ld -> %ld ", e->id, e->start->id, e->end->id);
+    printf("<Edge: %ld>(", e->id);
+	if(e->start!=NULL)
+		printf("vstart%ld]-->", e->start->id);
+	else
+		printf("vstart[NULL]-->");
+	if(e->end!=NULL)
+		printf("vend[%ld])}", e->end->id);
+	else
+		printf("vend[NULL])");
     return 0;
 }
 
@@ -917,12 +925,14 @@ int print_v_attr(VertexType* v){
     GList* klist = g_hash_table_get_keys(v->attributes);
     int l = g_list_length(klist);
     int n = 0;
+    printf("\nVertex Attributes:------------\n");
     printf("<Vertex> : Id = %ld\n", v->id);
     for(n; n<l; n++){
         void* key = g_list_nth_data(klist, n);
         Attribute* value = g_hash_table_lookup(v->attributes, key);
         output_attr( (char *) key, value, stdout);
     }
+	printf("------------------------------\n");
     g_list_free(klist);
     return 0;
 }
@@ -933,13 +943,28 @@ int print_e_attr(EdgeType* e){
     GList* klist = g_hash_table_get_keys(e->attributes);
     int l = g_list_length(klist);
     int n = 0;
-    //printf("\nEdge Attributes=======================\n");
-	printf("\nvstart: ");
-	print_v(e->start);
-	printf("--->vend: ");
-	print_v(e->end);
+    printf("\nEdge Attributes:--------------\n");
+    printf("<Edge> : Id = %ld \n", e->id);
+	printf("vstart");
+	if(e->start!=NULL){
+		printf("[");
+		print_v(e->start);
+		printf("]");
+	}
+	else
+		printf("[NULL]");
+	
+	printf("-->vend");
+	
+	if(e->end!=NULL){
+		printf("[");
+		print_v(e->end);
+		printf("]");
+	}
+	else
+		printf("[NULL]");
 	printf("\n");
-    printf("<Edge> : Id = %ld\n", e->id);
+	printf("------------------------------\n");
     for(n; n<l; n++){
         void* key = g_list_nth_data(klist, n);
         Attribute* value = g_hash_table_lookup(e->attributes, key);
@@ -955,7 +980,7 @@ int print_g(GraphType* g){
     GList* vlist = get_g_allv(g);
     GList* elist = get_g_alle(g);
     int l,n;
-    printf("\nGraph===========================\n");
+    printf("\nGraph------------------------------------------------------------\n");
     l = g_list_length(vlist);
     printf("Vertices: \n");
     for(n=0; n<l; n++){
@@ -973,7 +998,7 @@ int print_g(GraphType* g){
         printf(" | ");
     }
     printf("\n");
-    printf("==================================\n");
+    printf("-----------------------------------------------------------------\n");
     g_list_free(vlist);
     g_list_free(elist);
     return 0;

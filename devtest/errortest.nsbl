@@ -12,9 +12,18 @@ elist el2 = [e0,e1,e2];
 
 edge ee;
 ee = el2[0];
-print <<ee;
+//print <<ee;
 
 vlist vl2 = [v0,v1,v2];
 vertex vv;
 vv = vl2[0];
 print <<vv;
+
+edge etest;
+print <<etest;
+
+graph g1;
+g1<:ee;g1<:e5;
+g1<:etest;g1<:v4;g1<:vv;
+
+print<<g1;
