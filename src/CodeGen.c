@@ -88,12 +88,12 @@ void stringInitCode(struct Node* node, int type, int isglobal){
                 node->child[0]->symbol->bind, " = ", node->child[1]->code, ";\n"); 
 		else
 			node->code = strCatAlloc("",7,INDENT[node->scope[0]], 
-                sTypeName(type), " ", node->child[0]->symbol->bind, " = ", node->child[1]->code, ";\n");	
+                sTypeName(type), " * ", node->child[0]->symbol->bind, " = ", node->child[1]->code, ";\n");	
 	}else{
 		if(isglobal)
 			node->code = strCatAlloc("",3,INDENT[node->scope[0]], node->symbol->bind, " = g_string_new(\"\");\n"); 
 		else
-			node->code = strCatAlloc("",5,INDENT[node->scope[0]], sTypeName(type), " ", node->symbol->bind, " = g_string_new(\"\");\n");
+			node->code = strCatAlloc("",5,INDENT[node->scope[0]], sTypeName(type), " * ", node->symbol->bind, " = g_string_new(\"\");\n");
 	}
 }
 

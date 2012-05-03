@@ -14,9 +14,9 @@ e.name = "edge 0";
 g <: v;
 g <: e;
 
-//print<<le;
-//print<<g;
-//print<<le<<lv<<g;
+print<<le;
+print<<g;
+print<<le<<lv<<g;
 print<<"in scope 0 i: "<<i<<" "<<f<<" "<<b<<" "<<s<<" "<<"\n";
 
 {
