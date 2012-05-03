@@ -1,0 +1,55 @@
+int i = 0;
+float f = 0.00;
+bool b = true;
+string s="scope 0";
+print<<"string: "<<s<<"\n";
+graph g;
+vertex v;
+edge e;
+vlist lv = [v];
+elist le;
+le <: e; 
+v.name = "vertex 0";
+e.name = "edge 0"; 
+g <: v;
+g <: e;
+
+//print<<le;
+//print<<g;
+//print<<le<<lv<<g;
+print<<"in scope 0 i: "<<i<<" "<<f<<" "<<b<<" "<<s<<" "<<"\n";
+
+{
+	int i = 1;
+	float f = 1.1;
+	bool b = false;
+	string s="scope 1";
+	graph g;
+	vertex v;
+	edge e;
+	v.name = "vertex 1";
+	e.name = "edge 1";
+	g <: v;
+	g <: e;
+	elist le = [e];
+	vlist lv = [v];
+	print<<"in scope 0 i: "<<i<<" "<<f<<" "<<b<<" "<<" "<<s<<"\n";
+
+	{
+		int i = 2;
+	        float f = 2.2;
+        	bool b = false;
+     	   	//string s = "scope 2";
+        	graph g;
+        	vertex v;
+        	edge e;
+        	v.name = "vertex 2";
+        	e.name = "edge 2";
+        	g <: v;
+        	g <: e;
+        	elist le = [e];
+        	vlist lv = [v];
+        	print<<"in scope 0 i: "<<i<<" "<<f<<" "<<b<<" "<<s<<"\n";
+
+	} 
+} 
