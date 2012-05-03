@@ -59,7 +59,7 @@
      VertexType* v = (VertexType*)(g_list_nth_data(listV,n));
      vertex = mxmlNewElement(vertices, "vertex");
      vertex_id=mxmlNewElement(vertex,"vertex_id");
-     int len = snprintf(str, 100, "%ld",v->id );
+     int len = snprintf(str, 100, "%d",v->id );
      //printf("%s\n",str);
      mxmlNewText(vertex_id,0,str);
 		
@@ -70,7 +70,7 @@
 	 {
 		outedge=mxmlNewElement(outedges,"outedge");
 		EdgeType* e_temp = g_list_nth_data(v->outEdges,y);
-		int len = snprintf(str, 100, "%ld",e_temp->id );
+		int len = snprintf(str, 100, "%d",e_temp->id );
 		mxmlNewText(outedge, 0, str);
 	 }
   
@@ -82,7 +82,7 @@
 	 {
 		inedge=mxmlNewElement(inedges,"inedge");
 		EdgeType* e_temp = g_list_nth_data(v->inEdges,d);
-		int len = snprintf(str, 100, "%ld",e_temp->id );
+		int len = snprintf(str, 100, "%d",e_temp->id );
 		mxmlNewText(inedge, 0, str);
 	 }
      vertex_attributes =  mxmlNewElement(vertex,"vertex_attributes");
@@ -118,6 +118,11 @@
 
                 //mxmlNewText(edge_attribute_value,1, (char*)(((Attribute*)(g_list_nth_data(e_attr_value,y)))->value));
         }
+	if (type==BOOL_T)
+	{
+		char* val = ((Attribute*)(g_list_nth_data(v_attr_value,x)))->value.bv ? "true" : "fasle";
+		mxmlNewText(vertex_attribute_value, 0, val);
+	}
 
       //printf("%s\n",(char*)(((Attribute*)(g_list_nth_data(v_attr_value,x)))->value));
 
@@ -167,14 +172,14 @@
       EdgeType* e= g_list_nth_data(listE,m);
       edge =mxmlNewElement(edges,"edge");
       edge_id=mxmlNewElement(edge, "edge_id");
-      int len = snprintf(str, 100, "%ld",(e->id) );
+      int len = snprintf(str, 100, "%d",(e->id) );
       mxmlNewText(edge_id,0,str);
       startV = mxmlNewElement(edge, "startV");
-      len = snprintf(str, 100, "%ld",e->start->id );
+      len = snprintf(str, 100, "%d",e->start->id );
       mxmlNewText(startV,0,str);
       endV = mxmlNewElement(edge,"endV");
 
-     len = snprintf(str, 100, "%ld",(e->end->id) );
+     len = snprintf(str, 100, "%d",(e->end->id) );
       mxmlNewText(endV,0,str);
       edge_attributes = mxmlNewElement(edge, "edge_attributes");
       //edge_attribute = mxmlNewElement(edge_attributes, "edge_attribute");
@@ -210,7 +215,11 @@
         {
                 mxmlNewText(edge_attribute_value,0, ((Attribute*)(g_list_nth_data(e_attr_value,y)))->value.sv->str);
         }
-
+        if (type==BOOL_T)
+        {
+                char* val = ((Attribute*)(g_list_nth_data(e_attr_value,y)))->value.bv ? "true" : "fasle";
+                mxmlNewText(edge_attribute_value, 0, val);
+        }
 
 	//mxmlNewText(edge_attribute_value, 1,
         //(char*)(((Attribute*)(g_list_nth_data(e_attr_value,y)))->value));
@@ -529,7 +538,14 @@ B
                                 vertex_assign_attribute( v, attribute, s, type);
                                 //printf("\nattribute assigned to edge\n");
                         }
-
+			if (type==BOOL_T)
+			{
+				char * vIn = (char*)mxmlGetText(n,NULL);
+				bool vOut = vIn && strcasecmp(vIn,"true")==0;
+				bool* b1=(bool*)malloc(sizeof(bool));
+				*b1 = vOut;
+				vertex_assign_attribute( v, attribute, b1, type);
+			}
 			//vertex_assign_attribute( v, attribute, value, type);//check if its correct as it returns int
             		//testing if vertex assigned attribute or not
 			//printf("vertex attribute value: %d\n",vertex_get_attribute_value(v, attribute));
@@ -654,8 +670,16 @@ B
 				GString* s=g_string_new(c);
                                 edge_assign_attribute( e, attribute, s, type);
                                 //printf("\nattribute assigned to edge\n");
-			}	
-			
+			}
+                        if (type==BOOL_T)
+                        {
+                                char * vIn = (char*)mxmlGetText(n,NULL);
+                                bool vOut = vIn && strcasecmp(vIn,"true")==0;
+                                bool* b1=(bool*)malloc(sizeof(bool));
+                                *b1 = vOut;
+                                edge_assign_attribute( e, attribute, b1, type);
+                        }
+	
 			//edge_assign_attribute( e, attribute, value, type);//check if its correct as it returns int
             		//printf("\nattribute assigned to edge\n");
 			node_temp1=mxmlGetNextSibling(node_temp1);

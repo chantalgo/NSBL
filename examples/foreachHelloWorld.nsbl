@@ -1,0 +1,49 @@
+//Primitive Declaration
+int i=0;
+int y=0;
+
+//Graph Creation
+vertex v1, v2, v3, v4, v5;
+edge e1, e2, e3, e4;
+vlist lv = [v2, v3, v4, v5];
+elist le = [e1, e2, e3];
+graph g1;
+
+v1.project = "World";
+v2.name = "Friend one";
+v3.name = "Friend two";
+v4.name = "Friend three";
+v5.name = "Friend four";
+
+e1.relationship = " says " ;
+e2.relationship = " says ";
+e3.relationship = e2.relationship;
+e4.relationship = e3.relationship;
+
+le <: e4;
+
+e1:v2->v1;
+e2:v3->v1;
+e3:v4->v1;
+e4:v5->v1;
+
+g1 <: lv;
+g1 <: le;
+g1 <: v1;
+
+void hello(){
+        print<<"Welcome to NSBL!\n";
+	foreach (vertex vtemp: lv)
+	{
+                print<<vtemp.name;
+                vlist lv1;
+		lv1<:vtemp;
+		elist le1 = lv1|outE;
+		foreach(edge etemp: le1)
+			print<<etemp.relationship;
+		print<<" Hello ";
+		print<<v1.project<<"\n";
+        }
+}
+hello();
+

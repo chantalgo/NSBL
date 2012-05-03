@@ -17,6 +17,12 @@ v3.w = 300.1;
 v4.w = 400.1;
 v5.w = 500.1;
 
+v1.flag = true;
+v2.flag = false;
+v3.flag = false;
+v4.flag = true;
+v5.flag = true;
+
 //v1.name="v1";
 //v2.name="v2";
 
@@ -33,6 +39,12 @@ e2.name = "e2";
 e3.name = "e3";
 e4.name = "e4";
 e5.name = "e5";
+
+e1.flag = true;
+e2.flag = true;
+e3.flag = false;
+e4.flag = true;
+e5.flag = false; 
 
 //e1.w=45.89;
 //e1.age=45;

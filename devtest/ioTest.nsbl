@@ -13,8 +13,15 @@ print<<i<<k<<u;
 
 v1.name = "testio1";
 v2.name = "testio2";
+v1.val=10;
+v2.val=20;
+v1.fval=10.09;
+v2.fval=20.09;
+v1.bval = true;
+v2.bval = false;
 e:v1->v2;
 e.level = 5;
+e.bval=false;
 
 g<:v1; g<:v2; g<:e;
 
@@ -29,11 +36,22 @@ graph g2;
 x>>g2;
 print<<g2;
 vlist vl2 = g2.allV;
-foreach(vertex vt2 : vl2) print<<vt2;
+float sum;
+int sum1;
+foreach(vertex vv : vl2) 
+{
+        if (true && v1.bval)
+                print<<vv.name<<" has bool value "<<vv.bval<<"\n";
+        else
+                print<<vv.name<<" has bool value "<<vv.bval<<"\n";
+        sum = vv.fval + 1.1;
+        print<<"the float test: "<<sum<<"\n";
+        sum1 = vv.val + 5;
+        print<<"the int test: "<<sum1<<"\n";
+}
+
 elist el2= g2.allE;
 foreach(edge et2 : el2) print<<et2;
-
-
 
 
 

@@ -1,0 +1,57 @@
+graph social;
+vertex person1,person2,person3,person4,person5;
+edge connect1, connect2, connect3, connect4;
+
+person1.name = "Jim";
+person2.name = "Martha";
+person3.name = "Kevin";
+person4.name = "Alicia";
+person5.name = "Silvia";
+
+person1.position = "Project Manager";
+person2.position = "Project Lead";
+person3.position = "Associate";
+person4.position = "Associate";
+person5.position = "Associate";
+
+person1.salary = 2000;
+person2.salary = 1500;
+person3.salary = 1200;
+person4.salary = 1100;
+person5.salary = 1000;
+
+connect1.relation = "Boss of";
+connect2.relation = "Boss of";
+connect3.relation = "Boss of";
+connect4.relation = "Boss of";
+
+connect1:person1->person2;
+connect2:person2->person3;
+connect3:person2->person4;
+connect4:person2->person5;
+
+vlist vertices = [person1, person2, person3, person4, person5];
+elist edges = [connect1, connect2, connect3, connect4];
+
+social <: vertices;
+social <: edges;
+
+func cond(int a):boolean = { return (@salary>a); };
+
+vlist query1 = social.allV?[@salary>1100];
+vlist query2 = social.allE|endV?[@position=="Associate"];
+
+print<<"The employees who are in the position of associate are:\n";
+foreach (vertex tempV: query2){
+	print<<tempV.name<<"\n";
+}
+
+print<<"Determining the names of the employees who have a salary greater than 1100 through match and pipe query:\n";
+foreach (vertex tempV1: query1){
+	print<<tempV1.name<<"\n";
+}  
+
+print<<"Determining the names of the employees who have a salary greater than 1100 through function literal:\n";
+foreach(vertex tempV2:social.allV?[cond(1100)]){
+	print<<tempV2.name<<"\n";
+}

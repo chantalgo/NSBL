@@ -1,0 +1,50 @@
+
+vertex v1,v2,v3;
+
+edge e1, e2;
+
+graph g;
+
+v1.name = "v1";
+v2.name = "v2";
+v3.name = "v3";
+
+e1.name = "e1";
+e2.name = "e2"; 
+
+e1:v1->v2;
+e2:v2->v3; 
+
+g <: v1;
+g <: v2;
+g <: v3;
+
+g <: e1;
+g <: e2;
+
+vlist lv = g.allV;
+elist le = g.allE;
+
+int i = 0;
+
+for (i ; i < length(lv) ; i = i + 1)
+{	
+	vertex v = lv[i];
+	print<<"Vertex "<<v.name<<" says Hello Graphs!\n";
+}
+
+for (i=0; i < length(le); i = i+1)
+{
+	edge e = le[i];
+	print<<"Edge "<<e.name<<" says Hello Graphs!\n";
+}
+
+string s = "gaph.xml";
+s << g;
+graph g1;
+s >> g1;
+print<<"g1 the new graph is \n"<<g1;
+vlist vl = g1.allV;
+foreach(vertex v:vl) print<<"vertex of g1:\n"<<v;
+elist el = g1.allE;
+foreach(edge e:el) print<<"edge of g1:\n"<<e;

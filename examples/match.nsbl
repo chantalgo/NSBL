@@ -1,0 +1,30 @@
+graph g;
+vertex v1,v2,v3;
+edge e1,e2;
+
+v1.name = "First Vertex";
+v2.name = "Second Vertex";
+v3.name = "Third Vertex";
+
+e1.weight = 1;
+e1.relation = "friends";
+e2.weight = 12;
+e2.relation = "friends";
+e1.name = "e1";
+e2.name = "e2";
+
+e1:v1->v2;
+e2:v2->v3;
+
+g<:v1;
+g<:v2;
+g<:v3;
+g<:e1;
+g<:e2;
+
+vlist vertices = g.allV;
+
+elist edges=vertices|outE?[@weight>10];
+
+foreach(edge e: edges)
+	print<<e;

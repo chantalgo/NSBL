@@ -1,0 +1,38 @@
+graph g;
+vertex v1, v2, v3;
+edge e1, e2, temp;
+
+v1.name = "First House";
+v2.name = "Second House";
+v3.name = "Third House";
+
+v1.isBought = true;
+v2.isBought = false;
+v3.isBought = true;
+
+e1.weight = 10;
+e2.weight = 15;
+
+int total = 0;
+int difference = 0;
+
+boolean result  = true;
+
+e1:v1->v2;
+e2:v2->v3;
+
+g <: v1;
+g <: v2;
+g <: v3;
+g <: e1;
+g <: e2;
+
+total = e1.weight + e2.weight;
+difference = e2.weight - e1.weight;
+print<<"The total distance from "<<v1.name<<" to "<<v3.name<<" is "<<total<<"\n";
+print <<"The distance difference between 2 to 3 and 2 to 1 is "<<difference<<"\n";
+result = v1.isBought || v2.isBought;
+print<<"House 1 or House 2 are bought? "<<result<<"\n";
+result = v1.isBought && v3.isBought;
+print<<"House 1 and House 2 are bought? "<<result<<"\n";  
+ 
