@@ -1,0 +1,52 @@
+graph g;
+vertex v1,v2,v3;
+edge e1,e2,e3,e4,e5;
+
+v1.name = "v1";
+v2.name = "v2";
+v3.name = "v3";
+v1.w = 10;
+v2.w = 12;
+v3.w = 14;
+;
+;
+e1.name = "e1";
+e2.name = "e2";
+e3.name = "e3";
+e4.name = "e4";
+e5.name = "e5";
+
+e1.w = 10;
+e2.w = 11;
+e3.w = 12;
+e4.w = 13;
+e5.w = 14;
+
+e1.b = true;
+e2.b = true;
+e3.b = false;
+e4.b = false;
+e5.b = true;
+
+e1:v1->v2;
+e2:v2->v3;
+e3:v3->v1;
+e4:v1->v3;
+e5:v2->v1;
+
+g <: v1; 
+g <: v2;
+
+g <: e1;
+g <: e2;
+
+
+
+
+elist le = g.allV|outE|endV|inE?[@w>10 && @b];
+
+foreach(edge e: le) print<<e.name<<"\n";
+
+vlist lv = g.allE|strtV|outE|endV?[@w>11];
+
+foreach(vertex v: lv) print<<v.name<<"\n";

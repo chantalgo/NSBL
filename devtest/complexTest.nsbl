@@ -1,0 +1,63 @@
+vertex v1,v2,v3;
+edge e1,e2,e3,e4,e5;
+graph g;
+v1.name = "v1";
+v2.name = "v2";
+v3.name = "v3";
+v1.w = 10;
+v2.w = 12;
+v3.w = 14;
+;
+;
+e1.name = "e1";
+e2.name = "e2";
+e3.name = "e3";
+e4.name = "e4";
+e5.name = "e5";
+
+e1.w = 10;
+e2.w = 11;
+e3.w = 12;
+e4.w = 13;
+e5.w = 14;
+
+e1.b = true;
+e2.b = true;
+e3.b = false;
+e4.b = false;
+e5.b = true;
+
+e1:v1->v2;
+e2:v2->v3;
+e3:v3->v1;
+e4:v1->v3;
+e5:v2->v1;
+
+g <: v1;
+g <: v2;
+g <: e1;
+g <: e2;
+g <: e3;
+g <: e4;
+g <: e5;
+
+func cond():bool = {	if (@b){ return @w > 10;} return @w<12;};
+
+void testFunc(graph g)
+{
+	bool i;
+	elist le = g.allE?[cond()];
+	foreach(edge e: le)
+	{
+		//i = cond(e.b);
+		if ((e.b)) 
+		{
+			print<<"in case for edge "<<e.name<<" with b:: "<<e.b<<" and w:: "<<e.w<<"\n";
+		}
+		else
+		{
+			print<<"in case for edge "<<e.name<<" with b:: "<<e.b<<" and w:: "<<e.w<<"\n";
+		}
+	}
+}
+testFunc(g); 
